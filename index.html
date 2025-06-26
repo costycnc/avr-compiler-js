@@ -1,0 +1,1455 @@
+<html>
+
+<head>
+
+    <!-- Google Tag Manager -->
+
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+
+})(window,document,'script','dataLayer','GTM-WPHFPJX');</script>
+
+<!-- End Google Tag Manager -->
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Avr Assembly Arduino Nano</title>
+
+<meta name="description" content="Programmare arduino in linguaggio avr assembler e compilare, caricare codice tramite usb con questa pagina e molto facile ">
+
+
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+<script src="avrlass.js"></script>
+
+<script src="avrdass.js"></script>
+
+<script src="main-beauty.js"></script>
+
+
+
+<!--               17.01.25   youtube videos -->
+
+
+
+<style>
+
+
+
+iframe{
+
+box-shadow: 10px 10px 10px grey;
+
+border-radius: 10px;
+
+}
+
+
+
+.video-csty-container {
+
+  position: relative;
+
+  text-align: center;
+
+}
+
+
+
+.video-csty-container .thumbnails {
+
+  width: 100%; /* Adatta la larghezza in base alle tue esigenze */
+
+  overflow-x: auto;
+
+  white-space: nowrap; /* Impedisce alle parole di andare a capo */
+
+  display: flex;
+
+  justify-content: left;
+
+}
+
+
+
+.video-csty-container .thumbnails img {
+
+    width: 200px;
+
+    height: 112px; /* Proporzioni standard di YouTube */
+
+    margin: 10px;
+
+    cursor: pointer;
+
+    box-shadow: 5px 5px 5px grey;
+
+    border-radius: 5px;
+
+}
+
+
+
+@media only screen and (max-width:601px) {
+
+iframe{
+
+width:350px;
+
+height:250px;
+
+box-shadow: 5px 5px 5px grey;
+
+border-radius: 5px;
+
+}
+
+</style>
+
+
+
+<!--             END  17.01.25   youtube videos -->
+
+</head>
+
+<body style="font-size: 12px;">
+
+    
+
+    <div class="w3-bar w3-black" >
+
+  <a href="https://www.costycnc.it" class="w3-bar-item w3-button" target="_blank">Home</a>
+
+  <div class="w3-dropdown-hover">
+
+  <button class="w3-button">Source</button>
+
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+
+        <a href="https://github.com/LingDong-/avrlass" class="w3-bar-item w3-button" target="_blank">LingDong-avrlass</a>
+
+        <a href="https://github.com/dbuezas/arduino-web-uploader" class="w3-bar-item w3-button" target="_blank">arduino-web-uploader</a>
+
+        <a href="https://www.serialterminal.com" class="w3-bar-item w3-button" target="_blank">serialterminal</a>
+
+        <a href="https://esp.huhn.me/" class="w3-bar-item w3-button" target="_blank">esp-web-tool</a>
+
+        <a href="https://espressif.github.io/esptool-js/" class="w3-bar-item w3-button" target="_blank">esptool-js</a>
+
+        <a href="https://github.com/DarkSector/AVR/blob/master/asm/include/m328Pdef.inc" class="w3-bar-item w3-button" target="_blank">m328Pdef.inc</a>
+
+        <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf" class="w3-bar-item w3-button" target="_blank">ATmega328P_Datasheet</a>
+
+    </div>
+
+  </div>
+
+  <div class="w3-dropdown-hover">
+
+  <button class="w3-button">Tutorial cnc shield arduino</button>
+
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+
+        <a href="https://blog.protoneer.co.nz/wp-content/uploads/2013/07/Arduino-CNC-Shield-Schematics.png" class="w3-bar-item w3-button">schematic shield v4</a>
+
+        <a href="https://www.teachmemicro.com/wp-content/uploads/2019/06/Arduino-Nano-pinout-3.jpg" class="w3-bar-item w3-button">Arduino nano pinout</a>
+
+        <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf" class="w3-bar-item w3-button">Atmega328 datasheet</a>
+
+        <a href="https://www.costycnc.it/avr1/ledon.txt" class="w3-bar-item w3-button">ledon.hex</a>
+
+    </div>
+
+  </div>
+
+  <div class="w3-dropdown-hover">
+
+  <button class="w3-button">Quiz</button>
+
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+
+     <a href="intro.html" class="w3-bar-item w3-button" target="_blank">Intro</a> 
+
+     <a href="perche-atmega328.html" class="w3-bar-item w3-button" target="_blank">Perche Atmega328</a> 
+     
+     <a href="quiz-cosa-fa-avr1.html" class="w3-bar-item w3-button" target="_blank">quiz-cosa-fa-avr1</a>
+     
+     <a href="quiz-registri-avr.html" class="w3-bar-item w3-button" target="_blank">Quiz</a>
+     
+     <a href="quiz1.html" class="w3-bar-item w3-button" target="_blank">Quiz-1</a>
+
+    </div>
+
+  </div>
+
+  
+
+     <a href="https://www.youtube.com/watch?v=7mmIcMpbt34&list=PLExU_91E1BQcsiTJsTdpcapHdc0bBkNHf" class="w3-bar-item w3-button" target="_blank">Video Tutorials</a> 
+     
+     
+     
+     
+  <div class="w3-dropdown-hover">
+
+  <button class="w3-button">Didactic</button>
+
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+
+        <a href="read-flash" class="w3-bar-item w3-button" target="_blank">Read flash</a>
+
+        <a href="read-serial" class="w3-bar-item w3-button" target="_blank">Read serial</a>
+
+        <a href="read-signature" class="w3-bar-item w3-button" target="_blank">Read signature</a>
+
+        <a href="read-write-page" class="w3-bar-item w3-button" target="_blank">Read write page</a>
+
+        <a href="uploader.html" class="w3-bar-item w3-button" target="_blank">uploader (in work)</a>
+
+        <a href="flash-tutorial" class="w3-bar-item w3-button" target="_blank">Write directly to flash (tutorial)</a>
+
+        <a href="compiler" class="w3-bar-item w3-button" target="_blank">Compiler</a>
+
+        <a href="label" class="w3-bar-item w3-button" target="_blank">Label</a>
+
+
+    </div>
+
+  </div>
+
+     
+     
+  <div class="w3-dropdown-hover">
+
+  <button class="w3-button">Tutoriale</button>
+
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+
+        <a href="ledon.html" class="w3-bar-item w3-button" target="_blank">Led on</a>
+
+        <a href="pin-vs-registri.html" class="w3-bar-item w3-button" target="_blank">pin vs registri</a>
+
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<div class="w3-container w3-padding-32">
+  <div class="w3-row w3-center w3-card w3-round-large">
+
+    <div class="w3-col s12 m6 l6">
+      <img src="arduino-nano-pinout.jpg" alt="Immagine" class="w3-image w3-round-large" style="max-width:100%">
+    </div>
+
+    <div class="w3-col s12 m6 l6 ">
+<!-- Sezione: Funzionamento microcontrollore -->
+<div class="w3-container w3-padding w3-light-grey">
+  <h3>IDE Arduino vs costycnc.it/avr1</h3>
+  <div class="w3-responsive">
+    <table class="w3-table w3-bordered w3-striped w3-small">
+      <thead>
+        <tr class="w3-light-grey">
+          <th>Caratteristica</th>
+          <th>IDE Arduino</th>
+          <th>costycnc.it/avr1</th>
+        </tr>
+      </thead>
+      <tr>
+        <td>Installazione</td>
+        <td>Si (IDE + driver)</td>
+        <td>No, funziona direttamente dal browser</td>
+      </tr>
+        <td>Configurazione</td>
+        <td>Scegli scheda, porta, chip</td>
+        <td>Niente da configurare: plug and go</td>
+      </tr>
+      <tr>
+        <td>Primo codice LED</td>
+        <td><code>setup(), loop(), digitalWrite()</code></td>
+        <td><code>sbi 0x4,5 -> il LED si accende (PB5)</code></td>
+      </tr>
+      <tr>
+        <td>Librerie</td>
+        <td>Tante, ma spesso nascondono tutto</td>
+        <td>Nessuna: vedi i registri reali</td>
+      </tr>
+      <tr>
+        <td>Progetti complessi</td>
+        <td>Ideale, con molte librerie</td>
+        <td>Limitato all'apprendimento base</td>
+      </tr>
+      <tr>
+        <td>Curva di apprendimento</td>
+        <td>Piu "soft", ma meno trasparente</td>
+        <td>Piu diretta: impari come funziona davvero</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
+
+
+    </div>
+<p>
+    Benvenuto su costycnc.it/avr1, una piattaforma pensata per farti capire che e possibile programmare i microcontrollori anche senza librerie, senza IDE - niente magia.
+</p>
+<p>
+    Con un click sul pulsante "Assemble", il sito trasforma automaticamente il tuo codice Assembly in un file HEX, pronto per essere caricato su un microcontrollore.
+
+Non servono compilatori installati. Tutto avviene direttamente nel browser!
+</p>
+<p>
+    Usa un semplice cavo USB per collegare la tua scheda (es. Arduino UNO) al computer.Clicca su uno dei pulsanti che rappresentano il microcontroller che stai usando(uno,nano,ecc).
+    Si aprira una finestra (Web Serial API) dove potrai selezionare la porta USB a cui e collegato il tuo Arduino.Basta cliccare su "Connetti" ... ed e fatta!
+</p>
+<p>
+    Subito dopo il caricamento, il LED integrato sul pin 13 (PB5) si accendera. Questo e il risultato del tuo codice puro in Assembly, senza nessuna libreria, IDE o software esterno.
+    <a href="https://www.youtube.com/shorts/ZcSXHUBY7dc">VIDEO</a>
+</p>
+  </div>
+</div>
+
+<div id="init"></div>
+<hr>
+
+  Upload to :<button arduino-uploader="" board="uno" verify="" >uno[<span class="upload-progress"></span>]</button>
+
+  <button arduino-uploader="" board="proMini" verify="" >proMini[<span class="upload-progress"></span>]</button>
+
+  <button arduino-uploader="" board="nano" verify="" >nano[<span class="upload-progress"></span>]</button>
+
+  <button arduino-uploader="" board="nanoOldBootloader" verify="" >nanoOldBootloader[<span class="upload-progress"></span>]</button>
+
+  <button arduino-uploader="" board="lgt8f328p" verify="" >lgt8f328p[<span class="upload-progress"></span>]</button>
+
+  <hr>
+
+  
+
+  <div class="w3-row w3-border">
+
+  <div class="w3-container w3-half w3-red">
+
+  <p><button onclick="start('in-asm');">Assemble</button>  </p>
+
+    <textarea id="in-asm" style="width:100%;height:500px">
+    .org 0
+    rjmp init
+     .org 0x68
+    init:
+    sbi 4,5
+    sbi 5,5
+    rjmp init
+    </textarea> 
+
+  </div>
+
+  <div class="w3-container w3-half w3-blue">
+
+  <p><button id="btn-dasm">DisAssemble</button>  <input type="file" onchange="loadhex(this.files)"></p>
+
+    <textarea id="out-hex" style="width:100%;height:500px"></textarea>  
+
+  </div>
+
+</div>
+
+<div class="w3-row">
+
+  <div class="w3-container w3-third w3-border">
+
+   <p><a href="#init"><button onclick='start("1blink1");'>Assemble 1BLINK1</button></a>  </p>
+
+    <textarea  id="1blink1" style="left:0%;width:100%;height:300px">
+
+       
+    </textarea> 
+
+  </div>
+    <script>
+      window.addEventListener("load", () => {
+        fetch("1blink1.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("1blink1").value = text;
+          });
+      });
+    </script>
+
+  <div class="w3-container w3-third w3-border">
+
+   <p><a href="#init"><button onclick='start("2ledon");'>Assemble 2LEDON</button></a>(arduino nano) <a href="https://www.youtube.com/shorts/ZcSXHUBY7dc">watch video</a> </p>
+
+    <textarea  id="2ledon" style="left:0%;width:100%;height:300px">
+
+
+    </textarea>
+
+  </div>
+    <script>
+      window.addEventListener("load", () => {
+        fetch("2ledon.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("2ledon").value = text;
+          });
+      });
+    </script>
+
+  <div class="w3-container w3-third w3-border">
+
+   <p><a href="#init"><button onclick='start("3ledoff");'>Assemble 3LEDOFF</button></a> <a href="https://www.youtube.com/shorts/ZcSXHUBY7dc">watch video</a> </p>
+
+    <textarea  id="3ledoff" style="left:0%;width:100%;height:300px">
+
+    </textarea>
+
+  </div>
+    <script>
+      window.addEventListener("load", () => {
+        fetch("3ledoff.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("3ledoff").value = text;
+          });
+      });
+    </script>
+  
+  <div class="w3-container w3-third w3-border">
+
+    <p><a href="#init"><button onclick='start("4receivechar");'>Assemble 4Receivechar</button></a>  </p>
+
+    <textarea  id="4receivechar" style="left:0%;width:100%;height:300px">
+
+    </textarea>
+
+  </div>
+    <script>
+      window.addEventListener("load", () => {
+        fetch("4receivechar.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("4receivechar").value = text;
+          });
+      });
+    </script>
+    
+  <div class="w3-container w3-third w3-border">
+
+       <p><a href="#init"><button onclick='start("5receivecharint");' > Assemble 5Receivecharint</button></a>  </p>
+
+       <textarea  id="5receivecharint" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("5receivecharint.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("5receivecharint").value = text;
+          });
+      });
+    </script>
+
+  <div class="w3-container w3-third w3-border">
+
+       <p><a href="#init"><button onclick='start("6receivecharint1");' > Assemble 6receivecharint1</button></a>  </p>
+
+       <textarea  id="6receivecharint1" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("6receivecharint1.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("6receivecharint1").value = text;
+          });
+      });
+    </script>
+
+  <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("7blink-big");'>Assemble 7blink-big</button></a></p>
+
+       <textarea  id="7blink-big" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("7blink-big.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("7blink-big").value = text;
+          });
+      });
+    </script>
+
+  <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("8receivecharint2");' > Assemble 8receivecharint2</button></a>  </p>
+
+       <textarea id="8receivecharint2" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("8receivecharint2.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("8receivecharint2").value = text;
+          });
+      });
+    </script>
+
+    <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("9portint");' > Assemble 9portint</button></a>  </p>
+
+       <textarea  id="9portint" style="left:0%;width:100%;height:300px">
+
+    </textarea>
+
+    </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("9portint.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("9portint").value = text;
+          });
+      });
+    </script>
+
+    <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("10semaforo");' > Assemble 10semaforo</button></a>  </p>
+
+       <textarea  id="10semaforo" style="left:0%;width:100%;height:300px">
+
+    </textarea>
+
+    </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("10semaforo.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("10semaforo").value = text;
+          });
+      });
+    </script>
+
+    <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("11rxtx");' > Assemble 11rxtx</button></a>  </p>
+
+       <textarea  id="11rxtx" style="left:0%;width:100%;height:300px">
+
+    </textarea>
+
+    </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("11rxtx.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("11rxtx").value = text;
+          });
+      });
+    </script>
+
+    <div class="w3-container w3-third w3-border" id="_timer0">
+
+    </div>
+
+    <div class="w3-container w3-third w3-border" id="_timer1">
+
+    </div>
+
+    <div class="w3-container w3-third w3-border" id="_blink">
+
+    </div>
+
+    <div class="w3-container w3-third w3-border">
+
+    <p><a href="#"><button onclick='start("shieldv4");'> Assemble</button>-Arduino nano cnc shield v4.0 turn motor in avr asm </a> </p>
+
+       <textarea  id="shieldv4" style="left:0%;width:100%;height:300px">
+
+ .equ DDRB=4
+
+  .equ PORTB=5
+
+  .equ DDRD=10
+
+  .equ PORTD=11
+
+  .equ PB0=0 ;ENABLE
+
+  .equ PD2=2 ;STEP
+
+  .equ PD5=5 ;DIRECTION
+
+
+
+ .org 0x60
+
+init:
+
+        ; arduino nano cnc shield v4.0
+
+        sbi DDRB,PB0          ;pin ENABLE as output D8  PORTB,PB0
+
+        sbi DDRD,PD5          ;pin STEP as output  D5    PORTD,PD5
+
+        sbi DDRD,PD2           ;pin DIR as output  D2    PORTD,PD2
+
+        cbi	PORTB,PB0          ; put pin ENABLE low D8 
+
+loop:
+
+        cbi PORTD,PD2          ;set DIR pin low
+
+        call turn            ;turn motor 255 steps
+
+        call wait3s         ;wait 1 second
+
+        sbi PORTD,PD2           ;set DIR pin high
+
+        call turn             ;turn motor 255 steps
+
+        call wait3s         ;wait 1 second
+
+	rjmp	loop           ;loop
+
+pulse:
+
+        ldi r17,30   ;motor velocity 5
+
+        pause:
+
+	dec	R16
+
+	brne    pause
+
+	dec	R17
+
+	brne    pause
+
+	ret
+
+step:
+
+	sbi	PORTD,PD5       ; put high pin STEP 
+
+	rcall pulse        ;pulse
+
+	cbi	PORTD,PD5        ;put low pin Step 
+
+	rcall pulse         ;pulse
+
+        ret
+
+turn:
+
+        call step
+
+	dec	R20
+
+	brne    turn
+
+        ret    
+
+ wait3s:
+
+        ldi r18,100   ; wait 10
+
+        waitx:
+
+	dec	R16
+
+	brne    waitx
+
+	dec	R17
+
+	brne    waitx
+
+	dec	R18
+
+	brne    waitx
+
+	ret
+
+           
+
+           </textarea>
+
+    </div>
+
+    <div class="w3-container w3-third w3-border">
+
+    <p><a href="#"><button onclick='start("shieldv4-memory")'> Assemble</button></a> shieldv4 con memory </p>
+
+       <textarea  id="shieldv4-memory" style="left:0%;width:100%;height:300px">
+
+                      .def	ZH	= r31
+
+          .def	ZL	= r30
+
+          .org 0x60
+
+init:
+
+        ; arduino nano cnc shield v4.0
+
+        sbi 0x4,0          ;pin ENABLE as output D8  PORTB,PB0
+
+        sbi 0xa,5          ;pin STEP as output  D5    PORTD,PD5
+
+        sbi 0xa,2           ;pin DIR as output  D2    PORTD,PD2
+
+        cbi	5,0          ; put pin ENABLE low D8 
+
+	ldi	ZL, LOW (dithord*2)
+
+	ldi	ZH, HIGH(dithord*2)
+
+loop:
+
+        inc r26
+
+        cpi r26,10 ;how many from dithord
+
+        brlo equal1 ;if 10
+
+        rcall iar     ; again to 0
+
+        equal1:    
+
+        sbi 0xb,2    ; pin Direction high
+
+	lpm	r25, Z+ ; load value from dithord and increment adress
+
+        cpi r25, 1       ;if 1 
+
+        breq equal
+
+        cbi 0xb,2          ;set DIR pin low
+
+        equal:      
+
+        call turn            ;turn motor 255 steps
+
+	rjmp	loop           ;again to loop
+
+pulse:
+
+        ldi r17,100   ;motor velocity 5
+
+        pause:
+
+	dec	R16
+
+	brne    pause
+
+	dec	R17
+
+	brne    pause
+
+	ret
+
+step:
+
+	sbi	0xb,5       ; put high pin STEP 
+
+	rcall pulse        ;pulse
+
+	cbi	0xb,5        ;put low pin Step 
+
+	rcall pulse         ;pulse
+
+        ret
+
+turn:
+
+        call step
+
+	dec	R20
+
+	brne    turn
+
+        ret    
+
+iar:
+
+       	ldi	ZL, LOW (dithord*2)
+
+	ldi	ZH, HIGH(dithord*2)
+
+        ldi r26,0
+
+        ret
+
+dithord: .db 1,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,1,1,1,0,0
+
+           </textarea>
+
+    </div>
+
+    <div class="w3-container w3-third w3-border">
+
+<p><a href="#"><button onclick='start("shield-v3")'> Assemble</button></a> cnc shield v3.0 </p>
+
+       <textarea  id="shield-v3" style="left:0%;width:100%;height:300px">
+
+           .equ DDRB=4
+
+  .equ PORTB=5
+
+  .equ DDRD=10
+
+  .equ PORTD=11
+
+  .equ PB0=0 ;ENABLE
+
+  .equ PD5=5 ;STEP
+
+  .equ PD2=2 ;DIRECTION
+
+
+
+ .org 0x60
+
+init:
+
+        ; arduino nano cnc shield v3.0
+
+        sbi DDRB,PB0          ;pin ENABLE as output D8  PORTB,PB0
+
+        sbi DDRD,PD2          ;pin STEP as output  D5    PORTD,PD5
+
+        sbi DDRD,PD5           ;pin DIR as output  D2    PORTD,PD2
+
+        cbi	PORTB,PB0          ; put pin ENABLE low D8 
+
+loop:
+
+        cbi PORTD,PD5          ;set DIR pin low
+
+        call turn            ;turn motor 255 steps
+
+        call wait3s         ;wait 1 second
+
+        sbi PORTD,PD5           ;set DIR pin high
+
+        call turn             ;turn motor 255 steps
+
+        call wait3s         ;wait 1 second
+
+	rjmp	loop           ;loop
+
+pulse:
+
+        ldi r16,250   ;motor velocity 5
+
+        pause:
+
+	dec	R16
+
+	brne    pause
+
+	ret
+
+step:
+
+	sbi	PORTD,PD2       ; put high pin STEP 
+
+	rcall pulse        ;pulse
+
+	cbi	PORTD,PD2        ;put low pin Step 
+
+	rcall pulse         ;pulse
+
+        ret
+
+turn:
+
+        call step
+
+	dec	R20
+
+	brne    turn
+
+	dec	R21
+
+	brne    turn
+
+        ret    
+
+ wait3s:
+
+        ldi r18,100  
+
+        waitx:
+
+	dec	R16
+
+	brne    waitx
+
+	dec	R17
+
+	brne    waitx
+
+	dec	R18
+
+	brne    waitx
+
+	ret
+
+           
+
+            
+
+           </textarea>
+
+    </div>
+
+      <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("serial-github");'>Serial github with macro</button></a></p>
+
+       <textarea  id="serial-github" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("serial-github.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("serial-github").value = text;
+          });
+      });
+    </script>
+
+    <div class="w3-container w3-third w3-border">
+
+     <p><a href="#"><button onclick='start("pwm");'>Assemble PWM</button></a> PWM on pin PB0 <a href="https://www.youtube.com/shorts/7b3jtFH6VGA">video</a>  </p>
+
+    <textarea  id="pwm" style="left:0%;width:100%;height:300px">
+    ;PWM on pin PB0
+    .org 0x60
+    sbi 4,0
+    loop:
+    cbi 5,0
+    rcall pause
+    ldi r18,60;here change value to change angle
+    sbi 5,0
+    rcall pause
+    rjmp loop
+    pause:
+    L2: dec r19
+          brne L2
+          dec r18
+          brne L2
+    ret
+           </textarea>
+
+    </div>
+
+
+
+    <div class="w3-container w3-third w3-border">
+
+    <p><a href="#"><button onclick='start("190724");'> Assemble</button></a> 
+
+receive char  <a href="https://youtube.com/live/2s4K3ppPFDg">video(romana) </a> <a href="https://youtube.com/live/neEDNzcFBHY"> video(english)</a>FUNZIONA!</p>
+
+       <textarea  id="190724" style="left:0%;width:100%;height:300px">
+.equ	RXCIE0	= 7	
+.equ	RXEN0	= 4	
+.equ	UCSR0B	= 0xc1
+.equ	UCSR0C	= 0xc2
+.equ	TXEN0	= 3
+.equ	UDR0	= 0xc6
+.equ	bps	= 16000000/(16*9600) - 1
+.equ	UBRR0L	= 0xc4	
+.equ	UBRR0H	= 0xc5
+.equ	UCSZ00	= 1
+.equ	UCSZ01	= 2
+
+.org 0x0
+	jmp RESET		; Reset Handler
+.org 0x24   ;USART, RX Complete Handler
+	jmp receive
+.org 0x60
+RESET:	
+        sbi 4,5
+	ldi	r16,103			
+	ldi	r17,0	
+	sts	UBRR0L,r16			
+	sts	UBRR0H,r17
+        ldi r16 ,(1 << UCSZ00) | (1 << UCSZ01)
+        sts UCSR0C,r16
+	ldi	r16,(1 << RXCIE0) | (1 << RXEN0)| (1 << TXEN0)
+	sts	UCSR0B,r16
+	sei
+loop:	
+	rjmp loop
+receive:
+        sbi 5,5
+        lds	r16,UDR0	
+        cpi	r16,65			; compare r16 to "A"
+	breq	next
+        cbi 5,5
+next:        
+        reti        
+           </textarea>
+
+    </div>
+    
+    
+  
+  <div class="w3-container w3-third w3-border">
+
+    <p><a href="#init"><button onclick='start("VL53L0X");'>Assemble VL53L0X</button></a>  </p>
+
+    <textarea  id="VL53L0X" style="left:0%;width:100%;height:300px">
+
+    </textarea>
+
+  </div>
+    <script>
+      window.addEventListener("load", () => {
+        fetch("VL53L0X.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("VL53L0X").value = text;
+          });
+      });
+    </script>
+    
+    
+
+  <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("wait-ms");'>Assemble wait-ms</button></a></p>
+
+       <textarea  id="wait-ms" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("wait-ms.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("wait-ms").value = text;
+          });
+      });
+    </script>
+    
+      <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("fotoresistor");'>Assemble fotoresistor </button></a><a href="https://www.youtube.com/shorts/Tn6T5a4H_XU">  watch video</a></p>
+
+       <textarea  id="fotoresistor" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("fotoresistor.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("fotoresistor").value = text;
+          });
+      });
+    </script>      
+    
+    <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("adc");'>Assemble ADC </button></a></p>
+
+       <textarea  id="adc" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("adc.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("adc").value = text;
+          });
+      });
+    </script>    
+    
+    <div class="w3-container w3-third w3-border">
+
+<p style="display: flex; justify-content: space-between; align-items: center; width: 100%;"><a href="#init"><button onclick='start("adc1");'>Assemble ADC1 </button></a><a href="read-serial"> read-serial </a><a href="https://www.youtube.com/shorts/3RnYLiUipX4"> video </a></p>
+
+       <textarea  id="adc1" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("adc1.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("adc1").value = text;
+          });
+      });
+    </script>   
+    
+    <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("serial-rec-A");'>Assemble serial-rec-A FUNZIONA!!!</button></a> <a href="https://www.youtube.com/shorts/ywmxSc17gMU">video</a></p>
+
+       <textarea  id="serial-rec-A" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("serial-rec-A.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("serial-rec-A").value = text;
+          });
+      });
+    </script>    
+    
+    <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("shieldv40");'>Assemble shieldv40 turn stepper</button></a> <a href="https://www.youtube.com/shorts/3M-RNsV8gwE">video </a></p>
+
+       <textarea  id="shieldv40" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("shieldv40.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("shieldv40").value = text;
+          });
+      });
+    </script>    
+    
+    <div class="w3-container w3-third w3-border">
+
+<p><a href="#init"><button onclick='start("abcd");'>Assemble serial abcd</button></a> <a href="">video </a></p>
+
+       <textarea  id="abcd" style="left:0%;width:100%;height:300px">
+
+           </textarea>
+
+  </div>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("abcd.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("abcd").value = text;
+          });
+      });
+    </script>  
+    
+    
+
+</div>
+
+
+
+
+
+<script>
+
+  var nomeid='in-asm'; 
+
+  var hexvalue;
+
+  
+
+  function loadhex(files) {
+
+  const reader = new FileReader()
+
+  reader.onload = (e) => {
+
+  hexvalue= e.target.result;
+
+  OHEX.value = hexvalue;
+
+  }
+
+  reader.readAsText(files[0])
+
+}
+
+  let OHEX = document.getElementById('out-hex');
+
+ 
+
+  function start(nomeid){
+
+      console.log(nomeid);
+
+  var INASM = document.getElementById(nomeid);
+
+   document.getElementById('in-asm').value=INASM.value;
+
+  let context = AVRLASS.new_context({});
+
+    let lst,ins,sum="",code,hex;
+
+    try{
+
+      console.log("parsing...");
+
+      //lst = AVRLASS.parse(src,reader,context);
+
+	  lst = AVRLASS.parse(INASM.value,"",context);
+
+      ins = AVRLASS.compile(lst,context);
+
+	  
+
+	  console.log("lst,context");
+
+	  console.log(lst);
+
+	  console.log(context);
+
+      code = AVRLASS.assemble(ins);
+
+	  console.log("ins");
+
+	  console.log(ins);
+
+      hexvalue = AVRLASS.to_ihex(code);
+
+    }catch(e){
+
+      let err = '[error] '+e+'\n';;
+
+      alert(err);
+
+      throw 'abort';
+
+    }
+
+    OHEX.value = hexvalue;
+
+    }
+
+  start('in-asm');
+
+  
+
+  document.getElementById('btn-dasm').onclick = function(){
+
+  let ret;
+
+  try{
+
+    ret = AVRDASS.hex_to_asm(OHEX.value);
+
+  }catch(e){
+
+    let err = '[error] '+e+'\n';;
+
+    alert(err);
+
+    console.log(err);
+
+    throw 'abort';
+
+  }
+
+  INASM = document.getElementById('in-asm');
+
+   INASM.value = ret;
+
+}
+
+
+    
+
+
+fetch("timer0.txt")
+
+    .then(response => response.text())
+
+    .then(text => {
+
+        document.getElementById("_timer0").innerHTML = text;
+
+    });
+
+fetch("timer1.txt")
+
+    .then(response => response.text())
+
+    .then(text => {
+
+        document.getElementById("_timer1").innerHTML = text;
+
+    });
+
+    
+
+fetch("blink.txt")
+
+    .then(response => response.text())
+
+    .then(text => {
+
+        document.getElementById("_blink").innerHTML = text;
+
+    });
+
+    
+
+</script>
+
+<!--                      17.01.25                    -->
+
+<hr>
+
+<section class="video-presentation">
+
+    <div class="video-csty-container">
+
+      <iframe id="youtube-player" width="800" height="450" src="https://www.youtube.com/embed/UvmIo5vloLM" frameborder="0" allowfullscreen></iframe>
+
+      <hr><p><b>Clicca immagine sotto per video (click image bellow for video)</b></p><hr>
+
+      <div class="thumbnails">
+
+        <img src="https://img.youtube.com/vi/xdO3KncBsmk/0.jpg" data-video-id="xdO3KncBsmk?autoplay=1" alt="Arduino nano blink pure avr asm costycnc">
+
+        <img src="https://img.youtube.com/vi/fvjLvYqgWrY/0.jpg" data-video-id="fvjLvYqgWrY?autoplay=1" alt="Arduino nano blink and turn stepper motor with pure avr asm costycnc">
+
+        <img src="https://img.youtube.com/vi/8mphkmWR1ZM/0.jpg" data-video-id="8mphkmWR1ZM?autoplay=1" alt="Arduino nano blink and pure avr asm costycnc">
+
+        <img src="https://img.youtube.com/vi/MFzyV_AoNVw/0.jpg" data-video-id="MFzyV_AoNVw?autoplay=1" alt="Stepper motor and pure avr asm costycnc">
+
+        <img src="https://img.youtube.com/vi/B7WlI0SMY_U/0.jpg" data-video-id="B7WlI0SMY_U?autoplay=1" alt="Avr assembler costycnc">
+
+        <img src="https://img.youtube.com/vi/4TcuVCN5QjI/0.jpg" data-video-id="4TcuVCN5QjI?autoplay=1" alt="Avr assembler costycnc">
+
+        <img src="https://img.youtube.com/vi/-ssFs5UGSXE/0.jpg" data-video-id="-ssFs5UGSXE?autoplay=1" alt="Servo avr assembler costycnc">
+
+        <img src="https://img.youtube.com/vi/Bb2zKkTPqJU/0.jpg" data-video-id="Bb2zKkTPqJU?autoplay=1" alt="Arduino nano led off on costycnc">
+
+        <img src="https://img.youtube.com/vi/fMQcUIg2h6g/0.jpg" data-video-id="fMQcUIg2h6g?autoplay=1" alt="Scara robot costycnc">
+
+        <img src="https://img.youtube.com/vi/7mmIcMpbt34/0.jpg" data-video-id="7mmIcMpbt34?autoplay=1" alt="Pure avr asm costycnc">
+
+        <img src="https://img.youtube.com/vi/1AuP856peeo/0.jpg" data-video-id="1AuP856peeo?autoplay=1" alt="Tutorial avr asm costycnc">
+
+        <img src="https://img.youtube.com/vi/HkAUilbUX84/0.jpg" data-video-id="HkAUilbUX84?autoplay=1" alt="Line follower costycnc">
+
+        <img src="https://img.youtube.com/vi/f6O3v9RHhVM/0.jpg" data-video-id="f6O3v9RHhVM?autoplay=1" alt="Infrared remote hack costycnc">
+
+        <img src="https://img.youtube.com/vi/z5abdgvMcj0/0.jpg" data-video-id="z5abdgvMcj0?autoplay=1" alt="Attiny2313 triac 220v costycnc">
+
+        
+
+        <img src="https://img.youtube.com/vi/UvmIo5vloLM/0.jpg" data-video-id="UvmIo5vloLM?autoplay=1" alt="Thumbnail 1">
+
+        <img src="https://img.youtube.com/vi/C1kf7KvFcTE/0.jpg" data-video-id="C1kf7KvFcTE?autoplay=1" alt="Thumbnail 2">
+
+        <img src="https://img.youtube.com/vi/tuZNVB552p0/0.jpg" data-video-id="tuZNVB552p0?autoplay=1" alt="Thumbnail 1">
+
+        <img src="https://img.youtube.com/vi/qenZ8UBppY4/0.jpg" data-video-id="qenZ8UBppY4?autoplay=1" alt="Thumbnail 2">
+
+        <img src="https://img.youtube.com/vi/AYhrUfhR66s/0.jpg" data-video-id="AYhrUfhR66s?autoplay=1" alt="Thumbnail 1">
+
+        <img src="https://img.youtube.com/vi/sVZyphjAQgU/0.jpg" data-video-id="sVZyphjAQgU?autoplay=1" alt="Thumbnail 2">
+
+        <img src="https://img.youtube.com/vi/qqXi1Bc7Ies/0.jpg" data-video-id="qqXi1Bc7Ies?autoplay=1" alt="Thumbnail 1">
+
+      </div>
+
+    </div>
+
+</section> 
+
+<hr>
+
+
+
+<script>
+
+const thumbnails = document.querySelectorAll('.thumbnails img');
+
+const youtubePlayer = document.getElementById('youtube-player');
+
+
+
+thumbnails.forEach(thumbnail => {
+
+  thumbnail.addEventListener('click', () => {
+
+    const videoId = thumbnail.dataset.videoId;
+
+    youtubePlayer.src = `https://www.youtube.com/embed/${videoId}`;
+
+  });
+
+});
+
+</script>
+
+
+
+<!--                   End 17.01.25                       -->
+
+</body>
+
+</html>

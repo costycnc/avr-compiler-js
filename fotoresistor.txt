@@ -1,0 +1,16 @@
+.org 0
+rjmp start
+.org 100
+start:
+  cbi 4, 5       ; D13 → output
+  sbi 4, 5
+  cbi 4, 4       ; D12 (PB4) → input
+  sbi 5, 4       ; Pull-up ON
+loop:
+  sbis 3, 4      ; Salta se PB4 è alto
+  rjmp spegni
+  sbi 5, 5       ; Accendi D13
+  rjmp loop
+spegni:
+  cbi 5, 5       ; Spegni D13
+  rjmp loop

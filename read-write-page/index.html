@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Leggi e Scrivi la Memoria Flash di ATmega328 via Web Serial (Bootloader)</title>
+
+  <meta name="description" content="Leggi, modifica e carica il contenuto della memoria Flash di un microcontrollore ATmega328P direttamente dal browser via Web Serial usando il bootloader STK500v1.">
+  <meta name="keywords" content="atmega328, flash, dump, bootloader, stk500, web serial, arduino, lettura memoria, scrittura memoria, microcontrollore, seriale, optiboot">
+  <meta name="author" content="Il Tuo Nome o Sito">
+
+  <style>
+    body { font-family: monospace; background: #f4f4f4; padding: 1em; }
+    h1, h2 { font-family: sans-serif; }
+    button { font-size: 1em; margin: 10px 5px; padding: 10px; }
+    pre { background: #fff; padding: 1em; border: 1px solid #ccc; height: 150px; overflow-y: auto; white-space: pre-wrap; }
+textarea {
+  font-family: monospace;
+  font-size: 14px;
+  width: 48ch;  /* 48 caratteri = 16 byte esadecimali con spazi */
+  height: 16em; /* oppure: height: auto; rows nel tag */
+}
+    label { font-weight: bold; margin-top: 15px; display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📦 Lettura e Scrittura Memoria Flash ATmega328 via Web Serial</h1>
+    <p>Strumento online per leggere, modificare e caricare 512 byte della flash del microcontrollore ATmega328P usando il bootloader, direttamente dal browser.</p>
+  </header>
+
+  <section>
+    <button id="readBtn">🔌 Connetti e leggi 4 blocchi da 128 byte</button>
+    <button id="writeBtn" disabled>📤 Carica bin</button>
+    <button id="saveBtn" disabled>💾 Salva come .bin</button>
+
+    <label for="block1">Blocco 1</label>
+    <textarea id="block1" placeholder="Blocco 1..." spellcheck="false" disabled></textarea>
+
+    <label for="block2">Blocco 2</label>
+    <textarea id="block2" placeholder="Blocco 2..." spellcheck="false" disabled></textarea>
+
+    <label for="block3">Blocco 3</label>
+    <textarea id="block3" placeholder="Blocco 3..." spellcheck="false" disabled></textarea>
+
+    <label for="block4">Blocco 4</label>
+    <textarea id="block4" placeholder="Blocco 4..." spellcheck="false" disabled></textarea>
+
+    <pre id="log"></pre>
+  </section>
+
+  <script>
+    const STK_GET_SYNC = 0x30;
+    const STK_OK = 0x10;
+    const STK_INSYNC = 0x14;
+    const STK_ENTER_PROGMODE = 0x50;
+    const STK_LEAVE_PROGMODE = 0x51;
+    const STK_READ_SIGNATURE = 0x75;
+    const STK_READ_PAGE = 0x74;
+    const STK_LOAD_PAGE = 0x64;
+    const STK_PROG_PAGE = 0x65;
+    const STK_CRC_EOP = 0x20;
+
+    const PAGE_SIZE = 128;
+
+    const logElem = document.getElementById('log');
+    const readBtn = document.getElementById('readBtn');
+    const writeBtn = document.getElementById('writeBtn');
+    const saveBtn = document.getElementById('saveBtn');
+
+    const blockElems = [
+      document.getElementById('block1'),
+      document.getElementById('block2'),
+      document.getElementById('block3'),
+      document.getElementById('block4')
+    ];
+
+    let port, writer, reader;
+
+    function log(msg) {
+      console.log(msg);
+      logElem.textContent += msg + "\n";
+      logElem.scrollTop = logElem.scrollHeight;
+    }
+
+    function bytesToHexString(bytes) {
+      return bytes.map(b => b.toString(16).padStart(2, '0')).join(' ');
+    }
+
+    function hexStringToBytesBlock(str) {
+      const parts = str.trim().split(/\s+/);
+      if(parts.length !== PAGE_SIZE) throw new Error(`La textarea deve contenere esattamente ${PAGE_SIZE} byte esadecimali separati da spazi.`);
+      return parts.map(b => {
+        const v = parseInt(b, 16);
+        if (isNaN(v) || v < 0 || v > 255) throw new Error(`Byte esadecimale non valido: "${b}"`);
+        return v;
+      });
+    }
+
+    async function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function writeBytes(bytes) {
+      await writer.write(Uint8Array.from(bytes));
+      log("➡️ Invio: " + bytes.map(b => b.toString(16).padStart(2, '0')).join(" "));
+    }
+
+    async function readBytes(expectedLength) {
+      let data = [];
+      while (data.length < expectedLength) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        if (value) data.push(...value);
+      }
+      log("⬅️ Ricevuto: " + data.map(b => b.toString(16).padStart(2, '0')).join(" "));
+      return data;
+    }
+
+    async function sendCommand(command, params = [], expectedLength = 2) {
+      await writeBytes([command, ...params, STK_CRC_EOP]);
+      const resp = await readBytes(expectedLength);
+      if (resp[0] !== STK_INSYNC || resp[resp.length - 1] !== STK_OK) {
+        throw new Error(`Errore comando 0x${command.toString(16)}: risposta ${resp.map(b => b.toString(16)).join(" ")}`);
+      }
+      return resp;
+    }
+
+    async function connectAndOpen() {
+      log("🔌 Seleziona la porta seriale...");
+      port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 115200 });
+      log("⚡ Porta seriale aperta a 115200 baud");
+      writer = port.writable.getWriter();
+      reader = port.readable.getReader();
+    }
+
+    async function closePort() {
+      try {
+        await reader.releaseLock();
+        await writer.releaseLock();
+        await port.close();
+        log("✅ Connessione chiusa.");
+      } catch {}
+    }
+
+    readBtn.addEventListener('click', async () => {
+      try {
+        blockElems.forEach(t => { t.disabled = true; t.value = ""; });
+        writeBtn.disabled = true;
+        saveBtn.disabled = true;
+        logElem.textContent = '';
+
+        await connectAndOpen();
+
+        log("⏳ Aspetto 1.5 secondi per reset...");
+        await sleep(1500);
+
+        for (let i = 0; i < 3; i++) await sendCommand(STK_GET_SYNC);
+        log("✅ SYNC OK");
+
+        await sendCommand(STK_ENTER_PROGMODE);
+        log("🔐 In modalità programmazione");
+
+        log("🔍 Lettura Signature...");
+        await writeBytes([STK_READ_SIGNATURE, STK_CRC_EOP]);
+        const sigResp = await readBytes(5);
+        if (sigResp[0] !== STK_INSYNC || sigResp[4] !== STK_OK) throw new Error("Errore lettura signature");
+        const sig = sigResp.slice(1, 4).map(b => b.toString(16).padStart(2, '0')).join(' ');
+        log(`🧾 Signature: ${sig}`);
+
+        // Leggi 4 blocchi da 128 byte
+        for (let i = 0; i < 4; i++) {
+          log(`📄 Lettura pagina flash 0x0000 (128 byte) - lettura #${i + 1}...`);
+          await writeBytes([STK_READ_PAGE, 0x00, 0x80, 0x46, STK_CRC_EOP]);
+          let resp = await readBytes(PAGE_SIZE + 2);
+          if (resp[0] !== STK_INSYNC || resp[PAGE_SIZE + 1] !== STK_OK) throw new Error(`Errore lettura pagina flash ${i + 1}`);
+          log(`✅ Lettura pagina ${i + 1} completata.`);
+          blockElems[i].value = bytesToHexString(resp.slice(1, 1 + PAGE_SIZE));
+        }
+
+        blockElems.forEach(t => t.disabled = false);
+        writeBtn.disabled = false;
+        saveBtn.disabled = false;
+
+        await sendCommand(STK_LEAVE_PROGMODE);
+        log("🚪 Uscita da modalità programmazione");
+
+        await closePort();
+
+      } catch (e) {
+        log("❌ Errore: " + e.message);
+        blockElems.forEach(t => t.disabled = false);
+        writeBtn.disabled = false;
+        saveBtn.disabled = false;
+      }
+    });
+
+    writeBtn.addEventListener('click', async () => {
+      try {
+        blockElems.forEach(t => t.disabled = true);
+        writeBtn.disabled = true;
+        saveBtn.disabled = true;
+        logElem.textContent = '';
+
+        // Leggi e unisci i dati di tutti i 4 blocchi
+        let fullData = [];
+        for (let i = 0; i < 4; i++) {
+          const blockBytes = hexStringToBytesBlock(blockElems[i].value);
+          fullData = fullData.concat(blockBytes);
+        }
+
+        if (fullData.length !== PAGE_SIZE * 4) throw new Error("La somma dei blocchi deve essere 512 byte.");
+
+        await connectAndOpen();
+
+        log("⏳ Aspetto 1.5 secondi per reset...");
+        await sleep(1500);
+
+        for (let i = 0; i < 3; i++) await sendCommand(STK_GET_SYNC);
+        log("✅ SYNC OK");
+
+        await sendCommand(STK_ENTER_PROGMODE);
+        log("🔐 In modalità programmazione");
+
+        // Scrittura 4 pagine da 128 byte ciascuna
+const pageSizeLow = PAGE_SIZE & 0xFF;
+const pageSizeHigh = (PAGE_SIZE >> 8) & 0xFF;
+
+for (let i = 0; i < 4; i++) {
+  const blockDataRaw = fullData.slice(i * PAGE_SIZE, (i + 1) * PAGE_SIZE);
+  const blockData = new Uint8Array(PAGE_SIZE);
+  blockData.set(blockDataRaw);
+
+  const pageAddress = i * PAGE_SIZE;
+  const highAddr = (pageAddress >> 8) & 0xFF;
+  const lowAddr = pageAddress & 0xFF;
+  const memType = 0x46; // 'F'
+
+  log(`⏳ Caricamento pagina flash ${i + 1} nel buffer...`);
+  const loadPacket = [
+    STK_LOAD_PAGE,
+    highAddr,
+    lowAddr,
+    memType,
+    pageSizeLow,
+    pageSizeHigh,
+    ...blockData,
+    STK_CRC_EOP
+  ];
+  await writeBytes(loadPacket);
+  let resp = await readBytes(2);
+  if (resp[0] !== STK_INSYNC || resp[1] !== STK_OK)
+    throw new Error(`Errore caricamento pagina flash ${i + 1}`);
+
+  log(`⏳ Scrittura pagina flash ${i + 1}...`);
+  const progPacket = [STK_PROG_PAGE, highAddr, lowAddr, memType, STK_CRC_EOP];
+  await writeBytes(progPacket);
+  resp = await readBytes(2);
+  if (resp[0] !== STK_INSYNC || resp[1] !== STK_OK)
+    throw new Error(`Errore scrittura pagina flash ${i + 1}`);
+
+  log(`✅ Pagina flash ${i + 1} scritta con successo.`);
+}
+
+
+
+        await sendCommand(STK_LEAVE_PROGMODE);
+        log("🚪 Uscita da modalità programmazione");
+
+        await closePort();
+
+        blockElems.forEach(t => t.disabled = false);
+        writeBtn.disabled = false;
+        saveBtn.disabled = false;
+
+      } catch (e) {
+        log("❌ Errore: " + e.message);
+        blockElems.forEach(t => t.disabled = false);
+        writeBtn.disabled = false;
+        saveBtn.disabled = false;
+      }
+    });
+
+    saveBtn.addEventListener('click', () => {
+      let fullData = [];
+      for (let i = 0; i < 4; i++) {
+        try {
+          const blockBytes = hexStringToBytesBlock(blockElems[i].value);
+          fullData = fullData.concat(blockBytes);
+        } catch {
+          log("❌ Errore nei dati del blocco " + (i + 1));
+          return;
+        }
+      }
+      const blob = new Blob([Uint8Array.from(fullData)], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "flash_dump_atmega328_4blocks.bin";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>

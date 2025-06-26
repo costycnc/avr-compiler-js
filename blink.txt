@@ -1,0 +1,20 @@
+<p>
+    	<a href="#"><button onclick='start("blink");'> Assemble BLINK </button></a>
+    	<button class="w3-right"> Tutorial BLINK </button>
+</p>
+    <textarea id="blink" style="left:0%;width:100%;height:300px">
+; ***** BLINK **************
+.org 0
+JMP init
+.org 0x60
+init:
+inc r16
+brne init
+inc r17
+brne init
+dec r18
+brne init
+ldi r18,10
+sbi 3,5
+rjmp init
+    </textarea>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Programmare AVR ATmega328 in Assembly: Guida Completa con Modifica Memoria Flash</title>
+<meta name="description" content="Guida completa per scrivere, compilare e caricare programmi assembly su microcontrollore AVR ATmega328. Modifica diretta della memoria flash con costycnc.it per sperimentare bit, registri e led onboard." />
+<meta name="keywords" content="assembly avr, programmazione atmega328, memoria flash avr, modificare memoria microcontrollore, led arduino assembly, costycnc, asm avr tutorial" />
+<meta name="author" content="CostyCNC" />
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 3em auto; line-height: 1.6; background: #f9f9f9; padding: 20px; }
+  h1, h2 { color: #2c3e50; }
+  a { color: #2980b9; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { padding: 2px 4px; border-radius: 3px; }
+  ul { margin-left: 1.5em; }
+  pre { background: #2d2d2d; color: #f8f8f2; padding: 1em; border-radius: 5px; overflow-x: auto; }
+  /* Video responsive wrapper */
+  .video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    padding-top: 25px;
+    height: 0;
+    margin-bottom: 2em;
+  }
+  .video-wrapper iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- Video YouTube incorporato -->
+<div class="video-wrapper">
+  <iframe src="https://www.youtube.com/embed/0Eu62RnUnuM" title="Video guida programmazione AVR ATmega328 Assembly" allowfullscreen></iframe>
+</div>
+
+<h1>Programmare AVR ATmega328 in Assembly: Guida Completa con Modifica Memoria Flash</h1>
+
+<p>Questa guida ti mostra come scrivere un programma assembly per microcontrollore AVR <strong>ATmega328</strong>, compilarlo e caricarlo usando la pagina web <a href="https://www.costycnc.it/avr1" target="_blank" rel="noopener">costycnc.it/avr1</a>. Inoltre, potrai leggere e modificare direttamente la memoria flash per sperimentare con bit, registri e vedere in tempo reale l’effetto sui LED onboard di Arduino.</p>
+
+<h2>1. Scrivi il programma assembly</h2>
+
+<p>Il codice qui sotto esegue un loop infinito in cui imposta due bit nei registri DDRD e PORTD per controllare il LED collegato al pin PD5:</p>
+
+<pre><code> .org 0
+rjmp init
+ .org 0x68
+init:
+  sbi 4,5    ; DDRD (I/O reg 4), imposta pin 5 come output
+  sbi 5,5    ; PORTD (I/O reg 5), accende il LED su PD5
+  rjmp init  ; loop infinito</code></pre>
+
+<p>Il comando <code>sbi</code> (Set Bit in I/O Register) imposta un bit specifico; con <code>cbi</code> potresti invece resettarlo per spegnere il LED.</p>
+
+<h2>2. Compila e carica il programma</h2>
+
+<p>Su <a href="https://www.costycnc.it/avr1" target="_blank" rel="noopener">costycnc.it/avr1</a> puoi caricare il tuo codice assembly, compilarlo in binario e caricarlo direttamente nel tuo Arduino via Web Serial senza software aggiuntivi.</p>
+
+<h2>3. Leggi e modifica la memoria flash</h2>
+
+<p>La pagina <a href="https://www.costycnc.it/avr1/read-write-page/" target="_blank" rel="noopener">costycnc.it/avr1/read-write-page/</a> ti permette di scaricare i blocchi da 128 byte della memoria flash. Puoi modificare i dati esadecimali dei blocchi e ricaricarli, per cambiare il comportamento del microcontrollore.</p>
+
+<p>Ad esempio, cambiando un <code>8</code> con <code>a</code> o viceversa nei comandi <code>sbi</code> o <code>cbi</code>, vedrai il LED onboard spegnersi o accendersi in base alle modifiche.</p>
+
+<h2>4. Perché questa esperienza è utile</h2>
+
+<ul>
+  <li><strong>Comprendi la memoria flash</strong> e come sono organizzati i dati dentro il microcontrollore.</li>
+  <li><strong>Metti le mani su bit e registri</strong>, modificando realmente i valori a basso livello.</li>
+  <li><strong>Visualizzi in tempo reale</strong> l’effetto delle modifiche hardware sul LED.</li>
+  <li><strong>Approccio didattico</strong> perfetto per chi vuole imparare embedded programming in modo pratico.</li>
+</ul>
+
+<h2>5. Risorse utili</h2>
+
+<ul>
+  <li><a href="https://www.costycnc.it/avr1" target="_blank" rel="noopener">Pagina compilazione e caricamento ASM AVR</a></li>
+  <li><a href="https://www.costycnc.it/avr1/read-write-page/" target="_blank" rel="noopener">Pagina lettura/scrittura memoria flash</a></li>
+</ul>
+
+<hr />
+<p><em>Pubblicato da CostyCNC – Il portale per chi ama imparare e sperimentare con l’elettronica embedded.</em></p>
+
+</body>
+</html>

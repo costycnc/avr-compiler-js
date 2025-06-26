@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leggi la Memoria Flash di ATmega328 via Web Serial (Bootloader)</title>
+  <meta name="description" content="Leggi e salva il contenuto della memoria Flash di un microcontrollore ATmega328 direttamente dal browser via Web Serial usando il bootloader STK500v1.">
+  <meta name="keywords" content="atmega328, flash, dump, bootloader, stk500, web serial, arduino, lettura memoria, microcontrollore, seriale, optiboot">
+  <meta name="author" content="Il Tuo Nome o Sito">
+  <meta property="og:title" content="Leggi la Memoria Flash di ATmega328 via Browser">
+  <meta property="og:description" content="Strumento Web Serial per leggere e salvare la Flash di un ATmega328 usando il bootloader. Nessun software da installare.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tuosito.it/flash-reader-atmega328">
+  <meta property="og:image" content="https://tuosito.it/img/flash-dump-og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Leggi la Flash di ATmega328 via Browser (Web Serial)">
+  <meta name="twitter:description" content="Dump completo della memoria Flash direttamente dal browser. Compatibile con bootloader STK500v1.">
+  <meta name="twitter:image" content="https://tuosito.it/img/flash-dump-og.jpg">
+  <style>
+    body { font-family: monospace; background: #f4f4f4; padding: 1em; }
+    h1, h2 { font-family: sans-serif; }
+    button { font-size: 1em; margin: 10px 5px; padding: 10px; }
+    pre { background: #fff; padding: 1em; border: 1px solid #ccc; height: 400px; overflow-y: auto; white-space: pre-wrap; }
+    input[type=number] { font-size: 1em; padding: 5px; margin-left: 5px; width: 60px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📦 Lettura Memoria Flash ATmega328 via Web Serial</h1>
+    <p>Strumento online per leggere l’intera flash del microcontrollore ATmega328P usando il bootloader, direttamente dal browser.</p>
+  </header>
+  <section>
+    <button id="readBtn">🔌 Connetti e leggi Flash</button>
+    <button id="saveBtn" disabled>💾 Salva come .bin</button>
+    <br />
+    <label for="pagesInput">📏 Numero pagine (x128 byte):</label>
+    <input type="number" id="pagesInput" min="1" value="1" />
+    <pre id="log"></pre>
+  </section>
+  <footer>
+    <h2>ℹ️ Come funziona</h2>
+    <ul>
+      <li>💻 Compatibile con browser Chrome, Edge, Opera (Web Serial)</li>
+      <li>📶 Richiede un bootloader STK500v1 (es. Optiboot)</li>
+      <li>🔧 Nessun software: tutto avviene nel browser</li>
+      <li>📥 Scarica il contenuto in formato .bin</li>
+    </ul>
+  </footer>
+  <script>
+    const STK_GET_SYNC = 0x30;
+    const STK_OK = 0x10;
+    const STK_INSYNC = 0x14;
+    const STK_ENTER_PROGMODE = 0x50;
+    const STK_LEAVE_PROGMODE = 0x51;
+    const STK_READ_SIGNATURE = 0x75;
+    const STK_READ_PAGE = 0x74;
+    const STK_CRC_EOP = 0x20;
+    const PAGE_SIZE = 128;
+    var FLASH_SIZE = 128;
+
+    const logElem = document.getElementById('log');
+    const readBtn = document.getElementById('readBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const pagesInput = document.getElementById('pagesInput');
+    let flashData = [];
+
+    pagesInput.addEventListener('input', () => {
+      const pages = parseInt(pagesInput.value) || 1;
+      FLASH_SIZE = pages * PAGE_SIZE;
+      log(`⚙️ FLASH_SIZE aggiornato: ${FLASH_SIZE} byte (${pages} pagine da 128)`);
+    });
+
+    function log(msg) {
+      console.log(msg);
+      logElem.textContent += msg + "\n";
+      logElem.scrollTop = logElem.scrollHeight;
+    }
+
+    async function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    readBtn.addEventListener('click', async () => {
+      try {
+        log("🔌 Seleziona la porta seriale...");
+        const port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 115200 });
+        log("⚡ Porta seriale aperta a 115200 baud");
+        const writer = port.writable.getWriter();
+        const reader = port.readable.getReader();
+
+        const writeBytes = async (bytes) => {
+          await writer.write(Uint8Array.from(bytes));
+        };
+        const readBytes = async (expectedLength) => {
+          let data = [];
+          while (data.length < expectedLength) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            if (value) data.push(...value);
+          }
+          return data;
+        };
+        const sendCommand = async (command, params = []) => {
+          await writeBytes([command, ...params, STK_CRC_EOP]);
+          const resp = await readBytes(2);
+          if (resp[0] !== STK_INSYNC || resp[1] !== STK_OK) {
+            throw new Error(`Errore comando ${command.toString(16)}: ${resp.map(b => b.toString(16)).join(" ")}`);
+          }
+        };
+
+        log("⏳ Aspetto 1.5 secondi per reset...");
+        await sleep(1500);
+
+        for (let i = 0; i < 3; i++) {
+          await sendCommand(STK_GET_SYNC);
+        }
+        log("✅ SYNC OK");
+
+        await sendCommand(STK_ENTER_PROGMODE);
+        log("🔐 In modalità programmazione");
+
+        log("🔍 Lettura Signature...");
+        await writeBytes([STK_READ_SIGNATURE, STK_CRC_EOP]);
+        const sigResp = await readBytes(5);
+        if (sigResp[0] !== STK_INSYNC || sigResp[4] !== STK_OK) {
+          throw new Error("Errore lettura signature");
+        }
+        const sig = sigResp.slice(1, 4).map(b => b.toString(16).padStart(2, '0')).join(' ');
+        log(`🧾 Signature: ${sig}`);
+
+        log(`📄 Lettura Flash (${FLASH_SIZE} byte)...`);
+        flashData = [];
+        for (let addr = 0; addr < FLASH_SIZE; addr += PAGE_SIZE) {
+          let hi = (PAGE_SIZE >> 8) & 0xFF;
+          let lo = PAGE_SIZE & 0xFF;
+          log(`➡️ Invio: STK_READ_PAGE addr 0x${addr.toString(16).padStart(4, '0')}`);
+          await writeBytes([STK_READ_PAGE, hi, lo, 0x46, STK_CRC_EOP]);
+          const pageResp = await readBytes(PAGE_SIZE + 2);
+          if (pageResp[0] !== STK_INSYNC || pageResp[PAGE_SIZE + 1] !== STK_OK) {
+            throw new Error(`Errore lettura flash pagina 0x${addr.toString(16)}`);
+          }
+          const page = pageResp.slice(1, 1 + PAGE_SIZE);
+          flashData.push(...page);
+        }
+
+        log("✅ Lettura flash completata.");
+        log("📦 Dati esadecimali:\n" + flashData.map((b, i) =>
+          b.toString(16).padStart(2, '0') + ((i + 1) % 16 === 0 ? '\n' : ' ')
+        ).join(''));
+
+        await sendCommand(STK_LEAVE_PROGMODE);
+        log("🚪 Uscita da modalità programmazione");
+        await reader.releaseLock();
+        await writer.releaseLock();
+        await port.close();
+        log("✅ Connessione chiusa.");
+        saveBtn.disabled = false;
+      } catch (e) {
+        log("❌ Errore: " + e.message);
+      }
+    });
+
+    saveBtn.addEventListener('click', () => {
+      const blob = new Blob([Uint8Array.from(flashData)], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "flash_dump_atmega328.bin";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>

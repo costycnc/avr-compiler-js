@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lettura Seriale da Arduino</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f8ff; /* Azzurro chiaro */
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #0056b3;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #output {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            text-align: left;
+            max-height: 250px;
+            overflow-y: auto;
+            white-space: pre-wrap; /* Mantiene la formattazione dei newline */
+            word-wrap: break-word; /* Va a capo se una singola parola è troppo lunga */
+        }
+        #currentValue {
+            font-size: 3em;
+            font-weight: bold;
+            color: #28a745; /* Verde per il valore corrente */
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f3fcf3;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            display: inline-block; /* Per adattarsi al contenuto */
+            min-width: 150px; /* Larghezza minima per evitare sbalzi */
+        }
+        .status {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .status.connected {
+            color: #28a745; /* Verde */
+            font-weight: bold;
+        }
+        .status.disconnected {
+            color: #dc3545; /* Rosso */
+            font-weight: bold;
+        }
+        .warning {
+            color: #ffc107;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lettura Dati Seriale da Arduino</h1>
+        <p class="status" id="statusMessage">Disconnesso</p>
+        <div class="warning" id="browserWarning"></div>
+
+        <button id="connectButton">Connetti ad Arduino</button>
+        <button id="disconnectButton" disabled>Disconnetti</button>
+
+        <h2 style="margin-top: 30px;">Valore ADC Corrente:</h2>
+        <div id="currentValue">N/A</div>
+
+        <h2 style="margin-top: 30px;">Log Dati:</h2>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        // Riferimenti agli elementi HTML
+        const connectButton = document.getElementById('connectButton');
+        const disconnectButton = document.getElementById('disconnectButton');
+        const outputDiv = document.getElementById('output');
+        const statusMessage = document.getElementById('statusMessage');
+        const currentValueDiv = document.getElementById('currentValue');
+        const browserWarning = document.getElementById('browserWarning');
+
+        let port; // Oggetto SerialPort
+        let reader; // ReadableStreamDefaultReader
+        let decoder = new TextDecoder(); // Decodifica i byte in stringhe
+        let keepReading = false; // Flag per controllare il ciclo di lettura
+
+        // Funzione per controllare la compatibilità del browser
+        function checkBrowserCompatibility() {
+            if ('serial' in navigator) {
+                browserWarning.textContent = '';
+                console.log("Web Serial API supportata.");
+            } else {
+                browserWarning.textContent = 'Attenzione: La Web Serial API non è supportata dal tuo browser. Usa Chrome, Edge o Opera.';
+                connectButton.disabled = true;
+                disconnectButton.disabled = true;
+            }
+        }
+
+        // Funzione per aggiornare lo stato di connessione
+        function updateConnectionStatus(isConnected) {
+            if (isConnected) {
+                statusMessage.textContent = 'Connesso ad Arduino';
+                statusMessage.className = 'status connected';
+                connectButton.disabled = true;
+                disconnectButton.disabled = false;
+            } else {
+                statusMessage.textContent = 'Disconnesso';
+                statusMessage.className = 'status disconnected';
+                connectButton.disabled = false;
+                disconnectButton.disabled = true;
+                currentValueDiv.textContent = 'N/A'; // Resetta il valore
+            }
+        }
+
+        // Funzione per collegarsi alla porta seriale
+        async function connectSerial() {
+            try {
+                // Chiede all'utente di selezionare una porta seriale
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 9600 }); // Apri la porta con la stessa baud rate di Arduino
+
+                statusMessage.textContent = 'Connessione in corso...';
+                updateConnectionStatus(true);
+                keepReading = true; // Abilita il ciclo di lettura
+                readLoop(); // Inizia a leggere i dati
+
+            } catch (error) {
+                console.error("Errore di connessione seriale:", error);
+                if (error.name === 'NotFoundError') {
+                    alert('Nessun dispositivo seriale selezionato o trovato.');
+                } else if (error.name === 'NetworkError' && error.message.includes('permission')) {
+                    alert('Permesso negato dall\'utente o dispositivo già in uso.');
+                } else {
+                    alert('Errore durante la connessione: ' + error.message);
+                }
+                updateConnectionStatus(false);
+            }
+        }
+
+        // Funzione per disconnettersi dalla porta seriale
+        async function disconnectSerial() {
+            if (reader) {
+                // Annulla la lettura, forzando la terminazione del ciclo readLoop
+                keepReading = false;
+                try {
+                    await reader.cancel();
+                } catch (error) {
+                    console.error("Errore durante l'annullamento del reader:", error);
+                }
+                reader.releaseLock(); // Rilascia il lock per poter chiudere la porta
+                reader = null; // Resetta il reader
+            }
+
+            if (port) {
+                try {
+                    await port.close();
+                    console.log("Porta seriale chiusa.");
+                } catch (error) {
+                    console.error("Errore durante la chiusura della porta:", error);
+                }
+                port = null; // Resetta la porta
+            }
+            outputDiv.textContent = ''; // Pulisce l'output
+            updateConnectionStatus(false);
+        }
+
+        // Ciclo di lettura dei dati seriali
+        async function readLoop() {
+            while (port.readable && keepReading) {
+                reader = port.readable.getReader(); // Ottieni un reader
+                try {
+                    let receivedData = ''; // Buffer per i dati ricevuti
+                    while (true && keepReading) {
+                        const { value, done } = await reader.read(); // Leggi i dati
+
+                        if (done) {
+                            console.log('Reader rilasciato.');
+                            break; // Il reader è bloccato o la porta è chiusa
+                        }
+
+                        receivedData += decoder.decode(value, { stream: true }); // Decodifica e aggiungi al buffer
+
+                        // Arduino invia dati con un newline (\n).
+                        // Se troviamo un newline, significa che abbiamo un messaggio completo.
+                        let newLineIndex;
+                        while ((newLineIndex = receivedData.indexOf('\n')) !== -1) {
+                            const line = receivedData.substring(0, newLineIndex).trim(); // Estrai la riga
+                            receivedData = receivedData.substring(newLineIndex + 1); // Rimuovi la riga dal buffer
+
+                            if (line) { // Assicurati che la riga non sia vuota
+                                outputDiv.textContent += line + '\n'; // Aggiungi all'output
+                                outputDiv.scrollTop = outputDiv.scrollHeight; // Scrolla in fondo
+
+                                // Tenta di convertire la riga in un numero per il valore corrente
+                                const parsedValue = parseInt(line);
+                                if (!isNaN(parsedValue)) {
+                                    currentValueDiv.textContent = parsedValue;
+                                }
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error("Errore durante la lettura seriale:", error);
+                    // Questo può accadere se il dispositivo viene scollegato
+                } finally {
+                    reader.releaseLock(); // Rilascia il lock quando il ciclo termina o c'è un errore
+                }
+            }
+            // Quando il ciclo di lettura termina, assicurati che lo stato sia disconnesso
+            if (!keepReading) {
+                updateConnectionStatus(false);
+            }
+        }
+
+        // Event Listeners
+        connectButton.addEventListener('click', connectSerial);
+        disconnectButton.addEventListener('click', disconnectSerial);
+
+        // Aggiungi un listener per gestire la disconnessione inaspettata del dispositivo
+        navigator.serial.addEventListener('disconnect', (event) => {
+            console.warn('Dispositivo seriale disconnesso:', event);
+            if (port && port.closed) { // Se la porta era quella che stavamo usando e ora è chiusa
+                disconnectSerial(); // Pulisci lo stato della connessione
+            }
+        });
+
+        // Inizializzazione all'avvio della pagina
+        document.addEventListener('DOMContentLoaded', () => {
+            checkBrowserCompatibility();
+            updateConnectionStatus(false); // Inizializza lo stato come disconnesso
+        });
+
+    </script>
+</body>
+</html>

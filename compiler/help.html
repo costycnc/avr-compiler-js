@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tutorial: Programmare Atmega328 con Assembler e Web Serial</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+      background: #f9f9f9;
+      color: #222;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      color: #007acc;
+    }
+    pre {
+      background: #eee;
+      border-left: 5px solid #007acc;
+      padding: 10px 15px;
+      overflow-x: auto;
+    }
+    code {
+      background: #ddd;
+      padding: 2px 5px;
+      font-family: monospace;
+      border-radius: 3px;
+    }
+    section {
+      margin-bottom: 30px;
+    }
+    .important {
+      color: #d9534f;
+      font-weight: bold;
+    }
+    ul {
+      padding-left: 20px;
+    }
+        nav { margin-bottom: 20px; }
+
+    nav a { color: #ffa500; margin-right: 15px; text-decoration: none; font-weight: bold; }
+
+    nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+    <nav>
+
+  <a href="https://costycnc.it/">Home</a>
+
+  <a href="https://costycnc.it/avr1">avr1</a>
+
+  <a href="https://costycnc.it/avr1/compiler">Compiler</a>
+
+</nav>
+
+<h1>Tutorial: Programmare Atmega328 con Assembler e Web Serial API</h1>
+
+<section>
+  <p>Questa pagina spiega il funzionamento di uno strumento didattico scritto in HTML e JavaScript per programmare il microcontrollore <code>Atmega328</code> (ad esempio quello di Arduino Uno) usando il linguaggio assembler e la Web Serial API.</p>
+</section>
+
+<section>
+  <h2>1. Interfaccia utente</h2>
+  <p>La pagina presenta una <code>textarea</code> per inserire istruzioni assembler, due bottoni (per compilare e flashare il microcontrollore e per tradurre la pagina) e un'area di log per mostrare messaggi e stati.</p>
+  <pre>
+&lt;textarea id="input"&gt;sbi 4,5
+sbi 5,5&lt;/textarea&gt;
+&lt;button id="compileBtn"&gt;Compila e Flash&lt;/button&gt;
+&lt;pre id="log"&gt;&lt;/pre&gt;
+  </pre>
+</section>
+
+<section>
+  <h2>2. Conversione da assembler a opcode</h2>
+  <p>Il microcontrollore interpreta le istruzioni assembler come codici macchina (opcode) a 16 bit. Il codice fa così:</p>
+  <ul>
+    <li>Definisce una mappa di opcode base per le istruzioni <code>sbi</code> (Set Bit) e <code>cbi</code> (Clear Bit):</li>
+  </ul>
+  <pre>
+const opcodeMap = {
+  sbi: 0x9A00,
+  cbi: 0x9800,
+};
+  </pre>
+  <ul>
+    <li>Il parser prende il testo assembler riga per riga e cerca il formato <code>mnemonico registro,bit</code> (es. <code>sbi 5,5</code>).</li>
+    <li>Verifica che registro sia tra 0 e 31 e bit tra 0 e 7.</li>
+    <li>Calcola l'opcode finale così:
+      <br>
+      <code>opcode = opcodeBase | (registro &lt;&lt; 3) | bit</code>
+    </li>
+    <li>Ad esempio per <code>sbi 5,5</code>:
+      <br>
+      <code>0x9A00 | (5 &lt;&lt; 3) | 5 = 0x9A00 | 0x28 | 0x05 = 0x9A2D</code></li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Preparazione del buffer da flashare</h2>
+  <p>Il microcontrollore viene programmato scrivendo pagine di memoria flash di 128 byte (64 istruzioni da 2 byte ciascuna). Il codice crea un buffer <code>Uint8Array</code> di 128 byte in cui inserisce le istruzioni codificate.</p>
+  <pre>
+function createFlashPageMultiple(instructions) {
+  const buffer = new Uint8Array(128);
+  for (let i = 0; i &lt; instructions.length &amp;&amp; i &lt; 64; i++) {
+    buffer[i * 2] = instructions[i] &amp; 0xFF;
+    buffer[i * 2 + 1] = (instructions[i] &gt;&gt; 8) &amp; 0xFF;
+  }
+  return buffer;
+}
+  </pre>
+</section>
+
+<section>
+  <h2>4. Comunicazione con Atmega328 via Web Serial e protocollo STK500</h2>
+  <p>La comunicazione con il microcontrollore avviene usando la <strong>Web Serial API</strong> del browser e il protocollo di programmazione <strong>STK500</strong>.</p>
+  <ul>
+    <li>Dopo un reset, il codice invia un comando <code>SYNC</code> (0x30 0x20) 3 volte per sincronizzarsi con il bootloader.</li>
+    <li>Entra in modalità programmazione (comando 0x50 0x20).</li>
+    <li>Imposta l'indirizzo flash dove scrivere (qui 0x0080).</li>
+    <li>Invia il comando di scrittura pagina flash (128 byte) con il buffer delle istruzioni.</li>
+    <li>Conferma la scrittura e chiude la porta.</li>
+  </ul>
+  <pre>
+async function flashPage(port, buffer) {
+  const writer = port.writable.getWriter();
+  const reader = port.readable.getReader();
+
+  await sleep(1500); // attesa reset
+
+  for (let i = 0; i &lt; 3; i++) {
+    await writer.write(Uint8Array.from([0x30, 0x20]));
+    await reader.read();
+  }
+
+  await writer.write(Uint8Array.from([0x50, 0x20]));
+  await reader.read();
+
+  await writer.write(Uint8Array.from([0x55, 0x80, 0x00, 0x20]));
+  await reader.read();
+
+  await writer.write(Uint8Array.from([0x64, 0x00, 0x80, 0x46]));
+  await writer.write(buffer);
+  await writer.write(Uint8Array.of(0x20));
+  await reader.read();
+
+  await writer.write(Uint8Array.from([0x51, 0x20]));
+  await reader.read();
+
+  writer.releaseLock();
+  reader.releaseLock();
+}
+  </pre>
+</section>
+
+<section>
+  <h2>5. Come usare il bottone "Compila e Flash"</h2>
+  <p>Quando premi il bottone:</p>
+  <ol>
+    <li>Il testo assembler viene convertito in opcode.</li>
+    <li>Si crea il buffer da inviare.</li>
+    <li>Il browser chiede di scegliere la porta seriale (es. USB di Arduino).</li>
+    <li>Si apre la porta e si inviano i comandi per flashare la memoria.</li>
+    <li>Al termine si chiude la porta.</li>
+    <li>I messaggi di stato e di errore sono mostrati nella finestra di log.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>6. Considerazioni finali</h2>
+  <p>Questo strumento è un esempio semplice e didattico per capire:</p>
+  <ul>
+    <li>Come funziona il linguaggio assembler su Atmega328.</li>
+    <li>Come tradurre assembler in opcode macchina.</li>
+    <li>Come comunicare con un microcontrollore via Web Serial API.</li>
+    <li>Come usare il protocollo STK500 per programmare la memoria flash.</li>
+  </ul>
+  <p>Puoi usare e modificare questo codice per imparare e sperimentare la programmazione embedded da browser, senza tool esterni.</p>
+</section>
+
+</body>
+</html>

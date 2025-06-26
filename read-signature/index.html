@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>STK500 Web Serial con reset</title>
+  <style>
+    body { font-family: monospace; background: #eee; padding: 1em; }
+    button { font-size: 1.2em; margin: 10px 0; }
+    pre { background: #fff; padding: 1em; border: 1px solid #ccc; height: 300px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <h1>STK500 Web Serial - Lettura Signature</h1>
+  <button id="connectBtn">Connetti e Leggi Signature</button>
+  <pre id="log"></pre>
+
+  <script>
+    const STK_GET_SYNC = 0x30;
+    const STK_OK = 0x10;
+    const STK_INSYNC = 0x14;
+    const STK_ENTER_PROGMODE = 0x50;
+    const STK_LEAVE_PROGMODE = 0x51;
+    const STK_READ_SIGNATURE = 0x75;
+    const STK_CRC_EOP = 0x20;
+
+    const logElem = document.getElementById('log');
+    const connectBtn = document.getElementById('connectBtn');
+
+    function log(msg) {
+      console.log(msg);
+      logElem.textContent += msg + "\n";
+      logElem.scrollTop = logElem.scrollHeight;
+    }
+
+    async function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    connectBtn.addEventListener('click', async () => {
+      try {
+        log("🔌 Seleziona la porta seriale...");
+        const port = await navigator.serial.requestPort();
+
+        log("⚡ Apro la porta seriale a 115200 baud...");
+        await port.open({ baudRate: 115200 });
+
+        // Attendere 1.5 secondi per il reset automatico del micro
+        log("⏳ Attendo 1500 ms per reset automatico del micro...");
+        await sleep(1500);
+
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+
+        const writer = port.writable.getWriter();
+        const reader = port.readable.getReader();
+
+
+        async function writeBytes(bytes) {
+          log("➡️ Invio: " + bytes.map(b => b.toString(16).padStart(2, '0')).join(" "));
+          await writer.write(Uint8Array.from(bytes));
+        }
+
+        async function readBytes(expectedLength) {
+          let received = [];
+          while (received.length < expectedLength) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            if (value) {
+              received.push(...value);
+            }
+          }
+          log("⬅️ Ricevuto: " + received.map(b => b.toString(16).padStart(2, '0')).join(" "));
+          return received;
+        }
+
+        // Funzione per inviare un comando e aspettare risposta (2 byte risposta standard)
+        async function sendCommand(command, params = []) {
+          await writeBytes([command, ...params, STK_CRC_EOP]);
+          const response = await readBytes(2);
+		  console.log(response);
+          if (response[0] !== STK_INSYNC || response[1] !== STK_OK) {
+            throw new Error(`Errore protocollo STK500: ${response.map(b => b.toString(16)).join(" ")}`);
+          }
+        }
+
+        // SYNC x3 per sicurezza
+        log("🔁 SYNC (x3)...");
+        for (let i = 0; i < 3; i++) {
+		   console.log(i);
+          await sendCommand(STK_GET_SYNC);
+        }
+        log("✅ SYNC OK");
+
+        // Entra in modalità programmazione
+        log("🟢 Entra in programmazione...");
+        await sendCommand(STK_ENTER_PROGMODE);
+
+        // Legge signature (comando + 3 byte risposta + OK)
+        log("🔍 Legge signature...");
+        await writeBytes([STK_READ_SIGNATURE, STK_CRC_EOP]);
+        const sigResponse = await readBytes(5);
+        if (sigResponse[0] !== STK_INSYNC || sigResponse[4] !== STK_OK) {
+          throw new Error("Errore lettura signature");
+        }
+        const [sig1, sig2, sig3] = sigResponse.slice(1, 4);
+        log(`🧾 Signature: ${sig1.toString(16)} ${sig2.toString(16)} ${sig3.toString(16)}`);
+
+        // Esce da programmazione
+        log("🚪 Esce da modalità programmazione...");
+        await sendCommand(STK_LEAVE_PROGMODE);
+
+        await reader.releaseLock();
+        await writer.releaseLock();
+        await port.close();
+
+        log("✅ Fine procedura.");
+
+      } catch (error) {
+        log("❌ Errore: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

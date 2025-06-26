@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html lang="it">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Programmare Atmega328 con Assembler - SBI / CBI - Educativo</title>
+
+  <meta name="description" content="Strumento didattico per programmare Atmega328 in linguaggio assembler: da mnemonico a opcode, per scrivere bit nei registri e accendere il LED onboard di Arduino. Facile, interattivo e tradotto." />
+
+  <meta name="keywords" content="assembler, atmega328, sbi, cbi, opcode, arduino, programmazione, microcontrollore, flash, didattica" />
+
+  <style>
+
+    body { font-family: monospace, monospace; background: #1c1c1c; color: #eee; padding: 20px; line-height: 1.5; }
+
+    h1,h2 { color: #ffa500; }
+
+    textarea { width: 100%; height: 120px; font-family: monospace; font-size: 1.1em; background: #222; color: #eee; border: none; padding: 10px; box-sizing: border-box; }
+
+    button { margin-top: 10px; padding: 10px 20px; font-size: 1em; cursor: pointer; background: #444; border: none; color: #eee; border-radius: 5px; }
+
+    button:hover { background: #666; }
+
+    pre { background: #111; padding: 10px; margin-top: 10px; height: 200px; overflow: auto; white-space: pre-wrap; }
+
+    nav { margin-bottom: 20px; }
+
+    nav a { color: #ffa500; margin-right: 15px; text-decoration: none; font-weight: bold; }
+
+    nav a:hover { text-decoration: underline; }
+
+    #translateBtn { background: #007bff; }
+
+  </style>
+
+</head>
+
+<body>
+
+
+
+<nav>
+
+  <a href="https://costycnc.it/">Home</a>
+
+  <a href="https://costycnc.it/avr1">avr1</a>
+
+  <a href="help.html">Tutorial</a>
+
+</nav>
+
+
+
+<h1>Flash Atmega328 con Assembler: SBI e CBI</h1>
+
+
+
+<section>
+
+  <p>
+
+    Questa pagina è uno strumento educativo essenziale per chi vuole imparare da zero come programmare il microcontrollore
+
+    <strong>Atmega328</strong> (usato ad esempio in Arduino Uno) a basso livello, scrivendo direttamente in linguaggio assembler.
+
+  </p>
+
+  <p>
+
+    Qui vedrai come convertire istruzioni mnemoniche semplici come <code>sbi</code> (Set Bit in I/O register) e <code>cbi</code> (Clear Bit in I/O register) in opcode esadecimali e come
+
+    caricarli nella memoria del microcontrollore usando il protocollo <strong>STK500</strong> via Web Serial API.
+
+  </p>
+
+  <p>
+
+    L’obiettivo didattico è mostrare in modo chiaro e interattivo l’essenza della programmazione embedded: scrivere un singolo bit in un registro per, ad esempio, accendere il LED onboard di Arduino.
+
+    Un approccio semplice e concreto per capire come funziona davvero un microcontrollore.
+
+  </p>
+
+</section>
+
+
+
+<textarea id="input" aria-label="Inserisci istruzioni assembler">sbi 4,5
+
+sbi 5,5</textarea>
+
+<button id="compileBtn">Compila e Flash</button>
+
+<button id="translateBtn">Traduci questa pagina</button>
+
+
+
+<pre id="log" aria-live="polite" aria-atomic="true"></pre>
+
+
+
+<script>
+
+const logEl = document.getElementById('log');
+
+function log(msg) {
+
+  logEl.textContent += msg + '\n';
+
+  logEl.scrollTop = logEl.scrollHeight;
+
+}
+
+
+
+// Mappa mnemonici → opcode base
+
+const opcodeMap = {
+
+  sbi: 0x9A00,  // Opcode base per SBI (Set Bit in I/O register)
+
+  cbi: 0x9800,  // Opcode base per CBI (Clear Bit in I/O register)
+
+};
+
+
+
+// Funzione per parsare le istruzioni inserite dall'utente
+
+function parseInstructions(text) {
+
+  const lines = text.trim().split('\n');
+
+  const instructions = [];
+
+
+
+  for (let line of lines) {
+
+    line = line.trim();
+
+    if (!line) continue;
+
+
+
+    // Pattern: mnemonico reg,bit (es. sbi 5,5)
+
+    const regex = /^(\w+)\s+(\d+)\s*,\s*(\d+)$/i;
+
+    const match = line.match(regex);
+
+    if (!match) throw new Error(`Formato non valido: "${line}"`);
+
+
+
+    const instr = match[1].toLowerCase();
+
+    const reg = parseInt(match[2], 10);
+
+    const bit = parseInt(match[3], 10);
+
+
+
+    if (reg < 0 || reg > 31 || bit < 0 || bit > 7)
+
+      throw new Error(`Registro o bit fuori range (registro 0-31, bit 0-7): "${line}"`);
+
+
+
+    const opcodeBase = opcodeMap[instr];
+
+    if (opcodeBase === undefined)
+
+      throw new Error(`Istruzione non supportata: "${instr}"`);
+
+
+
+    // Costruisce opcode: opcodeBase OR (registro << 3) OR bit
+
+    const instruction = opcodeBase | (reg << 3) | bit;
+
+    log(`${instr.toUpperCase()} ${reg},${bit} → 0x${instruction.toString(16).padStart(4, '0').toUpperCase()}`);
+
+    instructions.push(instruction);
+
+  }
+
+
+
+  return instructions;
+
+}
+
+
+
+// Crea buffer dati per la pagina da flashare
+
+function createFlashPageMultiple(instructions) {
+
+  const buffer = new Uint8Array(128);
+
+  for (let i = 0; i < instructions.length && i < 64; i++) {
+
+    buffer[i * 2] = instructions[i] & 0xFF;
+
+    buffer[i * 2 + 1] = (instructions[i] >> 8) & 0xFF;
+
+  }
+
+  return buffer;
+
+}
+
+
+
+// Funzione di attesa (delay)
+
+function sleep(ms) {
+
+  return new Promise(resolve => setTimeout(resolve, ms));
+
+}
+
+
+
+// Flash della pagina via Web Serial API con protocollo STK500
+
+async function flashPage(port, buffer) {
+
+  const writer = port.writable.getWriter();
+
+  const reader = port.readable.getReader();
+
+
+
+  log('Attendo reset dispositivo...');
+
+  await sleep(1500);
+
+
+
+  for (let i = 0; i < 3; i++) {
+
+    log('Invio SYNC...');
+
+    await writer.write(Uint8Array.from([0x30, 0x20]));
+
+    const { value } = await reader.read();
+
+    log('Risposta: ' + (value ? [...value].map(b => b.toString(16).padStart(2, '0')).join(' ') : 'n/d'));
+
+  }
+
+
+
+  log('Modo programmazione...');
+
+  await writer.write(Uint8Array.from([0x50, 0x20]));
+
+  await reader.read();
+
+
+
+  log('Imposto indirizzo 0x0080...');
+
+  await writer.write(Uint8Array.from([0x55, 0x80, 0x00, 0x20]));  // Indirizzo flash 0x0080 (128 dec)
+
+  await reader.read();
+
+
+
+  log('Carico pagina 128 byte...');
+
+  await writer.write(Uint8Array.from([0x64, 0x00, 0x80, 0x46])); // Comando pagina flash
+
+  await writer.write(buffer);
+
+  await writer.write(Uint8Array.of(0x20));
+
+  await reader.read();
+
+
+
+  log('Confermo scrittura...');
+
+  await writer.write(Uint8Array.from([0x51, 0x20]));
+
+  await reader.read();
+
+
+
+  writer.releaseLock();
+
+  reader.releaseLock();
+
+  log('✅ Flash completato!');
+
+}
+
+
+
+// Gestione eventi bottone "Compila e Flash"
+
+document.getElementById('compileBtn').addEventListener('click', async () => {
+
+  logEl.textContent = '';
+
+  try {
+
+    const text = document.getElementById('input').value;
+
+    const instructions = parseInstructions(text);
+
+    const page = createFlashPageMultiple(instructions);
+
+
+
+    log('Seleziona porta seriale...');
+
+    const port = await navigator.serial.requestPort();
+
+    await port.open({ baudRate: 115200 });
+
+    log('Porta aperta');
+
+
+
+    await flashPage(port, page);
+
+
+
+    await port.close();
+
+    log('Porta chiusa');
+
+  } catch (e) {
+
+    log('❌ Errore: ' + e.message);
+
+  }
+
+});
+
+
+
+// Bottone per tradurre la pagina usando Google Translate widget
+
+document.getElementById('translateBtn').addEventListener('click', () => {
+
+  if (!document.getElementById('google_translate_element')) {
+
+    const el = document.createElement('div');
+
+    el.id = 'google_translate_element';
+
+    document.body.insertBefore(el, document.body.firstChild);
+
+
+
+    const script = document.createElement('script');
+
+    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+
+    document.body.appendChild(script);
+
+
+
+    window.googleTranslateElementInit = function() {
+
+      new google.translate.TranslateElement({pageLanguage: 'it'}, 'google_translate_element');
+
+    };
+
+  }
+
+});
+
+</script>
+
+
+
+</body>
+
+</html>
