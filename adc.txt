@@ -1,0 +1,29 @@
+.org 0
+rjmp main
+
+main:
+  ; --- Inizializza ADC ---
+  ldi r16, 0b01000000      ; AVcc come riferimento, input su ADC0 (MUX[3:0]=0000)
+  sts 0x7C, r16            ; ADMUX = 0x7C (con +0x20 già incluso per sts)
+
+  ldi r16, 0b10000111      ; ADEN=1 (enable), prescaler=128 (divisione clock)
+  sts 0x7A, r16            ; ADCSRA = 0x7A
+
+loop:
+  ; --- Avvia conversione ---
+  lds r16, 0x7A            ; Leggi ADCSRA
+  ori r16, 0b01000000      ; Imposta bit ADSC (start conversion)
+  sts 0x7A, r16
+
+wait_adc:
+  lds r16, 0x7A            ; Leggi ADCSRA
+  sbrs r16, 6              ; Attendi che ADSC torni 0 (conversione finita)
+  rjmp wait_adc
+
+  ; --- Leggi il risultato ---
+  lds r17, 0x78            ; ADCL (LSB) — devi leggere ADCL prima!
+  lds r18, 0x79            ; ADCH (MSB)
+
+  ; Ora r17:r18 contiene il valore a 10 bit (r18 = 2 bit più significativi)
+
+  rjmp loop

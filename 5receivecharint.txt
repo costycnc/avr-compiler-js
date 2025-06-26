@@ -1,0 +1,20 @@
+;enable RX interrupt 
+;when char arrived led onboard is on
+.equ	RXCIE0	= 7	
+.equ	RXEN0	= 4	
+.equ	UCSR0B	= 0xc1	
+.org 0x0
+	jmp RESET		; Reset Handler
+.org 0x0024    ;USART, RX Complete Handler
+	jmp costy 
+.org 0x60
+RESET:	
+    sbi 4,5 ; set PB5 as output
+	ldi r16, 0b10010000 ;(1 << RXCIE0) | (1 << RXEN0)	
+	sts	UCSR0B,r16
+	sei
+loop:	
+	rjmp loop
+costy:
+	sbi 5,5  ;set PB5 HIGH
+	reti

@@ -1,0 +1,8 @@
+
+        .org 0x0
+        rjmp init
+        .org 0x60
+        init:
+        sbi 4,5 ;set pin as output
+        sbi 5,5; led on
+        rjmp init

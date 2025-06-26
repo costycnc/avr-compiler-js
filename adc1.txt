@@ -1,0 +1,104 @@
+.org 0x0000
+  rjmp reset
+.0rg 0x60
+reset:
+  ; --- Inizializza stack ---
+  ldi r16, 0xFF
+  out 0x3D, r16    ; SPL
+  ldi r16, 0x08
+  out 0x3E, r16    ; SPH
+
+  ; --- USART init (9600 baud @16MHz) ---
+  ldi r16, 103
+  sts 0xC4, r16    ; UBRR0L
+  ldi r16, 0
+  sts 0xC5, r16    ; UBRR0H
+  ldi r16, 0x08
+  sts 0xC1, r16    ; UCSR0B (TXEN0)
+  ldi r16, 0x06
+  sts 0xC2, r16    ; UCSR0C (8N1)
+
+  ; --- ADC init ---
+  ldi r16, 0x40        ; REFS0 = AVcc, MUX[3:0]=0000 (ADC0)
+  sts 0x7C, r16        ; ADMUX
+  ldi r16, 0x87        ; ADEN=1, prescaler=128 (ADPS2:0=111)
+  sts 0x7A, r16        ; ADCSRA
+
+loop:
+  ; --- Start ADC ---
+  lds r16, 0x7A        ; ADCSRA
+  ori r16, 0x40        ; ADSC
+  sts 0x7A, r16
+
+wait_adc:
+  lds r16, 0x7A
+  sbrc r16, 6          ; ADSC bit
+  rjmp wait_adc
+  
+  ldi r19,50
+wait_05s:
+    dec r17
+    brne wait_05s
+    dec r18
+    brne wait_05s
+    dec r19
+    brne wait_05s
+
+  ; --- Read ADC result ---
+  lds r17, 0x78        ; ADCL
+  lds r18, 0x79        ; ADCH
+  mov r20, r17
+  mov r21, r18         ; 10-bit value in r21:r20
+
+  ; --- Decimal conversion (3 digits) ---
+  ldi r22, 0           ; centinaia
+hundreds:
+  subi r20, low(100)
+  sbci r21, high(100)
+  brcs h_done
+  ldi r19, 1
+  add r22, r19
+  rjmp hundreds
+h_done:
+  subi r20, -low(100)
+  sbci r21, -high(100)
+
+  ldi r23, 0           ; decine
+tens:
+  subi r20, 10
+  brcs t_done
+  ldi r19, 1
+  add r23, r19
+  rjmp tens
+t_done:
+  subi r20, -10        ; restore remainder = unità
+
+  ; --- ASCII offset ---
+  ldi r30, '0'
+  add r22, r30
+  add r23, r30
+  add r20, r30
+
+  ; --- Send via USART ---
+  mov r24, r22
+  rcall send
+  mov r24, r23
+  rcall send
+  mov r24, r20
+  rcall send
+
+  ; newline
+  ldi r24, 13
+  rcall send
+  ldi r24, 10
+  rcall send
+
+  rjmp loop
+
+; --- Subroutine: send byte via USART ---
+send:
+  lds r25, 0xC0       ; UCSR0A
+  sbrs r25, 5         ; UDRE0 bit
+  rjmp send
+  sts 0xC6, r24       ; UDR0
+  ret

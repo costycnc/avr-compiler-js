@@ -1,0 +1,61 @@
+.equ DDRB = 0x04
+	.equ PORTB = 0x05
+	.equ LEDP = 5
+	.equ SPH = 0x3e
+	.equ SPL = 0x3d
+	.equ RAMEND_HI = 0x08
+	.equ RAMEND_LO = 0xff
+; Rest and Interrupt table for ATmega328p
+	.org 0x0
+	jmp RESET		; Reset Handler
+	jmp IgnoreINT		; IRQ0 Handler
+	jmp IgnoreINT		; IRQ1 Handler
+	jmp IgnoreINT		; PCINT0 Handler
+	jmp IgnoreINT		; PCINT1 Handler
+	jmp IgnoreINT		; PCINT2 Handler
+	jmp IgnoreINT		; Watchdog Timer
+	jmp IgnoreINT		; Timer2 Compare
+	jmp IgnoreINT		; Timer2 Compare
+	jmp IgnoreINT		; Timer2 Overflow Handler
+	jmp IgnoreINT		; Timer1 Capture Handler
+	jmp IgnoreINT		; Timer1 Compare A Handler
+	jmp IgnoreINT		; Timer1 Compare B Handler
+	jmp IgnoreINT		; Timer1 Overflow Handler
+	jmp IgnoreINT		; Timer0 Compare A Handler
+	jmp IgnoreINT		; Timer0 Compare B Handler
+	jmp IgnoreINT		; Timer0 Overflow Handler
+	jmp IgnoreINT		; SPI Transfer Complete Handler
+	jmp IgnoreINT		; USART, RX Complete Handler
+	jmp IgnoreINT		; USART, UDR Empty Handler
+	jmp IgnoreINT		; USART, TX Complete Handler
+	jmp IgnoreINT		; ADC Conversion Complete Handler
+	jmp IgnoreINT		; EEPROM Ready Handler
+	jmp IgnoreINT		; Analog Comparator Handler
+	jmp IgnoreINT		; 2-wire Serial Interface Handler
+	jmp IgnoreINT		; Store Program Memory Ready Handler
+IgnoreINT:	reti
+longDelay:
+	clr   R1
+	clr   R2		;R2 used as delay 3d count
+delay_1:
+	dec   R2
+	brne  delay_1            
+	dec   R1
+	brne  delay_1           
+	dec   R19
+	brne  delay_1		; delay master count
+	ret                     
+RESET:
+	ldi   r16, RAMEND_HI	; Main program start
+	out   SPH,r16		;Set Stack Pointer to top of RAM
+	ldi   r16, RAMEND_LO
+	out   SPL,r16
+	cli
+	sbi   DDRB, LEDP		;connect LED to PORTD pin 5, aka D13
+flash:	sbi   PORTB, LEDP	;LED on
+	ldi   R19, 10		;X sec delay           
+	rcall longDelay             
+	cbi   PORTB, LEDP	;LED off            
+	ldi   R19, 10		;X sec delay
+	rcall longDelay
+	rjmp  flash		;another run

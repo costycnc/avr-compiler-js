@@ -1,0 +1,53 @@
+        
+    .equ	baud	= 9600			
+	.equ	bps	= (16000000/16/baud) - 1	
+	.equ	UBRR0L	= 0xc4	
+    .equ	UBRR0H	= 0xc5
+    .equ	TXEN0	= 3	
+    .equ	RXEN0	= 4	
+    .equ	UCSR0A	= 0xc1	
+    .equ	UCSR0B	= 0xc0	
+    .equ	UCSR0C	= 0xc2
+    .equ	UDRE0	= 5
+    .equ	UDR0	= 0xc6
+    .equ	UCSZ00	= 1
+    .equ	UCSZ01	= 2
+    .equ	RXCIE0	= 7
+	.org 0x0
+	rjmp init
+	
+	.org 0x60
+	init:
+	ldi	r16,LOW(bps)			
+	ldi	r17,HIGH(bps)			
+	rcall	initUART
+	loop:	
+	rcall   getc
+    cpi r16,65 ; Compare r16 to "A"
+    brne loop 
+    sbi 5,5
+    rjmp loop
+	
+	
+initUART:
+    sts	UBRR0L, r16			
+    sts	UBRR0H, r17			
+
+    ; UCSR0C = 0b00000110 → 8-bit data (UCSZ01=1, UCSZ00=1)
+    ldi r18, 0x06
+    sts UCSR0C, r18
+
+    ; UCSR0B = RXEN0 | TXEN0 | RXCIE0 → ricezione, trasmissione, interrupt RX
+    ldi r16, (1 << RXEN0) | (1 << TXEN0) | (1 << RXCIE0)
+    sts UCSR0B, r16
+
+    ret
+	
+	
+	getc:
+	lds	r17,UCSR0A			
+	sbrs	r17,UDRE0			
+	rjmp	getc				
+    cbi 5,5
+	lds	r16,UDR0			
+	ret

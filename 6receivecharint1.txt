@@ -1,0 +1,46 @@
+           
+    .equ	baud	= 9600			
+	.equ	bps	= 16000000/(16*baud) - 1	
+	.equ	UBRR0L	= 0xc4	
+    .equ	UBRR0H	= 0xc5
+    .equ	TXEN0	= 3	
+    .equ	RXEN0	= 4	
+    .equ	UCSR0A	= 0xc1	
+    .equ	UCSR0B	= 0xc0	
+    .equ	UCSR0C	= 0xc2
+    .equ	UDRE0	= 5
+    .equ	UDR0	= 0xc6
+    .equ	UCSZ00	= 1
+    .equ	UCSZ01	= 2
+    .equ	RXCIE0	= 7           
+           
+           .org 0x0
+           jmp init
+           
+           .org 0x0024    ;USART, RX Complete Handler
+	       jmp costy 
+           
+           .org 0x60
+init:	
+       	ldi	r16,LOW(bps)			
+	ldi	r17,HIGH(bps)	
+       	sts	UBRR0L,r16			
+	sts	UBRR0H,r17
+       ldi r16 ,(1 << UCSZ00) | (1 << UCSZ01)
+       sts UCSR0C,r16
+      ; Use 8-bit character sizes //[00]- no parity, [0]- 1 stop bit, [011]- 8-bit data
+	ldi	r16,(1 << RXCIE0) | (1 << RXEN0)| (1 << TXEN0)	
+	sts	UCSR0B,r16
+	sei
+loop:	
+	rjmp loop
+costy:
+        lds	r16,UDR0
+        sts UDR0,r16
+        cpi	r16,65			; compare r16 to 11
+	breq	next
+	sbi 5,5
+	reti
+next:
+       cbi 5,5
+       ret

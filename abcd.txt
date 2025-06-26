@@ -1,0 +1,38 @@
+.org 0x00
+    rjmp RESET            ; salto al reset
+
+.org 0x60
+RESET:
+    ldi r16, 103          ; baud rate low byte = 103 per 9600 baud @16MHz
+    sts 0xC4, r16         ; scrivo in UBRR0L (indirizzo 0xC4)
+    ldi r16, 0            ; baud rate high byte = 0
+    sts 0xC5, r16         ; scrivo in UBRR0H (indirizzo 0xC5)
+    ldi r16, 0b00000110   ; UCSZ01=1 (bit 2), UCSZ00=1 (bit 1), 8 bit data frame
+    sts 0xC2, r16         ; scrivo in UCSR0C (indirizzo 0xC2)
+    ldi r16, 0b00011000   ; RXEN0=1 (bit 4), TXEN0=1 (bit 3), abilito ricevitore e trasmettitore
+    sts 0xC1, r16         ; scrivo in UCSR0B (indirizzo 0xC1)
+    ldi r16, 0b00001111   ; impostiamo PB0, PB1, PB2, PB3 come output
+    out 0x04, r16         ; scrivo in DDRB (indirizzo 0x04)
+loop:
+    lds r18, 0xC0          ; leggi UCSR0A
+    sbrc r18, 7            ; skip se bit 7 RXC0 = 1, quindi esce dallo skip
+    rjmp loop              ; se bit 7=0, loop
+lds r16, 0xC6          ; leggi UDR0
+    ldi r17, 0
+    out 0x05, r17          ; spegni PORTB PB0..PB3
+    cpi r16, 65
+    brne check_B
+    sbi 0x05, 0
+check_B:
+    cpi r16, 66
+    brne check_C
+    sbi 0x05, 1
+check_C:
+    cpi r16, 67
+    brne check_D
+    sbi 0x05, 2
+check_D:
+    cpi r16, 68
+    brne loop
+    sbi 0x05, 3
+    rjmp loop

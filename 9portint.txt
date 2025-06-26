@@ -1,0 +1,43 @@
+.equ	URXCaddr	= 0x0024	; USART Rx Complete
+.equ	RAMEND	= 0x08ff
+.equ	RXEN0	= 4	; Receiver Enable
+.equ	RXCIE0	= 7	; RX Complete Interrupt Enable
+.equ	SPL	= 0x3d
+.equ	SPH	= 0x3e
+.equ	RXCIE0	= 7	; RX Complete Interrupt Enable
+; Definitions marked "MEMORY MAPPED"are extended I/O ports
+; and cannot be used with IN/OUT instructions
+.equ	UCSR0B	= 0xc1	; MEMORY MAPPED
+.equ	UCSR0C	= 0xc2	; MEMORY MAPPED
+.equ	UBRR0L	= 0xc4	; MEMORY MAPPED
+.equ	UDR0	= 0xc6	; MEMORY MAPPED
+.equ	UCSZ00	= 1	    ; Character Size
+.equ	UCSZ01	= 2	    ; Character Size
+.equ	DDRB	= 0x04
+.equ	PORTB	= 0x05
+ 
+.CSEG 
+	RJMP MAIN 
+.ORG URXCaddr 
+	RJMP URXC_INT_HANDLER 
+.ORG 40 
+	MAIN: 
+		LDI R16, HIGH (RAMEND) 
+		OUT SPH, R16 
+		LDI R16, LOW (RAMEND) 
+		OUT SPL, R16 
+		LDI R16, (1<<RXEN0)|(1<<RXCIE0)
+		STS UCSR0B, R16 
+		LDI R16, (1<<UCSZ00) | (1<<UCSZ01)  
+		STS UCSR0C, R16 
+		LDI R16, 0x67    ;9600 bauds 
+		STS UBRR0L, R16
+		LDI R16, 0xFF 
+		OUT DDRB, R16 
+		SEI 
+	WAIT_HERE: 
+		RJMP WAIT_HERE 
+	URXC_INT_HANDLER: 
+		LDS R17, UDR0 
+		OUT PORTB, R17 
+		RETI

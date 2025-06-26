@@ -1,0 +1,41 @@
+.org 0x60
+
+; === Inizializza USART0 a 9600 baud (UBRR0 = 103 per 16MHz) ===
+
+; === Inizializza USART0 a 9600 baud (UBRR0 = 129 per 20MHz) ===
+
+ldi r16, 103
+sts 0xC5, r16    ; UBRR0L
+ldi r16, 0
+sts 0xC4, r16    ; UBRR0H
+
+ldi r16, 0b00011000     ; RXEN0 + TXEN0
+sts 0xC2, r16    ; UCSR0B: abilita ricezione
+
+ldi r16, 0b00000110
+sts 0xC1, r16    ; UCSR0C: 8N1
+
+; === Loop principale ===
+main:
+    ; Attendi che RXC0 sia 1 (dati ricevuti)
+wait_rx:
+    lds r17, 0xC0    ; UCSR0A
+    sbrs r17, 7      ; RXC0
+    rjmp wait_rx
+
+    ; Leggi carattere ricevuto
+    lds r16, 0xC6    ; UDR0
+
+    ; Incrementa (+1)
+    inc r16
+
+    ; Attendi che il buffer di trasmissione sia vuoto (UDRE0 = 1)
+wait_tx:
+    lds r17, 0xC0
+    sbrs r17, 5      ; UDRE0
+    rjmp wait_tx
+
+    ; Scrivi il dato
+    sts 0xC6, r16
+
+    rjmp main

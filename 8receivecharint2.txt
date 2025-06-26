@@ -1,0 +1,51 @@
+           ;enable RX interrupt 
+;when char arrived led onboard is on
+.equ	RXCIE0	= 7	
+.equ	RXEN0	= 4	
+.equ	UCSR0B	= 0xc1
+.equ	UCSR0C	= 0xc2
+.equ	TXEN0	= 3
+.equ	UDR0	= 0xc6
+.equ	bps	= 16000000/(16*9600) - 1
+.equ	UBRR0L	= 0xc4	
+.equ	UBRR0H	= 0xc5
+.equ	UCSZ00	= 1
+.equ	UCSZ01	= 2
+.equ	URXCaddr	= 0x0024
+.org 0x0
+	jmp RESET		; Reset Handler
+.org URXCaddr    ;USART, RX Complete Handler
+	jmp _URXCaddr 
+.org 0x60
+RESET:	
+    sbi 4,5 ;set PB5 as output
+	ldi	r16,LOW(bps)			
+	ldi	r17,HIGH(bps)
+	
+	sts	UBRR0L,r16			
+	sts	UBRR0H,r17
+       ldi r16 ,(1 << UCSZ00) | (1 << UCSZ01)
+       sts UCSR0C,r16
+      ; Use 8-bit character sizes //[00]- no parity
+      ;[0]- 1 stop bit, [011]- 8-bit data
+      
+      ;USART Receive Complete interrupt will be generated
+      ;if RXCIE0 bit is written to one
+      ;the Global Interrupt Flag in SREG is written to one
+      ;and the RXC0 bit in UCSR0A is set
+	ldi	r16,(1 << RXCIE0) | (1 << RXEN0)| (1 << TXEN0)
+	sts	UCSR0B,r16
+	sei
+loop:	
+	rjmp loop
+_URXCaddr:
+        cbi 5,5
+        lds	r16,UDR0	
+        cpi	r16,65			; compare r16 to "A"
+	    breq	next
+        ;sts UDR0,r16
+        ;ldi r16,65
+        ;sts UDR0,r16
+        sbi 5,5
+next:        
+        reti

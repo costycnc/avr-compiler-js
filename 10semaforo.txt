@@ -1,0 +1,78 @@
+.org 0x60
+
+; Setup: DDRB = 0b00000111 (PB0-PB2 output)
+ldi r16, 0b00000111
+out 4, r16      ; DDRB (indirizzo 4)
+
+loop:
+    ; --- Rosso ---
+    ldi r16, 0b00000001    ; PB0 (D8)
+    out 5, r16             ; PORTB (indirizzo 5)
+    rcall delay1s
+
+    ; --- Giallo ---
+    ldi r16, 0b00000010    ; PB1 (D9)
+    out 5, r16
+    rcall delay1s
+
+    ; --- Verde ---
+    ldi r16, 0b00000100    ; PB2 (D10)
+    out 5, r16
+    rcall delay1s
+
+    ; Pausa 10s
+    rcall delay10s
+
+    ; --- Verde ---
+    ldi r16, 0b00000100
+    out 5, r16
+    rcall delay1s
+
+    ; --- Giallo ---
+    ldi r16, 0b00000010
+    out 5, r16
+    rcall delay1s
+
+    ; --- Rosso ---
+    ldi r16, 0b00000001
+    out 5, r16
+    rcall delay1s
+
+    ; Pausa 10s
+    rcall delay10s
+
+    rjmp loop
+
+; === Delay di circa 1 secondo ===
+delay1s:
+    ldi r18, 150
+outer1:
+    ldi r17, 200
+middle1:
+    ldi r16, 200
+inner1:
+    nop
+    dec r16
+    brne inner1
+    dec r17
+    brne middle1
+    dec r18
+    brne outer1
+    ret
+
+; === Delay di circa 10 secondi ===
+delay10s:
+    ldi r18, 150
+outer10:
+    ldi r17, 200
+middle10:
+    ldi r16, 200
+inner10:
+    nop
+    dec r16
+    brne inner10
+    dec r17
+    brne middle10
+    dec r18
+    brne outer10
+    ret
