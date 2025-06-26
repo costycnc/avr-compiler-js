@@ -1,0 +1,39 @@
+    <p>
+    	<a href="#">
+    		<button onclick='start("timer0");'> Assemble TIMER0 </button>
+    	</a>see <a href="https://exploreembedded.com/wiki/AVR_Timer_programming">source</a>
+    	<button class="w3-right"> Tutorial TIMER0 </button>
+    </p>
+    <textarea id="timer0" style="left:0%;width:100%;height:300px">
+; ***** TIMER_COUNTER_0 **************
+.equ	CS00	= 0	; Clock Select
+.equ	CS02	= 2	; Clock Select
+.equ	TCCR0B	= 0x25
+.equ	TOV0	= 0	; Timer/Counter0 Overflow Flag
+.equ	TIFR0	= 0x15
+.equ	TOIE0	= 0	; Timer/Counter0 Overflow Interrupt Enable
+.equ	TIMSK0	= 0x6e	; MEMORY MAPPED
+.equ	OVF0addr	= 0x0020	; Timer/Couner0 Overflow
+ 
+.CSEG 
+	RJMP init 
+.ORG OVF0addr 
+	RJMP Timer0_Overflow 
+.ORG 0x60 
+init:
+	ldi r16,(1<<CS02)|(1<<CS00)
+	out TCCR0B,r16 ; Timer clock = system clock / 1024
+	ldi r16,1<<TOV0
+	out TIFR0,r16 ; Clear TOV0/ Clear pending interrupts
+	ldi r16,1<<TOIE0
+	sts TIMSK0,r16 ; Enable Timer/Counter0 Overflow Interrupt
+	sei
+loop: rjmp loop	
+Timer0_Overflow:
+    inc r17
+    cpi r17,255 ; Compare r17 with 255
+    brcs carry ; Branch if carry set
+    sbi 3,5
+    carry: reti 
+           
+    </textarea>

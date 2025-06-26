@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<title>Uploader Arduino Nano STK500v1</title>
+<style>
+  body { font-family: monospace; background:#222; color:#eee; padding: 1em; }
+  textarea { width: 100%; height: 100px; background: #333; color:#eee; font-family: monospace; }
+  #log { background: #111; height: 250px; overflow-y: scroll; padding: 0.5em; border: 1px solid #555; margin-bottom:1em; }
+  button { padding: 0.5em 1em; margin-right: 1em; }
+  .send { color: #0f0; }
+  .recv { color: #0af; }
+  .err { color: #f33; }
+  .info { color: #ff0; }
+</style>
+</head>
+<body>
+
+<h1>Uploader Arduino Nano STK500v1</h1>
+
+<button id="btnConnect">Connetti Porta</button>
+<button id="btnUpload" disabled>Scrivi e Verifica</button>
+
+<p>Modifica il file binario prima di caricare (128 byte, esadecimale, due cifre per byte, es: 55)</p>
+<textarea id="fileHex" style="width:100%; height:120px; background:#333; color:#eee; font-family: monospace;">FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+</textarea>
+
+<div id="log"></div>
+
+<script>
+let port, reader, writer;
+let isUploading = false;
+
+const log = document.getElementById('log');
+const btnConnect = document.getElementById('btnConnect');
+const btnUpload = document.getElementById('btnUpload');
+const fileHexArea = document.getElementById('fileHex');
+
+function append(msg, cls='info') {
+  const d = document.createElement('div');
+  d.textContent = msg;
+  d.className = cls;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+
+function appendHex(title, data, cls='info') {
+  const hex = [...data].map(b => b.toString(16).padStart(2,'0').toUpperCase()).join(' ');
+  append(`${title}: ${hex}`, cls);
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+btnConnect.onclick = async () => {
+  try {
+    port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 115200 });
+
+    reader = port.readable.getReader();
+    writer = port.writable.getWriter();
+
+    append('✅ Porta seriale connessa');
+    btnUpload.disabled = false;
+
+    (async () => {
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (value && value.length > 0) {
+            appendHex('⬅️ Ricevuto1', value, 'recv');
+          }
+        }
+      } catch(e) {
+        append('⚠️ Lettura interrotta', 'err');
+      }
+    })();
+
+  } catch(e) {
+    append('❌ Errore connessione porta: ' + e.message, 'err');
+  }
+};
+
+btnUpload.onclick = async () => {
+  if (!port || !writer || !reader) {
+    append('❌ Porta seriale non connessa', 'err');
+    return;
+  }
+  if (isUploading) {
+    append('⚠️ Upload già in corso', 'info');
+    return;
+  }
+  isUploading = true;
+  btnUpload.disabled = true;
+
+  try {
+    await resetArduino();
+
+    const synced = await sync();
+    if (!synced) throw new Error('Impossibile sincronizzarsi col bootloader');
+
+    const file = parseFileHex(fileHexArea.value);
+	console.log("sono aici");
+    if (!file) {
+      append('❌ File non valido: assicurati di avere 128 byte in esadecimale', 'err');
+      isUploading = false;
+      btnUpload.disabled = false;
+      return;
+    }
+    append(`📄 File pronto: ${file.length} byte`);
+
+    await enterProgrammingMode();
+
+    await uploadFlash(file);
+    await verifyFlash(file);
+    append('✅ Upload e verifica completati con successo');
+  } catch (e) {
+    append('🚫 Errore durante upload/verifica: ' + e.message, 'err');
+  }
+
+  isUploading = false;
+  btnUpload.disabled = false;
+};
+
+async function resetArduino() {
+  if (!port.setSignals) {
+    append('⚠️ Il browser non supporta setSignals (DTR reset)', 'err');
+    return;
+  }
+  append('🔁 Invio reset via DTR...');
+  await port.setSignals({ dataTerminalReady: false });
+  await sleep(100);
+  await port.setSignals({ dataTerminalReady: true });
+  await sleep(500);
+  append('✅ Reset completato, bootloader attivo');
+}
+
+async function sync() {
+  append('🔄 Tentativo di sincronizzazione con bootloader...');
+  const syncCmd = new Uint8Array([0x30, 0x20]); // comando sign-on
+
+  for (let i = 0; i < 16; i++) {
+    await writeAndLog(syncCmd);
+    const resp = await readResponse(2, 200);
+    if (resp && resp.length === 2 && resp[0] === 0x14 && resp[1] === 0x10) {
+      append('✅ Sincronizzazione riuscita');
+      return true;
+    }
+    await sleep(50);
+  }
+  append('❌ Sincronizzazione fallita: bootloader non risponde come atteso', 'err');
+  return false;
+}
+
+function parseFileHex(text) {
+  const clean = text.replace(/[^0-9a-fA-F]/g, '');
+  if (clean.length !== 128 * 2) return null;
+  const arr = new Uint8Array(128);
+  for (let i=0; i<128; i++) {
+    arr[i] = parseInt(clean.substr(i*2,2),16);
+  }
+  return arr;
+}
+
+async function enterProgrammingMode() {
+  append('➡️ Comando: ENTER_PROGRAMMING_MODE (0x30 0x53)');
+  await writeAndLog(new Uint8Array([0x30, 0x53]));
+  const resp = await readResponse(1, 2000);
+  if (!resp || resp[0] !== 0x14) {
+    throw new Error('Errore comando 0x30: risposta inattesa o timeout');
+  }
+  append('✅ Modalità programmazione attivata');
+}
+
+async function uploadFlash(data) {
+  append(`➡️ Scrittura flash (${data.length} byte)...`);
+  const pageSize = 128;
+  for (let page=0; page < data.length / pageSize; page++) {
+    const addrHi = ((page * pageSize) >> 8) & 0xFF;
+    const addrLo = (page * pageSize) & 0xFF;
+    const block = data.slice(page * pageSize, (page+1)*pageSize);
+
+    append(`➡️ Comando: LOAD_PAGE (0x64 ${addrHi.toString(16).padStart(2,'0')} ${addrLo.toString(16).padStart(2,'0')})`);
+    const cmd = new Uint8Array(3 + block.length);
+    cmd[0] = 0x64;
+    cmd[1] = addrHi;
+    cmd[2] = addrLo;
+    cmd.set(block, 3);
+    await writeAndLog(cmd);
+
+    let resp = await readResponse(1);
+    if (!resp || resp[0] !== 0x14) {
+      throw new Error(`Errore comando 0x64 pagina ${page}: risposta inattesa`);
+    }
+
+    append(`➡️ Comando: WRITE_PAGE (0x74 ${addrHi.toString(16).padStart(2,'0')} ${addrLo.toString(16).padStart(2,'0')})`);
+    const writeCmd = new Uint8Array([0x74, addrHi, addrLo]);
+    await writeAndLog(writeCmd);
+
+    resp = await readResponse(1);
+    if (!resp || resp[0] !== 0x14) {
+      throw new Error(`Errore comando 0x74 pagina ${page}: risposta inattesa`);
+    }
+
+    append(`✅ Pagina ${page + 1} scritta`);
+  }
+  append('✅ Flash scritta completamente');
+}
+
+async function verifyFlash(data) {
+  append('➡️ Verifica flash...');
+  const pageSize = 128;
+  for (let page=0; page < data.length / pageSize; page++) {
+    const addrHi = ((page * pageSize) >> 8) & 0xFF;
+    const addrLo = (page * pageSize) & 0xFF;
+
+    append(`➡️ Comando: READ_FLASH (0x20 ${addrHi.toString(16).padStart(2,'0')} ${addrLo.toString(16).padStart(2,'0')} ${pageSize.toString(16).padStart(2,'0')})`);
+    const readCmd = new Uint8Array([0x20, addrHi, addrLo, pageSize]);
+    await writeAndLog(readCmd);
+
+    const resp = await readResponse(pageSize);
+    if (!resp) throw new Error(`Errore durante lettura pagina ${page}`);
+
+    for (let i=0; i<pageSize; i++) {
+      if (resp[i] !== data[page*pageSize + i]) {
+        throw new Error(`Verifica fallita a pagina ${page} byte ${i}`);
+      }
+    }
+    append(`✅ Pagina ${page + 1} verificata`);
+  }
+  append('✅ Verifica flash completata con successo');
+}
+
+async function writeAndLog(data) {
+  appendHex('➡️ Inviato', data, 'send');
+  await writer.write(data);
+}
+
+async function readResponse(length=1, timeout=500) {
+  let chunks = [];
+  const start = Date.now();
+  while (chunks.length < length && (Date.now() - start) < timeout) {
+    try {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (value) {
+        for (const b of value) chunks.push(b);
+        appendHex('⬅️ Ricevuto (parziale)', value, 'recv');
+      }
+    } catch(e) {
+      append('⚠️ Errore lettura risposta: ' + e.message, 'err');
+      break;
+    }
+  }
+  if (chunks.length === 0) return null;
+  if (chunks.length > length) chunks = chunks.slice(0,length);
+  appendHex('⬅️ Risposta completa', new Uint8Array(chunks), 'recv');
+  return new Uint8Array(chunks);
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Esempio ASM: Accendere LED - CostyCNC.it/avr1</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 0 15px;
+      line-height: 1.6;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      color: #0057b7;
+      text-align: center;
+    }
+    pre {
+      background: #272822;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-size: 1.1em;
+      line-height: 1.3;
+    }
+    .note {
+      background: #d9edf7;
+      border-left: 5px solid #31708f;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      border-radius: 3px;
+      color: #31708f;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 0.9em;
+      text-align: center;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <h1>Esempio Assembly: Accendere un LED su ATmega328</h1>
+
+  <div class="note">
+    Questo codice usa gli indirizzi numerici diretti per i registri, ma attenzione: i registri di I/O tradizionali 
+    (accessibili con <code>in</code>/<code>out</code>) sono solo i primi 32, da 0x00 a 0x1F.<br/>
+    Registri come DDRB (indirizzo 0x24) e PORTB (0x25) sono in memoria mappata e richiedono istruzioni diverse.<br/>
+    Per quelli si usa <code>lds</code> (load direct from SRAM) e <code>sts</code> (store direct to SRAM) invece di <code>in</code>/<code>out</code>.
+  </div>
+
+  <pre><code>; -------------------------------------------
+; esempio1.asm - accendere LED su PORTB0
+; -------------------------------------------
+
+; Definizione registri come indirizzi numerici
+.equ DDRB = 0x24       ; DDRB è a indirizzo 0x24 nella SRAM mappata
+.equ PORTB = 0x25      ; PORTB è a indirizzo 0x25 nella SRAM mappata
+
+.org 0x0000            ; reset vector
+
+    rjmp start         ; salto all’inizio del programma
+
+start:
+    ldi r16, 0b00000001 ; configura bit0 come output
+    sts DDRB, r16       ; scrivi valore in DDRB (non si può usare out 0x24,r16)
+
+    ldi r16, 0b00000001 ; accendi LED sul bit0
+    sts PORTB, r16      ; scrivi valore in PORTB
+
+loop:
+    rjmp loop           ; ciclo infinito, mantieni LED acceso
+  </code></pre>
+
+  <h2>Come provarlo con costycnc.it/avr1</h2>
+  <ol>
+    <li>Copia e incolla il codice nell'editor assembly di <a href="https://costycnc.it/avr1" target="_blank" rel="noopener">costycnc.it/avr1</a>.</li>
+    <li>Compila ed esegui nel simulatore o caricalo sul tuo ATmega328.</li>
+    <li>Collega un LED con resistenza al pin PORTB0 (pin 14) e GND.</li>
+    <li>Il LED dovrebbe accendersi subito.</li>
+  </ol>
+
+  <footer>
+    &copy; 2025 CostyCNC.it - Progetti Assembly per principianti
+  </footer>
+</body>
+</html>

@@ -1,0 +1,19 @@
+ .org 0x0
+        rjmp init
+        .org 0x60
+        init:
+        sbi 4,5
+        loop:
+        sbi 5,5
+        rcall wait
+        cbi 5,5
+        rcall wait
+        rjmp loop
+        wait:
+        dec r16
+        brne wait
+        dec r17
+        brne wait
+        dec r18
+        brne wait
+        ret

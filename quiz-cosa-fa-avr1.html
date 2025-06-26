@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz: Cosa fa AVR1?</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fdfdfd;
+      padding: 2rem;
+      color: #333;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #198754;
+      font-size: 1.8rem;
+    }
+    .question {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #f0f0f0;
+      border-left: 4px solid #198754;
+      border-radius: 8px;
+    }
+    .question p {
+      margin: 0 0 1rem;
+    }
+    button {
+      display: inline-block;
+      margin: 0.3rem;
+      padding: 0.6rem 1.2rem;
+      background: #eee;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button.correct {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    button.wrong {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    #score {
+      margin-top: 2rem;
+      font-weight: bold;
+      color: #198754;
+    }
+    #home-link {
+      margin-top: 1.5rem;
+      display: block;
+      text-align: center;
+      background: #198754;
+      color: white;
+      padding: 1rem;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+    #home-link:hover {
+      background: #146c43;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h1>🧠 Quiz: Cosa fa (e non fa) AVR1?</h1>
+
+    <div class="question">
+      <p>❓ AVR1 ti fa accendere un LED con:</p>
+      <button onclick="check(this, true)">Una singola istruzione Assembly</button>
+      <button onclick="check(this, false)">Un linguaggio complicato</button>
+      <button onclick="check(this, false)">Un'app da installare sul telefono</button>
+    </div>
+
+    <div class="question">
+      <p>❓ AVR1 funziona direttamente nel browser?</p>
+      <button onclick="check(this, true)">Sì, senza installare nulla</button>
+      <button onclick="check(this, false)">No, serve un programma esterno</button>
+      <button onclick="check(this, false)">Solo su Windows</button>
+    </div>
+
+    <div class="question">
+      <p>❓ Cosa NON fa AVR1?</p>
+      <button onclick="check(this, true)">Non usa librerie esterne o IDE complicati</button>
+      <button onclick="check(this, false)">Non insegna i registri</button>
+      <button onclick="check(this, false)">Non funziona su microcontrollori reali</button>
+    </div>
+
+    <div class="question">
+      <p>❓ Cos'è il linguaggio Assembly?</p>
+      <button onclick="check(this, true)">Il linguaggio che capisce direttamente il microcontrollore</button>
+      <button onclick="check(this, false)">Un linguaggio per creare app</button>
+      <button onclick="check(this, false)">Una versione semplificata del C++</button>
+    </div>
+
+    <div class="question">
+      <p>❓ Perché imparare l’Assembly?</p>
+      <button onclick="check(this, true)">Per capire cosa succede dentro il microcontrollore</button>
+      <button onclick="check(this, false)">Per fare grafica 3D</button>
+      <button onclick="check(this, false)">Perché è usato sui social</button>
+    </div>
+
+    <div class="question">
+      <p>❓ Cosa rischi se inizi solo con IDE avanzati?</p>
+      <button onclick="check(this, true)">Impari a copiare codice senza capirlo</button>
+      <button onclick="check(this, false)">Diventi subito esperto</button>
+      <button onclick="check(this, false)">Rallenti il microcontrollore</button>
+    </div>
+
+    <div class="question">
+      <p>❓ AVR1 è utile anche per chi vuole imparare ESP32 o STM32?</p>
+      <button onclick="check(this, true)">Sì, perché ti insegna le basi valide per tutti</button>
+      <button onclick="check(this, false)">No, serve solo per Arduino</button>
+      <button onclick="check(this, false)">No, è troppo vecchio</button>
+    </div>
+
+    <div class="question">
+      <p>❓ AVR1 ti aiuta a:</p>
+      <button onclick="check(this, true)">Capire come funziona davvero un microcontrollore</button>
+      <button onclick="check(this, false)">Creare un sito web</button>
+      <button onclick="check(this, false)">Programmare app per smartphone</button>
+    </div>
+
+    <div class="question">
+      <p>❓ Quale linguaggio capisce davvero un microcontrollore?</p>
+      <button onclick="check(this, true)">Solo l'Assembly (istruzioni macchina)</button>
+      <button onclick="check(this, false)">Il C++ direttamente</button>
+      <button onclick="check(this, false)">Tutti i linguaggi moderni</button>
+    </div>
+
+    <div class="question">
+      <p>❓ Cosa succede quando usi Python o C++?</p>
+      <button onclick="check(this, true)">Il codice viene tradotto in più passaggi fino ad Assembly</button>
+      <button onclick="check(this, false)">Viene eseguito subito senza traduzione</button>
+      <button onclick="check(this, false)">Funziona solo su PC</button>
+    </div>
+
+    <div class="question">
+      <p>❓ Perché l’Assembly è importante per chi inizia?</p>
+      <button onclick="check(this, true)">Perché ogni istruzione è eseguita direttamente dal micro</button>
+      <button onclick="check(this, false)">Perché è simile all’inglese tecnico</button>
+      <button onclick="check(this, false)">Perché è più bello da vedere</button>
+    </div>
+
+    <div id="score"></div>
+    <a id="home-link" href="https://costycnc.it/avr1">🔙 Torna a costycnc.it/avr1</a>
+  </div>
+
+  <script>
+    let totalQuestions = document.querySelectorAll('.question').length;
+    let correctAnswers = 0;
+
+    function check(button, isCorrect) {
+      const parent = button.parentElement;
+      if (parent.classList.contains("answered")) return;
+      parent.classList.add("answered");
+
+      if (isCorrect) {
+        button.classList.add("correct");
+        correctAnswers++;
+      } else {
+        button.classList.add("wrong");
+      }
+
+      Array.from(parent.querySelectorAll('button')).forEach(btn => btn.disabled = true);
+
+      document.getElementById("score").innerHTML = `✅ Risposte corrette: ${correctAnswers} su ${totalQuestions}`;
+    }
+  </script>
+</body>
+</html>

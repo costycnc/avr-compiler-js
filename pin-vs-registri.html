@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html lang="it">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>ATmega328P – Pin e Registri (bare metal)</title>
+
+  <style>
+
+    body {
+
+      font-family: monospace;
+
+      background: #111;
+
+      color: #eee;
+
+      padding: 2em;
+
+    }
+
+    h1, h2 {
+
+      color: #44f;
+
+    }
+
+    table {
+
+      width: 100%;
+
+      border-collapse: collapse;
+
+      margin-top: 1em;
+
+    }
+
+    th, td {
+
+      border: 1px solid #444;
+
+      padding: 6px 10px;
+
+      text-align: center;
+
+    }
+
+    th {
+
+      background: #222;
+
+    }
+
+    tr:nth-child(even) {
+
+      background: #1a1a1a;
+
+    }
+
+    pre {
+
+      background: #222;
+
+      padding: 1em;
+
+      overflow-x: auto;
+
+      border-left: 4px solid #44f;
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>Pin Arduino ↔ Indirizzi registri ATmega328P</h1>
+
+  <p>Tabella completa per scrivere codice in puro assembly, senza simboli, solo numeri e bit.</p>
+
+<img src="arduino-nano.jpg" alt="Immagine" style="display:block; margin:auto; max-width:100%; border-radius:12px;">
+  <h2>Esempio in puro Assembly: accendere il pin D13</h2>
+  <a href="index.html#init">Compiler uploader online</a>
+
+  <pre>
+.org 0
+rjmp loop
+.org 100
+loop:
+ldi r16, 0b00100000   ; bit 5 → PB5 → D13
+out 36, r16           ; imposta direzione output (indirizzo 36)
+out 37, r16           ; accende D13 (indirizzo 37)
+rjmp loop
+  </pre>
+
+  <table>
+
+    <thead>
+
+      <tr>
+
+        <th>Arduino Pin</th>
+
+        <th>Porta</th>
+
+        <th>Bit</th>
+
+        <th>Dir. (dec)</th>
+
+        <th>Out (dec)</th>
+
+        <th>In (dec)</th>
+
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      <tr><td>D0</td><td>PD0</td><td>0</td><td>51</td><td>52</td><td>50</td></tr>
+
+      <tr><td>D1</td><td>PD1</td><td>1</td><td>51</td><td>52</td><td>50</td></tr>
+
+      <tr><td>D2</td><td>PD2</td><td>2</td><td>51</td><td>52</td><td>50</td></tr>
+
+      <tr><td>D3</td><td>PD3</td><td>3</td><td>51</td><td>52</td><td>50</td></tr>
+
+      <tr><td>D4</td><td>PD4</td><td>4</td><td>51</td><td>52</td><td>50</td></tr>
+
+      <tr><td>D5</td><td>PD5</td><td>5</td><td>51</td><td>52</td><td>50</td></tr>
+
+      <tr><td>D6</td><td>PD6</td><td>6</td><td>51</td><td>52</td><td>50</td></tr>
+
+      <tr><td>D7</td><td>PD7</td><td>7</td><td>51</td><td>52</td><td>50</td></tr>
+
+      <tr><td>D8</td><td>PB0</td><td>0</td><td>36</td><td>37</td><td>35</td></tr>
+
+      <tr><td>D9</td><td>PB1</td><td>1</td><td>36</td><td>37</td><td>35</td></tr>
+
+      <tr><td>D10</td><td>PB2</td><td>2</td><td>36</td><td>37</td><td>35</td></tr>
+
+      <tr><td>D11</td><td>PB3</td><td>3</td><td>36</td><td>37</td><td>35</td></tr>
+
+      <tr><td>D12</td><td>PB4</td><td>4</td><td>36</td><td>37</td><td>35</td></tr>
+
+      <tr><td><strong>D13</strong></td><td><strong>PB5</strong></td><td><strong>5</strong></td><td><strong>36</strong></td><td><strong>37</strong></td><td><strong>35</strong></td></tr>
+
+      <tr><td>A0</td><td>PC0</td><td>0</td><td>33</td><td>34</td><td>32</td></tr>
+
+      <tr><td>A1</td><td>PC1</td><td>1</td><td>33</td><td>34</td><td>32</td></tr>
+
+      <tr><td>A2</td><td>PC2</td><td>2</td><td>33</td><td>34</td><td>32</td></tr>
+
+      <tr><td>A3</td><td>PC3</td><td>3</td><td>33</td><td>34</td><td>32</td></tr>
+
+      <tr><td>A4 (SDA)</td><td>PC4</td><td>4</td><td>33</td><td>34</td><td>32</td></tr>
+
+      <tr><td>A5 (SCL)</td><td>PC5</td><td>5</td><td>33</td><td>34</td><td>32</td></tr>
+
+    </tbody>
+
+  </table>
+
+
+
+
+
+
+
+</body>
+
+</html>

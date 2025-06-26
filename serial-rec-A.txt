@@ -1,0 +1,43 @@
+.org 0x0000
+	jmp RESET          ; Reset vector
+
+.org 0x0024
+	jmp receive        ; USART RX Complete interrupt vector
+
+.org 0x0060
+RESET:
+	; --- Imposta PB5 (D13) come output ---
+	sbi 0x04, 5        ; DDRB (0x24), bit 5 = output
+
+	; --- Inizializza USART a 9600 baud ---
+	ldi r16, 103       
+	ldi r17, 0         
+	sts 0xC4, r16      ; UBRR0L (0xC4) = 103
+	sts 0xC5, r17      ; UBRR0H (0xC5) = 0
+
+	; Frame: 8 data bit, no parity, 1 stop bit
+	; UCSR0C (0xC2), UCSZ01 = bit 2, UCSZ00 = bit 1
+	ldi r16, 0b00000110
+	sts 0xC2, r16
+
+	; Abilita RX, TX, RX interrupt
+	; UCSR0B (0xC1), RXCIE0 = bit 7, RXEN0 = bit 4, TXEN0 = bit 3
+	ldi r16, 0b10011000
+	sts 0xC1, r16
+
+	sei                 ; Abilita interrupt globali
+
+loop:
+	rjmp loop           ; Attendi eventi
+
+; ---------------------------------------
+; ISR USART RX completa: accende LED se 'A'
+; ---------------------------------------
+receive:
+	sbi 0x05, 5         ; PORTB (0x25), bit 5 = 1 (accende LED)
+	lds r16, 0xC6       ; UDR0 (0xC6), leggi byte ricevuto
+	cpi r16, 65         ; ASCII 'A' = 65
+	breq next           ; Se è 'A', non spegnere LED
+	cbi 0x05, 5         ; Altrimenti spegni LED
+next:
+	reti                ; Ritorna da interrupt

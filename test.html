@@ -1,0 +1,302 @@
+<html>
+<head>
+    <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WPHFPJX');</script>
+<!-- End Google Tag Manager -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avr Assembly Arduino Nano</title>
+<meta name="description" content="Programmare arduino in linguaggio avr assembler e compilare, caricare codice tramite usb con questa pagina e molto facile ">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<script src="avrlass.js"></script>
+<script src="avrdass.js"></script>
+<script src="main-beauty.js"></script>
+<!--               17.01.25   youtube videos -->
+<style>
+iframe{
+box-shadow: 10px 10px 10px grey;
+border-radius: 10px;
+}
+.video-csty-container {
+  position: relative;
+  text-align: center;
+}
+.video-csty-container .thumbnails {
+  width: 100%; /* Adatta la larghezza in base alle tue esigenze */
+  overflow-x: auto;
+  white-space: nowrap; /* Impedisce alle parole di andare a capo */
+  display: flex;
+  justify-content: left;
+}
+.video-csty-container .thumbnails img {
+    width: 200px;
+    height: 112px; /* Proporzioni standard di YouTube */
+    margin: 10px;
+    cursor: pointer;
+    box-shadow: 5px 5px 5px grey;
+    border-radius: 5px;
+}
+@media only screen and (max-width:601px) {
+iframe{
+width:350px;
+height:250px;
+box-shadow: 5px 5px 5px grey;
+border-radius: 5px;
+}
+</style>
+<!--             END  17.01.25   youtube videos -->
+</head>
+<body style="font-size: 12px;">
+    
+    <div class="w3-bar w3-black" id="init">
+  <a href="https://www.costycnc.it" class="w3-bar-item w3-button" target="_blank">Home</a>
+  <div class="w3-dropdown-hover">
+  <button class="w3-button">Source</button>
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+        <a href="https://github.com/LingDong-/avrlass" class="w3-bar-item w3-button" target="_blank">LingDong-avrlass</a>
+        <a href="https://github.com/dbuezas/arduino-web-uploader" class="w3-bar-item w3-button" target="_blank">arduino-web-uploader</a>
+        <a href="https://www.serialterminal.com" class="w3-bar-item w3-button" target="_blank">serialterminal</a>
+        <a href="https://esp.huhn.me/" class="w3-bar-item w3-button" target="_blank">esp-web-tool</a>
+        <a href="https://espressif.github.io/esptool-js/" class="w3-bar-item w3-button" target="_blank">esptool-js</a>
+        <a href="https://github.com/DarkSector/AVR/blob/master/asm/include/m328Pdef.inc" class="w3-bar-item w3-button" target="_blank">m328Pdef.inc</a>
+        <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf" class="w3-bar-item w3-button" target="_blank">ATmega328P_Datasheet</a>
+    </div>
+  </div>
+  <div class="w3-dropdown-hover">
+  <button class="w3-button">Tutorial cnc shield arduino</button>
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+        <a href="https://blog.protoneer.co.nz/wp-content/uploads/2013/07/Arduino-CNC-Shield-Schematics.png" class="w3-bar-item w3-button">schematic shield v4</a>
+        <a href="https://www.teachmemicro.com/wp-content/uploads/2019/06/Arduino-Nano-pinout-3.jpg" class="w3-bar-item w3-button">Arduino nano pinout</a>
+        <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf" class="w3-bar-item w3-button">Atmega328 datasheet</a>
+        <a href="https://www.costycnc.it/avr1/ledon.txt" class="w3-bar-item w3-button">ledon.hex</a>
+    </div>
+  </div>
+  <div class="w3-dropdown-hover">
+  <button class="w3-button">About CostyCNC</button>
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+        <a href="https://www.costycnc.it/upload/" class="w3-bar-item w3-button" target="_blank">Firmware CostyCNC</a>
+        <a href="#" class="w3-bar-item w3-button">Example 2</a>
+        <a href="#" class="w3-bar-item w3-button">Example 3</a>
+    </div>
+  </div>
+  
+     <a href="https://www.youtube.com/watch?v=7mmIcMpbt34&list=PLExU_91E1BQcsiTJsTdpcapHdc0bBkNHf" class="w3-bar-item w3-button" target="_blank">Video Tutorials</a> 
+</div>
+<h4 class="w3-center w3-padding">Sei pronto a metterti alla prova?<br> Scrivi le prime righe di codice assembly e controlla direttamente il tuo Arduino. E come imparare a parlare una nuova lingua, ma con un vantaggio: potrai vedere i risultati concreti del tuo lavoro. <b>Sfida te stesso e diventa un vero maestro del microcontrollore!</b>"</h4>
+<hr>
+  Upload to :<button arduino-uploader="" board="uno" verify="" >uno[<span class="upload-progress"></span>]</button>
+  <button arduino-uploader="" board="proMini" verify="" >proMini[<span class="upload-progress"></span>]</button>
+  <button arduino-uploader="" board="nano" verify="" >nano[<span class="upload-progress"></span>]</button>
+  <button arduino-uploader="" board="nanoOldBootloader" verify="" >nanoOldBootloader[<span class="upload-progress"></span>]</button>
+  <button arduino-uploader="" board="lgt8f328p" verify="" >lgt8f328p[<span class="upload-progress"></span>]</button>
+  <hr>
+  
+  <div class="w3-row w3-border">
+  <div class="w3-container w3-half w3-red">
+  <p><button onclick="start('in-asm');">Assemble</button>  </p>
+    <textarea id="in-asm" style="width:100%;height:500px">
+     .org 0x60
+    init:
+    sbi 4,5
+    sbi 5,5
+    rjmp init
+        
+    </textarea> 
+  </div>
+  <div class="w3-container w3-half w3-blue">
+  <p><button id="btn-dasm">DisAssemble</button>  <input type="file" onchange="loadhex(this.files)"></p>
+    <textarea id="out-hex" style="width:100%;height:500px"></textarea>  
+  </div>
+</div>
+<div class="w3-row">
+  <div class="w3-container w3-third w3-border">
+   <p><a href="#"><button onclick='start("blink1");'>Assemble BLINK1</button></a>  </p>
+    <textarea  id="blink1" style="left:0%;width:100%;height:300px">
+        .org 0x0
+        rjmp init
+        .org 0x60
+        init:
+        sbi 4,5
+        loop:
+        sbi 5,5
+        rcall wait
+        cbi 5,5
+        rcall wait
+        rjmp loop
+        wait:
+        dec r16
+        brne wait
+        dec r17
+        brne wait
+        dec r18
+        brne wait
+    </textarea> 
+  </div>
+  <div class="w3-container w3-third w3-border">
+   <p><a href="#"><button onclick='start("minion");'>Assemble LEDON</button></a> <a href="https://www.youtube.com/shorts/ZcSXHUBY7dc">watch video</a> </p>
+    <textarea  id="minion" style="left:0%;width:100%;height:300px">
+        .org 0x0
+        rjmp init
+        .org 0x60
+        sbi 4,5 ;set pin as output
+        sbi 5,5; led on
+        init:  rjmp init
+    </textarea>
+  </div>
+  <div class="w3-container w3-third w3-border">
+   <p><a href="#"><button onclick='start("minioff");'>Assemble LEDOFF</button></a> <a href="https://www.youtube.com/shorts/ZcSXHUBY7dc">watch video</a> </p>
+    <textarea  id="minioff" style="left:0%;width:100%;height:300px">
+        .org 0x0
+        rjmp init
+        .org 0x60
+        sbi 4,5 ;set pin as output
+        cbi 5,5; led off
+        init:  rjmp init
+    </textarea>
+  </div>
+    <div class="w3-container w3-third w3-border" id="_printabc">
+
+    </div>
+ 
+</div>
+<!--                                        aaaaaa               -->
+<script>
+  var nomeid='in-asm'; 
+  var hexvalue;
+  
+  function loadhex(files) {
+  const reader = new FileReader()
+  reader.onload = (e) => {
+  hexvalue= e.target.result;
+  OHEX.value = hexvalue;
+  }
+  reader.readAsText(files[0])
+}
+  let OHEX = document.getElementById('out-hex');
+ 
+  function start(nomeid){
+      console.log(nomeid);
+  var INASM = document.getElementById(nomeid);
+   document.getElementById('in-asm').value=INASM.value;
+  let context = AVRLASS.new_context({});
+    let lst,ins,sum="",code,hex;
+    try{
+      console.log("parsing...");
+      //lst = AVRLASS.parse(src,reader,context);
+	  lst = AVRLASS.parse(INASM.value,"",context);
+      ins = AVRLASS.compile(lst,context);
+	  
+	  console.log("lst,context");
+	  console.log(lst);
+	  console.log(context);
+      code = AVRLASS.assemble(ins);
+	  console.log("ins");
+	  console.log(ins);
+      hexvalue = AVRLASS.to_ihex(code);
+    }catch(e){
+      let err = '[error] '+e+'\n';;
+      alert(err);
+      throw 'abort';
+    }
+    OHEX.value = hexvalue;
+    }
+  start('in-asm');
+  
+  document.getElementById('btn-dasm').onclick = function(){
+  let ret;
+  try{
+    ret = AVRDASS.hex_to_asm(OHEX.value);
+  }catch(e){
+    let err = '[error] '+e+'\n';;
+    alert(err);
+    console.log(err);
+    throw 'abort';
+  }
+  INASM = document.getElementById('in-asm');
+   INASM.value = ret;
+}
+fetch("timer0.txt")
+    .then(response => response.text())
+    .then(text => {
+        document.getElementById("_timer0").innerHTML = text;
+    });
+fetch("timer1.txt")
+    .then(response => response.text())
+    .then(text => {
+        document.getElementById("_timer1").innerHTML = text;
+    });
+    
+fetch("blink.txt")
+    .then(response => response.text())
+    .then(text => {
+        document.getElementById("_blink").innerHTML = text;
+    });
+    
+fetch("blink-big.asm")
+    .then(response => response.text())
+    .then(text => {
+        document.getElementById("blink-big").innerHTML = text;
+    });
+    
+fetch("serialgithub.txt")
+    .then(response => response.text())
+    .then(text => {
+        document.getElementById("_serialgithub").innerHTML = text;
+    });    
+    
+fetch("printabc.txt")
+    .then(response => response.text())
+    .then(text => {
+        document.getElementById("_printabc").innerHTML = text;
+    });    
+    
+</script>
+<!--                      17.01.25                    -->
+<hr>
+<section class="video-presentation">
+    <div class="video-csty-container">
+      <iframe id="youtube-player" width="800" height="450" src="https://www.youtube.com/embed/UvmIo5vloLM" frameborder="0" allowfullscreen></iframe>
+      <hr><p><b>Clicca immagine sotto per video (click image bellow for video)</b></p><hr>
+      <div class="thumbnails">
+        <img src="https://img.youtube.com/vi/xdO3KncBsmk/0.jpg" data-video-id="xdO3KncBsmk?autoplay=1" alt="Arduino nano blink pure avr asm costycnc">
+        <img src="https://img.youtube.com/vi/fvjLvYqgWrY/0.jpg" data-video-id="fvjLvYqgWrY?autoplay=1" alt="Arduino nano blink and turn stepper motor with pure avr asm costycnc">
+        <img src="https://img.youtube.com/vi/8mphkmWR1ZM/0.jpg" data-video-id="8mphkmWR1ZM?autoplay=1" alt="Arduino nano blink and pure avr asm costycnc">
+        <img src="https://img.youtube.com/vi/MFzyV_AoNVw/0.jpg" data-video-id="MFzyV_AoNVw?autoplay=1" alt="Stepper motor and pure avr asm costycnc">
+        <img src="https://img.youtube.com/vi/B7WlI0SMY_U/0.jpg" data-video-id="B7WlI0SMY_U?autoplay=1" alt="Avr assembler costycnc">
+        <img src="https://img.youtube.com/vi/4TcuVCN5QjI/0.jpg" data-video-id="4TcuVCN5QjI?autoplay=1" alt="Avr assembler costycnc">
+        <img src="https://img.youtube.com/vi/-ssFs5UGSXE/0.jpg" data-video-id="-ssFs5UGSXE?autoplay=1" alt="Servo avr assembler costycnc">
+        <img src="https://img.youtube.com/vi/Bb2zKkTPqJU/0.jpg" data-video-id="Bb2zKkTPqJU?autoplay=1" alt="Arduino nano led off on costycnc">
+        <img src="https://img.youtube.com/vi/fMQcUIg2h6g/0.jpg" data-video-id="fMQcUIg2h6g?autoplay=1" alt="Scara robot costycnc">
+        <img src="https://img.youtube.com/vi/7mmIcMpbt34/0.jpg" data-video-id="7mmIcMpbt34?autoplay=1" alt="Pure avr asm costycnc">
+        <img src="https://img.youtube.com/vi/1AuP856peeo/0.jpg" data-video-id="1AuP856peeo?autoplay=1" alt="Tutorial avr asm costycnc">
+        <img src="https://img.youtube.com/vi/HkAUilbUX84/0.jpg" data-video-id="HkAUilbUX84?autoplay=1" alt="Line follower costycnc">
+        <img src="https://img.youtube.com/vi/f6O3v9RHhVM/0.jpg" data-video-id="f6O3v9RHhVM?autoplay=1" alt="Infrared remote hack costycnc">
+        <img src="https://img.youtube.com/vi/z5abdgvMcj0/0.jpg" data-video-id="z5abdgvMcj0?autoplay=1" alt="Attiny2313 triac 220v costycnc">
+        
+        <img src="https://img.youtube.com/vi/UvmIo5vloLM/0.jpg" data-video-id="UvmIo5vloLM?autoplay=1" alt="Thumbnail 1">
+        <img src="https://img.youtube.com/vi/C1kf7KvFcTE/0.jpg" data-video-id="C1kf7KvFcTE?autoplay=1" alt="Thumbnail 2">
+        <img src="https://img.youtube.com/vi/tuZNVB552p0/0.jpg" data-video-id="tuZNVB552p0?autoplay=1" alt="Thumbnail 1">
+        <img src="https://img.youtube.com/vi/qenZ8UBppY4/0.jpg" data-video-id="qenZ8UBppY4?autoplay=1" alt="Thumbnail 2">
+        <img src="https://img.youtube.com/vi/AYhrUfhR66s/0.jpg" data-video-id="AYhrUfhR66s?autoplay=1" alt="Thumbnail 1">
+        <img src="https://img.youtube.com/vi/sVZyphjAQgU/0.jpg" data-video-id="sVZyphjAQgU?autoplay=1" alt="Thumbnail 2">
+        <img src="https://img.youtube.com/vi/qqXi1Bc7Ies/0.jpg" data-video-id="qqXi1Bc7Ies?autoplay=1" alt="Thumbnail 1">
+      </div>
+    </div>
+</section> 
+<hr>
+<script>
+const thumbnails = document.querySelectorAll('.thumbnails img');
+const youtubePlayer = document.getElementById('youtube-player');
+thumbnails.forEach(thumbnail => {
+  thumbnail.addEventListener('click', () => {
+    const videoId = thumbnail.dataset.videoId;
+    youtubePlayer.src = `https://www.youtube.com/embed/${videoId}`;
+  });
+});
+</script>
+<!--                   End 17.01.25                       -->
+</body>
+</html>

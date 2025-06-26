@@ -1,0 +1,201 @@
+; === VL53L0X + UART TX (Assembly puro) ===
+; SDA = PC4 (A4), SCL = PC5 (A5), UART TX = PD1
+; Legge distanza e invia via seriale 2 byte grezzi
+
+; === Definizioni registri TWI ===
+.equ TWBR = 0xB8
+.equ TWSR = 0xB9
+.equ TWDR = 0xBB
+.equ TWCR = 0xBC
+
+; === Bit TWCR ===
+.equ TWINT = 7
+.equ TWEA  = 6
+.equ TWSTA = 5
+.equ TWSTO = 4
+.equ TWEN  = 2
+
+; === UART (USART0) ===
+.equ UDR0   = 0xC6
+.equ UCSR0A = 0xC0
+.equ UCSR0B = 0xC1
+.equ UCSR0C = 0xC2
+.equ UBRR0L = 0xC4
+.equ UBRR0H = 0xC5
+
+.equ TXEN0  = 3
+.equ UDRE0  = 5
+.equ UCSZ00 = 1
+.equ UCSZ01 = 2
+
+; === MAIN ===
+    call Wire_begin
+    call UART_init
+    call sensor_init
+    call sensor_startContinuous
+
+loop:
+    call sensor_readRangeSingleMillimeters
+
+    ; invia LSB poi MSB via UART
+    mov r16, r17      ; LSB in r16
+    rcall UART_send
+    mov r16, r16      ; MSB in r16 (già presente)
+    rcall UART_send
+
+    call delay_100
+    rjmp loop
+
+; === UART init: 9600 baud @ 16 MHz ===
+UART_init:
+    ldi r16, high(103)
+    sts UBRR0H, r16
+    ldi r16, low(103)
+    sts UBRR0L, r16
+
+    ldi r16, (1 << TXEN0)
+    sts UCSR0B, r16
+
+    ldi r16, (1 << UCSZ01) | (1 << UCSZ00)
+    sts UCSR0C, r16
+    ret
+
+; === UART_send: invia r16 via UART ===
+UART_send:
+wait_uart:
+    lds r18, UCSR0A
+    sbrs r18, UDRE0
+    rjmp wait_uart
+    sts UDR0, r16
+    ret
+
+; === I2C init ===
+Wire_begin:
+    ldi r16, 0
+    sts TWSR, r16       ; prescaler = 1
+    ldi r16, 72         ; TWBR = 72 per 100kHz con 16MHz
+    sts TWBR, r16
+    ldi r16, (1<<TWEN)  ; abilita TWI
+    sts TWCR, r16
+    ret
+
+; === Inizializzazione sensore VL53L0X ===
+sensor_init:
+    ; START
+    ldi r16, (1<<TWINT)|(1<<TWSTA)|(1<<TWEN)
+    sts TWCR, r16
+wait_start:
+    lds r17, TWCR
+    sbrs r17, TWINT
+    rjmp wait_start
+
+    ; indirizzo + write (0x52)
+    ldi r16, 0x52
+    rcall i2c_write_byte
+
+    ; registro 0x00
+    ldi r16, 0x00
+    rcall i2c_write_byte
+
+    ; valore 0x01 (inizializza)
+    ldi r16, 0x01
+    rcall i2c_write_byte
+
+    ; STOP
+    ldi r16, (1<<TWINT)|(1<<TWSTO)|(1<<TWEN)
+    sts TWCR, r16
+    ret
+
+sensor_startContinuous:
+    ; (opzionale - placeholder)
+    ret
+
+; === Lettura distanza in mm ===
+; Risultato in r16 (MSB), r17 (LSB)
+sensor_readRangeSingleMillimeters:
+    ; START
+    ldi r16, (1<<TWINT)|(1<<TWSTA)|(1<<TWEN)
+    sts TWCR, r16
+wait_start2:
+    lds r17, TWCR
+    sbrs r17, TWINT
+    rjmp wait_start2
+
+    ; indirizzo + write
+    ldi r16, 0x52
+    rcall i2c_write_byte
+
+    ; registro 0x1E (range result)
+    ldi r16, 0x1E
+    rcall i2c_write_byte
+
+    ; REPEATED START
+    ldi r16, (1<<TWINT)|(1<<TWSTA)|(1<<TWEN)
+    sts TWCR, r16
+wait_repstart:
+    lds r17, TWCR
+    sbrs r17, TWINT
+    rjmp wait_repstart
+
+    ; indirizzo + read
+    ldi r16, 0x53
+    rcall i2c_write_byte
+
+    ; leggi MSB (ACK)
+    rcall i2c_read_byte_ack
+    mov r16, r24
+
+    ; leggi LSB (NACK)
+    rcall i2c_read_byte_nack
+    mov r17, r24
+
+    ; STOP
+    ldi r16, (1<<TWINT)|(1<<TWSTO)|(1<<TWEN)
+    sts TWCR, r16
+    ret
+
+; === Delay grezzo ===
+delay_100:
+    ldi r20, 50
+d1:
+    ldi r21, 255
+d2:
+    nop
+    dec r21
+    brne d2
+    dec r20
+    brne d1
+    ret
+
+; === I2C helper: write byte da r16 ===
+i2c_write_byte:
+    sts TWDR, r16
+    ldi r17, (1<<TWINT)|(1<<TWEN)
+    sts TWCR, r17
+wait_write:
+    lds r18, TWCR
+    sbrs r18, TWINT
+    rjmp wait_write
+    ret
+
+; === I2C helper: read con ACK ===
+i2c_read_byte_ack:
+    ldi r16, (1<<TWINT)|(1<<TWEN)|(1<<TWEA)
+    sts TWCR, r16
+wait_read_ack:
+    lds r17, TWCR
+    sbrs r17, TWINT
+    rjmp wait_read_ack
+    lds r24, TWDR
+    ret
+
+; === I2C helper: read con NACK ===
+i2c_read_byte_nack:
+    ldi r16, (1<<TWINT)|(1<<TWEN)
+    sts TWCR, r16
+wait_read_nack:
+    lds r17, TWCR
+    sbrs r17, TWINT
+    rjmp wait_read_nack
+    lds r24, TWDR
+    ret

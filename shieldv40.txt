@@ -1,0 +1,16 @@
+.org 0x60
+;arduino nano cnc shield v4.0
+sbi 4,0       ;pin DIR as output D8 PORTB,PB0
+sbi 0xa,5     ;pin STEP as output D5 PORTD,PD5
+cbi 5,0       ;enable DIR pin D8 -put high
+init:
+sbi 0xb,5     ;put pin STEP high
+rcall pause   ;pause
+cbi 0xb,5     ;put pin STEP low
+rcall pause   ;pause
+rjmp init     ;repeat
+
+pause:
+dec R16
+brne pause
+ret

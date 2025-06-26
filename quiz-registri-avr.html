@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html lang="it">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>Quiz Registri AVR</title>
+
+  <style>
+
+    body {
+
+      font-family: sans-serif;
+
+      max-width: 700px;
+
+      margin: 2em auto;
+
+      padding: 1em;
+
+      background: #f9f9f9;
+
+      border-radius: 10px;
+
+      box-shadow: 0 0 10px #ccc;
+
+    }
+
+    h1 {
+
+      text-align: center;
+
+    }
+
+    .question {
+
+      margin-bottom: 1.5em;
+
+      padding: 1em;
+
+      background: #fff;
+
+      border: 1px solid #ddd;
+
+      border-radius: 8px;
+
+    }
+
+    .question h3 {
+
+      margin: 0 0 0.5em;
+
+    }
+
+    .feedback {
+
+      margin-top: 0.5em;
+
+      font-weight: bold;
+
+    }
+
+    .correct {
+
+      color: green;
+
+    }
+
+    .wrong {
+
+      color: red;
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>Quiz sui Registri AVR (Arduino Uno)</h1>
+
+  <div id="quiz"></div>
+
+
+
+  <script>
+
+    const questions = [
+        {
+        q: "Quale tipo di registro è r16 in un microcontrollore AVR?",
+        options: [
+          "Un registro I/O che controlla hardware specifico",
+          "Un registro generale usato per operazioni della CPU",
+          "Un file nella memoria SD",
+          "Un programma che gira in background"
+        ],
+        correct: 1
+      },
+      {
+        q: "Quale tipo di registro è DDRB (indirizzo I/O 4)?",
+        options: [
+          "Un registro generale della CPU",
+          "Un registro I/O che controlla i pin della porta B come input/output",
+          "Un file di configurazione del sistema",
+          "Un registro per leggere valori analogici"
+        ],
+        correct: 1
+      },
+
+      {
+
+        q: "Nel microcontrollore, un registro è:",
+
+        options: [
+
+          "Un file che si trova sulla memoria SD",
+
+          "Un'area della RAM riservata al sistema operativo",
+
+          "Un indirizzo fisico interno che controlla direttamente l’hardware",
+
+          "Un programma che gira in background"
+
+        ],
+
+        correct: 2
+
+      },
+
+      {
+
+        q: "Il registro DDRB (registro I/O 4) serve a:",
+
+        options: [
+
+          "Attivare la porta seriale",
+
+          "Impostare i pin della porta B come input o output",
+
+          "Leggere il valore analogico di un pin",
+
+          "Controllare la velocità del clock"
+
+        ],
+
+        correct: 1
+
+      },
+
+      {
+
+        q: "Che effetto ha questa istruzione? sbi 4,5",
+
+        options: [
+
+          "Imposta il pin 5 della porta B come output",
+
+          "Scrive 1 sul pin 5 della porta B (cioè lo accende)",
+
+          "Imposta il pin 5 della porta B come input",
+
+          "Disattiva l’interrupt sul pin 5"
+
+        ],
+
+        correct: 0
+
+      },
+
+      {
+
+        q: "Che effetto ha questa istruzione? sbi 5,5 (IO 5=PORTB)",
+
+        options: [
+
+          "Imposta il pin 5 della porta B come input",
+
+          "Attiva il pull-up interno del pin 5",
+
+          "Scrive 1 sul pin 5 della porta B (cioè lo accende)",
+
+          "Imposta la velocità del clock a 5 MHz"
+
+        ],
+
+        correct: 2
+
+      },
+
+		{
+
+		  q: "Per accendere o spegnere un LED collegato al pin 13, quali registri devi usare?",
+
+		  options: [
+
+			"Solo PINB",
+
+			"Solo DDRB (4)",
+
+			"DDRB(4) per impostare output e PORTB(5) per accendere/spegnere",
+
+			"TCCR1A e TCCR1B"
+
+		  ],
+
+		  correct: 2
+
+		},
+
+      {
+
+        q: "Cosa fa questa sequenza? ldi r16, (1 << 5); out 0x25, r16",
+
+        options: [
+
+          "Scrive il valore 5 nel registro PORTB",
+
+          "Azzera il pin 5 della porta B",
+
+          "Imposta solo il bit 5 di PORTB a 1",
+
+          "Imposta tutti i bit di PORTB a 1"
+
+        ],
+
+        correct: 2
+
+      }
+
+    ];
+
+
+
+    const quizDiv = document.getElementById("quiz");
+
+
+
+    questions.forEach((q, i) => {
+
+      const qDiv = document.createElement("div");
+
+      qDiv.className = "question";
+
+      const title = document.createElement("h3");
+
+      title.textContent = `Domanda ${i + 1}: ${q.q}`;
+
+      qDiv.appendChild(title);
+
+
+
+      q.options.forEach((opt, idx) => {
+
+        const label = document.createElement("label");
+
+        label.innerHTML = `
+
+          <input type="radio" name="q${i}" value="${idx}"> ${opt}<br>
+
+        `;
+
+        qDiv.appendChild(label);
+
+      });
+
+
+
+      const feedback = document.createElement("div");
+
+      feedback.className = "feedback";
+
+      qDiv.appendChild(feedback);
+
+
+
+      quizDiv.appendChild(qDiv);
+
+
+
+      qDiv.addEventListener("change", (e) => {
+
+        const selected = parseInt(e.target.value);
+
+        if (selected === q.correct) {
+
+          feedback.textContent = "✔️ Corretto!";
+
+          feedback.className = "feedback correct";
+
+        } else {
+
+          feedback.textContent = "❌ Risposta sbagliata.";
+
+          feedback.className = "feedback wrong";
+
+        }
+
+      });
+
+    });
+
+  </script>
+
+</body>
+
+</html>

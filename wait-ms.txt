@@ -1,0 +1,62 @@
+; wait_ms_16bit
+; Input:  
+;   - R24:R25 = numero di millisecondi da attendere (R25 alto, R24 basso)
+; Funzione: delay approssimativo basato su loop annidati (16MHz)
+; Usa registri: r18, r19, r24, r25
+
+wait_ms_16bit:
+    ; Copia il valore 16-bit in r22:r23 per il ciclo esterno (ms counter)
+    mov r22, r24
+    mov r23, r25
+
+wait_ms_loop_16:
+    ; Loop interno per 1 ms circa
+    ldi r18, 250
+    ldi r19, 6
+
+inner_loop_16:
+    dec r19
+    brne inner_loop_16
+    dec r18
+    brne inner_loop_16
+
+    ; decrementa il contatore 16-bit r22:r23
+    sbiw r22, 1       ; sottrae 1 a r23:r22 (word)
+    brne wait_ms_loop_16
+
+    ret
+
+
+; ----------------------------------------
+; Demo blinking LED su PORTB5 (pin 13 Arduino)
+
+    .def temp = r16
+
+    ; Setup iniziale
+    .org 0x0000
+    rjmp start
+
+start:
+    ; Configura PORTB5 come output
+    ldi temp, (1 << 5)
+    out DDRB, temp
+
+loop:
+    ; Accendi LED (PORTB5 HIGH)
+    out PORTB, temp
+
+    ; Delay 500 ms
+    ldi r24, 244        ; 0xF4 (500 dec = 0x01F4, r25:r24 = 0x01F4)
+    ldi r25, 1
+    rcall wait_ms_16bit
+
+    ; Spegni LED (PORTB5 LOW)
+    ldi temp, 0
+    out PORTB, temp
+
+    ; Delay 500 ms
+    ldi r24, 244
+    ldi r25, 1
+    rcall wait_ms_16bit
+
+    rjmp loop

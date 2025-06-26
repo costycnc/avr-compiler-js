@@ -1,0 +1,90 @@
+<p>
+
+    	<a href="#"><button onclick='start("printabc");'> Assemble Print-abc </button></a>
+
+    	<button class="w3-right"> Tutorial Print-abc </button>
+
+</p>
+
+    <textarea id="printabc" style="left:0%;width:100%;height:300px">
+
+; ===== INIZIO =====
+
+rjmp reset           ; Vettore di reset
+
+; ===== UART INIT =====
+uart_init:
+    ldi r16, 0            ; UBRR0H = 0
+    sts 0xC5, r16
+
+    ldi r16, 8            ; UBRR0L = 8 → 115200 baud @16MHz
+    sts 0xC4, r16
+
+    ldi r16, (1 << 3)     ; TXEN0 = bit 3
+    sts 0xC1, r16         ; UCSR0B
+
+    ldi r16, (1 << 1) | (1 << 2) ; UCSZ00 e UCSZ01 = 1 (8 bit)
+    sts 0xC2, r16         ; UCSR0C
+
+    ret
+
+; ===== STAMPA STRINGA IN Z (terminata da 0x00) =====
+print:
+    ld r16, Z+            ; Legge carattere da Z
+    cpi r16, 0x00         ; Fine stringa?
+    breq print_done
+
+wait_udre:
+    
+    sbis 0x0B, 5      ; UCSR0A, bit 5 = UDRE0
+    rjmp wait_udre
+
+    sts 0xC6, r16         ; Scrive in UDR0
+    rjmp print
+
+print_done:
+    ret
+
+; ===== DELAY ~1 SECONDO @16MHz =====
+wait1s:
+    ldi r17, 3
+outer:
+    ldi r18, 255
+middle:
+    ldi r19, 255
+inner:
+    nop
+    nop
+    dec r19
+    brne inner
+    dec r18
+    brne middle
+    dec r17
+    brne outer
+    ret
+
+; ===== MAIN RESET VETTORE =====
+reset:
+    ; Set stack pointer a RAMEND = 0x08FF
+    ldi r16, 0xFF
+    out 0x3D, r16         ; SPL
+    ldi r16, 0x08
+    out 0x3E, r16         ; SPH
+
+    rcall uart_init
+
+main_loop:
+    ldi r30, low(msg)
+    ldi r31, high(msg)
+    rcall print
+    rcall wait1s
+    rjmp main_loop
+
+; ===== STRINGA: "ABC\r\n" =====
+msg:
+    .db "ABC", 0x0D, 0x0A, 0x00
+
+; ===== FINE =====
+
+
+</textarea>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini Tutorial ASM + Quiz Registri AVR</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 2em auto;
+      padding: 1em;
+      background: #fefefe;
+      border-radius: 8px;
+      box-shadow: 0 0 12px #ccc;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    pre {
+      background: #eee;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    .quiz-section {
+      margin-top: 2em;
+    }
+    .question {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      padding: 1em;
+      margin-bottom: 1em;
+      border-radius: 6px;
+    }
+    label {
+      display: block;
+      margin: 0.3em 0;
+      cursor: pointer;
+    }
+    .feedback {
+      font-weight: bold;
+      margin-top: 0.5em;
+    }
+    .correct {
+      color: green;
+    }
+    .wrong {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Mini Tutorial ASM & Quiz: Registri AVR (Arduino Uno)</h1>
+
+<h2>Cos’è un registro in un microcontrollore?</h2>
+<p>
+Un <strong>registro</strong> è una piccola area di memoria interna, molto veloce, usata per controllare direttamente l'hardware. 
+Puoi immaginarlo come una scatola con interruttori ON/OFF (bit) per comandare porte, timer, ecc.
+</p>
+
+<h2>Esempio semplice: accendere il LED sul pin 13</h2>
+<p>Il LED è collegato al pin digitale 13, che corrisponde al bit 5 della porta B.</p>
+<pre>
+// Imposta il pin 13 (bit 5 di DDRB) come uscita
+sbi 4, 5          ; DDRB (indirizzo I/O 4)
+
+// Accendi il LED (imposta bit 5 di PORTB)
+sbi 5, 5            ; PORTB (indirizzo I/O 5)
+
+// Spegni il LED (azzera bit 5 di PORTB)
+cbi 5, 5
+</pre>
+
+---
+
+<div class="quiz-section">
+  <h2>Quiz per fissare i concetti</h2>
+  <div id="quiz"></div>
+</div>
+
+<script>
+  const questions = [
+    {
+      q: "Cos’è un registro in un microcontrollore?",
+      options: [
+        "Un file sulla memoria SD",
+        "Una scatola di interruttori ON/OFF interna al chip",
+        "Un programma che gira in background",
+        "Una parte della RAM usata dal sistema operativo"
+      ],
+      correct: 1
+    },
+    {
+      q: "Qual è l’indirizzo I/O del registro DDRB?",
+      options: [
+        "5",
+        "4",
+        "3",
+        "0"
+      ],
+      correct: 1
+    },
+    {
+      q: "Cosa fa l’istruzione `sbi 5, 5`?",
+      options: [
+        "Imposta il bit 5 di PORTB a 1 (accende il LED su pin 13)",
+        "Imposta il bit 5 di DDRB a 1 (configura pin 13 come output)",
+        "Legge il valore del pin 5 di PORTB",
+        "Spegne il LED sul pin 13"
+      ],
+      correct: 0
+    },
+    {
+      q: "Quale registro usi per configurare un pin come output?",
+      options: [
+        "PORTB",
+        "PINB",
+        "DDRB",
+        "TCCR0A"
+      ],
+      correct: 2
+    }
+  ];
+
+  const quizDiv = document.getElementById("quiz");
+
+  questions.forEach((q, i) => {
+    const qDiv = document.createElement("div");
+    qDiv.className = "question";
+    const title = document.createElement("h3");
+    title.textContent = `Domanda ${i + 1}: ${q.q}`;
+    qDiv.appendChild(title);
+
+    q.options.forEach((opt, idx) => {
+      const label = document.createElement("label");
+      label.innerHTML = `
+        <input type="radio" name="q${i}" value="${idx}"> ${opt}
+      `;
+      qDiv.appendChild(label);
+    });
+
+    const feedback = document.createElement("div");
+    feedback.className = "feedback";
+    qDiv.appendChild(feedback);
+
+    quizDiv.appendChild(qDiv);
+
+    qDiv.addEventListener("change", (e) => {
+      const selected = parseInt(e.target.value);
+      if (selected === q.correct) {
+        feedback.textContent = "✔️ Corretto!";
+        feedback.className = "feedback correct";
+      } else {
+        feedback.textContent = "❌ Risposta sbagliata.";
+        feedback.className = "feedback wrong";
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

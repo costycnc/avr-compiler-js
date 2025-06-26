@@ -1,0 +1,28 @@
+    <p>
+    	<a href="#">
+    		<button onclick='start("timer1");'> Assemble TIMER1 </button>
+    	</a>see <a href="https://exploreembedded.com/wiki/AVR_Timer_programming">source</a>
+    </p>
+    <textarea id="timer1" style="left:0%;width:100%;height:300px">
+;not finished
+.equ	TCCR1B	= 0x81	; MEMORY MAPPED
+.equ	CS10	= 0	; Prescaler source of Timer/Counter 1
+.equ	CS12	= 2	; Prescaler source of Timer/Counter 1
+.equ	OCR1AL	= 0x88	; MEMORY MAPPED
+.equ	OCR1AH	= 0x89	; MEMORY MAPPED
+
+.org 0
+    jmp init
+.org 0x60
+    init:
+        LDI R16,(1<<CS10) | (1<<CS12); //set the pre-scalar as 1024
+        sts TCCR1B,r16  
+        OCR1A = 1562; 	   //100ms delay
+        TCNT1 = 0;
+    loop:
+        while((TIFR & (1<<OCF1A)) == 0);// wait till the timer overflow flag is SET
+        PORTD ^= (1<< LED);
+        TCNT1 = 0; 
+        TIFR |= (1<<OCF1A) ; //clear timer1 overflow flag 
+    rjmp loop
+    </textarea>
