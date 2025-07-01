@@ -1450,6 +1450,54 @@ thumbnails.forEach(thumbnail => {
 
 <!--                   End 17.01.25                       -->
 
+	<section class="warning-section" style="background-color: #fff8f8; border-left: 5px solid #ff0000; padding: 20px; margin-top: 40px; font-family: monospace;">
+  <h2 style="color: #d40000;">⚠️ NON È UN'OPZIONE: STACK, CALL/RET, PUSH/POP SONO OBBLIGATORI</h2>
+  
+  <div class="disaster-example" style="background: #ffebeb; padding: 15px; margin: 15px 0; border-radius: 5px;">
+    <h3 style="margin-top: 0;">BOEING 737 MAX (2019) - 346 MORTI</h3>
+    <p><strong>Causa:</strong> Stack corruption nel sistema MCAS</p>
+    <pre style="background: #2d2d2d; color: #f8f8f2; padding: 10px; overflow-x: auto;">
+; Codice difettoso (simulato):
+ISR_MCAS:
+  push r16
+  push r17
+  call leggi_sensore  ; Stack cresce
+  ; ... nessun pop prima di un'altra call!
+  call controlla_flap ; Stack overflow → crash
+  ; Manca ret!
+    </pre>
+    <p><strong>Come il tuo trio lo avrebbe evitato:</strong> Avresti visto subito lo sbilanciamento push/pop.</p>
+  </div>
+
+  <div class="disaster-example" style="background: #ffebeb; padding: 15px; margin: 15px 0; border-radius: 5px;">
+    <h3 style="margin-top: 0;">TOYOTA UNINTENDED ACCELERATION (2010-2023)</h3>
+    <p><strong>Causa:</strong> Call ricorsive senza controllo stack</p>
+    <pre style="background: #2d2d2d; color: #f8f8f2; padding: 10px; overflow-x: auto;">
+controlla_acceleratore:
+  call leggi_pedale
+  call verifica_errore  ; Troppe call annidate
+  call aggiorna_log     ; Stack esaurito → dati corrotti
+  ret                   ; Ritorno a indirizzo sbagliato
+    </pre>
+    <p><strong>Lezione:</strong> Senza contare call/ret, il firmware diventa un'arma.</p>
+  </div>
+
+  <div class="ethical-commandments" style="background: #2d2d2d; color: white; padding: 20px; border-radius: 5px;">
+    <h3 style="color: #ff5555; margin-top: 0;">COMANDAMENTI ETICI DELL'EMBEDDED:</h3>
+    <ol style="line-height: 1.6;">
+      <li>Ogni <strong>call</strong> deve avere una <strong>ret</strong> (o sei un pericolo pubblico)</li>
+      <li>Le <strong>push</strong> devono bilanciare le <strong>pop</strong> (o il sistema crasha)</li>
+      <li>Lo <strong>stack</strong> non è magico: ha dimensioni finite (Boeing l'ha imparato a sue spese)</li>
+      <li>Se non sai queste cose, <strong>non sei un ingegnere</strong>, sei un copia-incollatore</li>
+    </ol>
+  </div>
+
+  <div class="call-to-action" style="background: #d40000; color: white; padding: 15px; text-align: center; margin-top: 20px; border-radius: 5px;">
+    <h3 style="margin: 0;">NON SEI AUTORIZZATO A PROGRAMMARE SE NON SAI QUESTE 4 ISTRUZIONI</h3>
+    <p style="margin-bottom: 0;">Usa <strong>costycnc.it/avr1</strong> ora o smetti di scrivere firmware.</p>
+  </div>
+</section>
+
 </body>
 
 </html>
