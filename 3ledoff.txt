@@ -2,6 +2,11 @@
         rjmp init
         .org 0x60
         init:
+           ; --- Inizializza stack ---
+          ldi r16, 0xFF
+          out 0x3D, r16    ; SPL
+          ldi r16, 0x08
+          out 0x3E, r16    ; SPH
         sbi 4,5 ;set pin as output
         cbi 5,5; led off
         rjmp init
