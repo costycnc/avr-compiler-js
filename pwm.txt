@@ -1,0 +1,22 @@
+.org 0
+rjmp init
+.org 0x60
+init:
+; DDRD = 0x0A, impostare PD6 (bit 6) come output (bit 6 = 1)
+; sbi <I/O Register>, <bit>
+sbi 0x0A, 6       ; 0x0A = DDRD, bit 6 ON → 0b01000000
+
+; TCCR0A = 0b10000011 (0x83)
+ldi r16, 0b10000011
+sts 0x44, r16     ; TCCR0A
+
+; TCCR0B = 0b00000010 (0x02)
+ldi r16, 0b00000010
+sts 0x45, r16     ; TCCR0B
+
+; OCR0A = 0b10000000 (128 decimal)
+ldi r16, 0b10000000
+sts 0x47, r16     ; OCR0A
+
+loop:
+    rjmp loop     ; loop infinito
