@@ -303,7 +303,7 @@ send_char:
   La comunicazione seriale nei microcontrollori (come gli ATmega) funziona scrivendo e leggendo dei bit in registri speciali, cioè piccole scatole di memoria con significati precisi.
 </p>
 <p>
-  Per esempio:
+  In questo codice:
 </p>
 <ul>
   <li><strong>Registri 0xC4 (UBRRL) e 0xC5 (UBRRH):</strong> qui scriviamo la velocità della comunicazione seriale, chiamata "baud rate". È come dire "parliamo a 9600 parole al secondo".</li>
@@ -321,8 +321,6 @@ send_char:
 
   <h2>🚀 Provalo subito</h2>
   <p>Collega un Arduino Nano via USB, apri <a href="https://costycnc.it/avr1" target="_blank">costycnc.it/avr1</a>, incolla il codice e premi <strong>UPLOAD</strong>. Il LED lampeggerà con ogni carattere ricevuto!</p>
-
-  <p><strong>Vuoi vedere magia?</strong> Cambia <code>sbi 3,5</code> con <code>cbi 3,5</code>: il LED si spegnerà! Hai appena scritto e cancellato un bit in un vero registro hardware!</p>
 
   <hr>
   <p><em>Non stai solo programmando. Stai capendo il cuore dell'informatica.</em></p>
