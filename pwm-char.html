@@ -206,6 +206,36 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     Nei miei esempi futuri troverai sempre questa stessa tecnica, questo stesso modo di spiegare: semplice, chiaro e unico, perché crediamo che capire il funzionamento reale sia il primo vero passo per imparare a programmare davvero.
   </p>
 </section>
+	<hr>
+<section>
+  <h2>La vera programmazione: scrivere e leggere bit nei registri</h2>
+  <p>
+    Nei microcontrollori (come gli ATmega) la comunicazione seriale funziona scrivendo e leggendo bit in registri speciali, cioè piccole scatole di memoria con significati precisi. 
+  </p>
+  <p>
+    In questo esempio useremo i registri con i loro numeri, non i nomi. Non serve conoscere i nomi, basta il numero. E quei numeri sono veri: li puoi trovare nel datasheet ufficiale del microcontrollore. 
+  </p>
+  <p>
+    Ti consiglio vivamente di aprire il datasheet e guardare con i tuoi occhi: tanti programmatori avanzati non sanno leggere un datasheet perché non capiscono che tutto si riduce a questi registri numerati. 
+  </p>
+  <p>
+    Tutto quello che impari con migliaia, anzi miliardi di nomi diversi, alla fine è solo un numero d’ordine di un registro nella gerarchia del microcontrollore. È tutto qui. 
+  </p>
+  <p>
+    Chi vede l’informatica così, senza astrazioni inutili, avrà più coraggio e più voglia di imparare davvero.
+  </p>
+  <p>Nel codice:</p>
+  <ul>
+    <li><strong>Registri 0xC4 (UBRRL) e 0xC5 (UBRRH):</strong> impostano la velocità della comunicazione seriale (baud rate), come dire “parliamo a 9600 parole al secondo”.</li>
+    <li><strong>Registro 0xC1 (UCSRC):</strong> definisce il formato dei dati. Con <code>ldi r16, 0b00000110</code> diciamo: “8 bit per carattere, 1 bit di stop, senza parità”.</li>
+    <li><strong>Registro 0xC0 (UCSRB):</strong> attiva la ricezione e trasmissione seriale. Con <code>ldi r16, 0b00011000</code> accendiamo RX e TX, cioè abilitiamo la comunicazione.</li>
+    <li><strong>Registro 0xC6 (UDR):</strong> è la “buca delle lettere”: scriviamo qui un carattere da inviare o leggiamo quello appena ricevuto.</li>
+    <li><strong>Registri 4 e 5 (PORTD):</strong> usati per impostare i pin come uscite. Ad esempio, dire che il pin 5 è in uscita per accendere un LED.</li>
+  </ul>
+  <p>
+    In pratica, tutta la magia avviene <strong>scrivendo o leggendo bit nei registri</strong>. Questa è la vera programmazione a basso livello, quella che succede “sotto il cofano”. Molti programmatori moderni non la vedono mai, ma è qui che inizia tutto.
+  </p>
+</section>
 
 	<hr>
 
@@ -317,26 +347,6 @@ send_char:
     <li><code>sbrs r18, 5</code> → Attende che il buffer seriale sia pronto.</li>
     <li><code>sts 0xC6, r16</code> → Invia r16 sulla seriale.</li>
   </ul>
-
-  <hr>
-<h2>La vera programmazione: scrivere e leggere bit nei registri</h2>
-<p>
-  La comunicazione seriale nei microcontrollori (come gli ATmega) funziona scrivendo e leggendo dei bit in registri speciali, cioè piccole scatole di memoria con significati precisi.
-</p>
-<p>
-  In questo codice:
-</p>
-<ul>
-  <li><strong>Registri 0xC4 (UBRRL) e 0xC5 (UBRRH):</strong> qui scriviamo la velocità della comunicazione seriale, chiamata "baud rate". È come dire "parliamo a 9600 parole al secondo".</li>
-  <li><strong>Registro 0xC1 (UCSRC):</strong> serve per dire come sarà il formato dei dati. Con il comando <code>ldi r16, 0b00000110</code> diciamo: "8 bit per carattere, 1 bit di stop, senza parità".</li>
-  <li><strong>Registro 0xC0 (UCSRB):</strong> serve per attivare la ricezione e la trasmissione seriale. Con <code>ldi r16, 0b00011000</code> diciamo: "Accendi RX e TX", cioè abilitiamo il parlare e ascoltare via seriale.</li>
-  <li><strong>Registro 0xC6 (UDR):</strong> è come una buca delle lettere. Quando vogliamo inviare un carattere, lo scriviamo qui. Quando ne arriva uno, lo leggiamo da qui. Stesso registro, due funzioni.</li>
-  <li><strong>Registri 4 e 5 (PORTD):</strong> servono per impostare dei pin come uscite. Per esempio, possiamo dire che il pin 5 è in uscita e poi attivarlo (accendere un LED, ad esempio).</li>
-</ul>
-<p>
-  In pratica, tutta la magia avviene <strong>scrivendo o leggendo bit nei registri</strong>. Questa è la vera programmazione a basso livello, quella che succede "sotto il cofano". Molti programmatori moderni non la vedono mai, ma è qui che inizia tutto. Anche i microcontrollori più semplici fanno cose incredibili, solo leggendo e scrivendo nei registri.
-</p>
-
 
   <hr>
 
