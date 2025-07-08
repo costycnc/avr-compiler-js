@@ -1,0 +1,76 @@
+; ----------------------
+; ⚡ Inizio del programma
+; ----------------------
+.org 0                ; Indirizzo iniziale di reset
+rjmp init             ; Vai alla routine di inizializzazione
+
+.org 0x68             ; Inizio della sezione codice "reale" in flash
+init:
+    rcall init_uart   ; Chiama subroutine per inizializzare la seriale
+
+read:
+    rcall read_byte   ; Leggi un carattere se presente
+    mov r16, r20      ; Copia il carattere ricevuto in r16
+    andi r16, 0b10111111 ; Rimuove il bit 6 (per esempio per rendere le lettere tutte minuscole)
+    ;rcall send_char  ; (opzionale) rimanda il carattere indietro sulla seriale
+    rcall led         ; Chiama la routine per accendere il LED
+    rjmp read         ; Torna a leggere un altro carattere
+
+; --------------------------------------------------
+; 📻 init_uart: configura la comunicazione seriale
+; --------------------------------------------------
+; Imposta la velocità a 9600 baud per 16 MHz
+; Frame: 8 bit, nessuna parità, 1 bit di stop (8N1)
+init_uart:
+    ldi r16, 103           ; Baud rate = 9600 @ 16 MHz
+    sts 0xC4, r16          ; UBRR0L (basso)
+    ldi r16, 0
+    sts 0xC5, r16          ; UBRR0H (alto)
+    ldi r16, 0b00000110    ; 8 bit per frame (UCSZ01 e UCSZ00)
+    sts 0xC2, r16          ; UCSR0C
+    ldi r16, 0b00011000    ; Abilita RX (bit 4) e TX (bit 3)
+    sts 0xC1, r16          ; UCSR0B
+    ret
+
+
+; --------------------------------------------------
+; 📨 read_byte: legge 1 carattere se disponibile
+; --------------------------------------------------
+; Non blocca l'esecuzione se nessun carattere è arrivato
+read_byte:
+    lds r18, 0xC0          ; Leggi UCSR0A (registro di stato)
+    sbrc r18, 7            ; Controlla RXC0 (bit 7): se 1, c'è un dato
+    rjmp read_done         ; Se c'è un byte, salta a read_done
+    ret                    ; Altrimenti ritorna senza far nulla
+
+read_done:
+    lds r20, 0xC6          ; Leggi il byte ricevuto da UDR0
+    ret
+
+
+
+; --------------------------------------------------
+; 💡 led: lampeggia LED usando delay via loop
+; --------------------------------------------------
+; Accende PB5 (LED su pin 13), aspetta, poi spegne
+led:
+    sbi 4, 5               ; DDRB, bit 5: imposta pin 13 come uscita
+    dec r19               ; Cicli di attesa
+    brne led
+    dec r17
+    brne led
+    dec r16
+    brne led
+    sbi 3, 5               ; PORTB, bit 5: accende il LED
+    ret
+
+
+; --------------------------------------------------
+; ✏️ send_char: invia un carattere da r16 via seriale
+; --------------------------------------------------
+send_char:
+    lds r18, 0xC0          ; UCSR0A - leggi stato trasmettitore
+    sbrs r18, 5            ; UDRE0 (bit 5): buffer pronto?
+    rjmp send_char         ; Se no, aspetta
+    sts 0xC6, r16          ; Scrivi r16 nel registro di trasmissione
+    ret
