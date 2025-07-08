@@ -1217,7 +1217,23 @@ next:
       });
     </script>  
     
-    
+    	    <div class="w3-container w3-third w3-border">
+<p><a href="#init"><button onclick='start("pwm-char");'>PWM CHAR</button></a> 
+	<a href="https://youtube.com/shorts">video </a></p>
+       <textarea  id="pwm-char" style="left:0%;width:100%;height:300px">
+           </textarea>
+  </div>
+    <script>
+      window.addEventListener("load", () => {
+        fetch("pwm-char.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("pwm-char").value = text;
+          });
+      });
+    </script>  
+
+	
 
 </div>
 
