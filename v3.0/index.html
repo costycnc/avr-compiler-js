@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Control a NEMA17 stepper motor using Arduino UNO and CNC Shield v3.0 with pure Assembly language and no libraries. Learn direct register access using the ATmega328 datasheet." />
+  <meta name="keywords" content="Arduino UNO, CNC Shield V3, NEMA17 motor, Assembly language, AVR programming, ATmega328 registers, stepper motor control, low-level Arduino, costycnc compiler, educational microcontroller tutorial" />
+  <meta name="author" content="CostyCNC" />
+    <!-- Google Tag Manager -->
+
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+
+})(window,document,'script','dataLayer','GTM-WPHFPJX');</script>
+
+<!-- End Google Tag Manager -->
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Control NEMA17 with Arduino UNO & CNC Shield v3.0 - Pure Assembly</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      background: #f9f9f9;
+      color: #333;
+    }
+    h1, h2 {
+      color: #0057a3;
+    }
+    code {
+      background: #eaeaea;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    pre {
+      background: #eee;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    a {
+      color: #0057a3;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+	    <div class="w3-bar w3-black" >
+
+  <a href="https://www.costycnc.it" class="w3-bar-item w3-button" target="_blank">Home</a>
+
+  <div class="w3-dropdown-hover">
+
+  <button class="w3-button">Source</button>
+
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+
+        <a href="https://github.com/LingDong-/avrlass" class="w3-bar-item w3-button" target="_blank">LingDong-avrlass</a>
+
+        <a href="https://github.com/dbuezas/arduino-web-uploader" class="w3-bar-item w3-button" target="_blank">arduino-web-uploader</a>
+
+        <a href="https://www.serialterminal.com" class="w3-bar-item w3-button" target="_blank">serialterminal</a>
+
+        <a href="https://esp.huhn.me/" class="w3-bar-item w3-button" target="_blank">esp-web-tool</a>
+
+        <a href="https://espressif.github.io/esptool-js/" class="w3-bar-item w3-button" target="_blank">esptool-js</a>
+
+        <a href="https://github.com/DarkSector/AVR/blob/master/asm/include/m328Pdef.inc" class="w3-bar-item w3-button" target="_blank">m328Pdef.inc</a>
+
+        <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf" class="w3-bar-item w3-button" target="_blank">ATmega328P_Datasheet</a>
+
+    </div>
+
+  </div>
+
+  <div class="w3-dropdown-hover">
+
+  <button class="w3-button">Tutorial cnc shield arduino</button>
+
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+
+        <a href="https://blog.protoneer.co.nz/wp-content/uploads/2013/07/Arduino-CNC-Shield-Schematics.png" class="w3-bar-item w3-button">schematic shield v4</a>
+
+        <a href="https://www.teachmemicro.com/wp-content/uploads/2019/06/Arduino-Nano-pinout-3.jpg" class="w3-bar-item w3-button">Arduino nano pinout</a>
+
+        <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf" class="w3-bar-item w3-button">Atmega328 datasheet</a>
+
+        <a href="https://www.costycnc.it/avr1/ledon.txt" class="w3-bar-item w3-button">ledon.hex</a>
+
+    </div>
+
+  </div>
+
+  <div class="w3-dropdown-hover">
+
+  <button class="w3-button">Quiz</button>
+
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+
+     <a href="intro.html" class="w3-bar-item w3-button" target="_blank">Intro</a> 
+
+     <a href="perche-atmega328.html" class="w3-bar-item w3-button" target="_blank">Perche Atmega328</a> 
+     
+     <a href="quiz-cosa-fa-avr1.html" class="w3-bar-item w3-button" target="_blank">quiz-cosa-fa-avr1</a>
+     
+     <a href="quiz-registri-avr.html" class="w3-bar-item w3-button" target="_blank">Quiz</a>
+     
+     <a href="quiz1.html" class="w3-bar-item w3-button" target="_blank">Quiz-1</a>
+
+    </div>
+
+  </div>
+
+  
+
+     <a href="https://www.youtube.com/watch?v=7mmIcMpbt34&list=PLExU_91E1BQcsiTJsTdpcapHdc0bBkNHf" class="w3-bar-item w3-button" target="_blank">Video Tutorials</a> 
+     
+     
+     
+     
+  <div class="w3-dropdown-hover">
+
+  <button class="w3-button">Didactic</button>
+
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+
+        <a href="read-flash" class="w3-bar-item w3-button" target="_blank">Read flash</a>
+
+        <a href="read-serial" class="w3-bar-item w3-button" target="_blank">Read serial</a>
+
+        <a href="read-signature" class="w3-bar-item w3-button" target="_blank">Read signature</a>
+
+        <a href="read-write-page" class="w3-bar-item w3-button" target="_blank">Read write page</a>
+
+        <a href="uploader.html" class="w3-bar-item w3-button" target="_blank">uploader (in work)</a>
+
+        <a href="flash-tutorial" class="w3-bar-item w3-button" target="_blank">Write directly to flash (tutorial)</a>
+
+        <a href="compiler" class="w3-bar-item w3-button" target="_blank">Compiler</a>
+
+        <a href="label" class="w3-bar-item w3-button" target="_blank">Label</a>
+
+        <a href="pwm-char.html" class="w3-bar-item w3-button" target="_blank">PWM-CHAR</a>
+
+
+    </div>
+
+  </div>
+
+     
+     
+  <div class="w3-dropdown-hover">
+
+  <button class="w3-button">Tutoriale</button>
+
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+
+        <a href="ledon.html" class="w3-bar-item w3-button" target="_blank">Led on</a>
+
+        <a href="pin-vs-registri.html" class="w3-bar-item w3-button" target="_blank">pin vs registri</a>
+
+
+    </div>
+
+  </div>
+
+</div>
+
+  <h1>Control a NEMA17 Stepper Motor with Arduino UNO & CNC Shield v3.0 Using Assembly</h1>
+
+  <p>This educational guide teaches you how to control a NEMA17 motor using only Assembly language on an <strong>Arduino UNO</strong> with the <strong>CNC Shield v3.0</strong> — all without Arduino IDE or any libraries.</p>
+
+  <h2>Why Use Assembly?</h2>
+  <p>Unlike typical tutorials, we go straight to the heart of the ATmega328P microcontroller. No abstractions, just real registers and bits — just like how the datasheet shows. This method helps you truly understand how microcontrollers work at the lowest level.</p>
+
+  <h2>Pin Mapping Based on Datasheet</h2>
+  <p>Many beginners get confused by multiple names for the same pin:</p>
+  <ul>
+    <li><strong>Enable:</strong> Called D8 or PB0 — in the datasheet, it's <code>Register 4, Bit 0</code></li>
+    <li><strong>Step X:</strong> Called D2 or PD2 — in the datasheet, it's <code>Register 9, Bit 2</code></li>
+  </ul>
+  <p>We ignore symbolic names and use only numeric registers and bits as described in the ATmega328 datasheet.</p>
+
+  <h2>Assembly Code Example</h2>
+  <p>Paste the following code into <a href="https://costycnc.github.io/avr-compiler-js" target="_blank">costycnc.github.io/avr-compiler-js</a>, compile, and upload to your Arduino UNO:</p>
+
+  <pre><code>.org 0
+rjmp init
+.org 0x60
+init:
+    sbi 4,0       ; Enable driver (Register 4, Bit 0)
+    ldi r18,10    ; Load delay loop counter
+    call wait
+    sbi 9,2       ; Step pulse X motor (Register 9, Bit 2)
+    rjmp init
+
+wait:
+    inc r17
+    brne wait
+    dec r18
+    brne wait
+    ret
+</code></pre>
+
+  <h2>What This Code Does</h2>
+  <ul>
+    <li>Enables the stepper driver by writing 1 to <code>Register 4, Bit 0</code></li>
+    <li>Creates a delay using a simple loop</li>
+    <li>Sends a step pulse to <code>Register 9, Bit 2</code> to turn the motor</li>
+  </ul>
+
+  <h2>Try It Now</h2>
+  <ol>
+    <li>Connect your Arduino UNO with CNC Shield v3.0</li>
+    <li>Insert a NEMA17 motor in the X slot</li>
+    <li>Go to <a href="https://costycnc.github.io/avr-compiler-js" target="_blank">costycnc.github.io/avr-compiler-js</a></li>
+    <li>Paste the code and hit <strong>UPLOAD</strong> after selecting your port</li>
+    <li>Watch your motor turn!</li>
+  </ol>
+
+  <h2>Conclusion</h2>
+  <p>This method teaches students how to interact directly with hardware — no IDEs, no libraries, no abstractions. Just pure control using the ATmega328's datasheet and logic.</p>
+
+  <p>🔧 This is real engineering — and you can learn it now.</p>
+
+</body>
+</html>
