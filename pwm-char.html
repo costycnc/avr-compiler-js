@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Impara Assembly con ATmega328</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; background: #f9f9f9; color: #333; }
+    code {
+      background: #eaeaea;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    pre {
+      background: #eee;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    h1, h2 { color: #1a73e8; }
+    hr { margin: 2rem 0; }
+  </style>
+</head>
+<body>
+
+  <h1>Impara l'essenza dell'informatica con ATmega328</h1>
+
+  <p>
+    L'ATmega328 (il cuore dell'Arduino UNO e Nano) è il microcontrollore <strong>più popolare</strong>, 
+    <strong>meglio documentato</strong>, e <strong>più semplice</strong> per chi vuole iniziare a capire come funziona davvero l'informatica.
+  </p>
+
+  <p>
+    Qui non ti insegno a programmare solo in Assembly, ma a <strong>capire</strong> cosa succede nel profondo. 
+    Perché tutto – sia nei PC moderni, sia nei microcontrollori – gira attorno a registri fatti di bit, cioè 0 e 1.
+  </p>
+
+  <p>
+    Con il tool <a href="https://costycnc.it/avr1" target="_blank">costycnc.it/avr1</a> puoi compilare e caricare il codice direttamente dal browser: 
+    <strong>niente installazioni</strong>, solo risultati!
+  </p>
+
+  <p>
+    E ricorda: quello che impari qui, non lo sanno nemmeno molti ingegneri. 
+    <strong>Sii fiero di aver toccato un bit e acceso un LED scrivendo solo 1 in un registro!</strong>
+  </p>
+
+  <hr>
+
+  <h2>📜 Codice completo Assembly</h2>
+
+  <pre><code>.org 0
+    rjmp init
+.org 0x68
+init:
+    rcall init_uart
+read:
+    rcall read_byte
+    mov r16, r20
+    andi r16, 0b10111111
+    ;rcall send_char
+    rcall led
+    rjmp read
+
+; init_uart: inizializza UART a 9600 baud, 8N1
+init_uart:
+    ldi r16, 103
+    sts 0xC4, r16
+    ldi r16, 0
+    sts 0xC5, r16
+    ldi r16, 0b00000110
+    sts 0xC2, r16
+    ldi r16, 0b00011000
+    sts 0xC1, r16
+    ret
+
+; read_byte: legge byte dalla seriale se presente
+read_byte:
+    lds r18, 0xC0
+    sbrc r18, 7
+    rjmp read_done
+    ret
+read_done:
+    lds r20, 0xC6
+    ret
+
+; led: lampeggia usando delay via loop
+led:
+    sbi 4, 5
+    dec r19
+    brne led
+    dec r17
+    brne led
+    dec r16
+    brne led
+    sbi 3, 5
+    ret
+
+; send_char: invia carattere via UART
+send_char:
+    lds r18, 0xC0
+    sbrs r18, 5
+    rjmp send_char
+    sts 0xC6, r16
+    ret
+</code></pre>
+
+  <hr>
+
+  <h2>🔍 Spiegazione didattica riga per riga</h2>
+
+  <p><code>.org 0</code> → Indirizzo iniziale: qui parte il programma dopo il reset.</p>
+  <p><code>rjmp init</code> → Salta alla parte principale del programma.</p>
+  <p><code>.org 0x68</code> → Dove inizia davvero il codice dell'applicazione.</p>
+  <p><code>init:</code> → Etichetta di inizio.</p>
+  <p><code>rcall init_uart</code> → Inizializza la comunicazione seriale.</p>
+  <p><code>read:</code> → Etichetta per leggere dati in loop.</p>
+  <p><code>rcall read_byte</code> → Tenta di leggere un byte dalla seriale.</p>
+  <p><code>mov r16, r20</code> → Copia il dato ricevuto nel registro r16.</p>
+  <p><code>andi r16, 0b10111111</code> → Rimuove il bit 6 (solo per esempio).</p>
+  <p><code>rcall led</code> → Usa il valore per accendere il LED (delay dipendente dal carattere).</p>
+  <p><code>rjmp read</code> → Ripete il ciclo all'infinito.</p>
+
+  <h3>Subroutine: init_uart<a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf"> Datasheet </a> page 279</h3>
+  <ul>
+    <li><img src="foto/0xc5.jpg"></li>
+    <li><code>ldi r16, 103</code> → Calcolo per 9600 baud a 16 MHz.</li>
+    <li><code>sts 0xC4, r16</code> → Scrivi in UBRR0L.</li>
+    <li><code>sts 0xC5, r16</code> → Scrivi in UBRR0H (alto).</li>
+    <li><code>ldi r16, 0b00000110</code> → Formato dati: 8 bit, 1 stop, nessuna parità.</li>
+    <li><code>ldi r16, 0b00011000</code> → Abilita RX e TX.</li>
+    <li><code>sts 0xC1, r16</code> → Abilita RX e TX.</li>
+	
+  </ul>
+
+  <h3>Subroutine: read_byte  <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf"> Datasheet </a> page 279</h3>
+  <ul>
+    <li><img src="foto/udr0.jpg"></li>
+    <li><code>lds r18, 0xC0</code> → Leggi stato USART (UCSR0A).</li>
+    <li><code>sbrc r18, 7</code> → Se bit 7 = 1 (dato pronto), salta.</li>
+    <li><code>lds r20, 0xC6</code> → Legge il dato dalla porta seriale (UDR0).</li>
+  </ul>
+
+  <h3>Subroutine: led  <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf"> Datasheet </a> page 280</h3></h3>
+  <ul>
+    <li><img src="foto/portb.jpg"></li>
+    <li><code>sbi 4,5</code> → DDRB bit 5: imposta pin 13 come output.</li>
+    <li><code>dec r19/r17/r16</code> → Ritardi per simulare attesa visibile.</li>
+    <li><code>sbi 3,5</code> → PORTB bit 5: accende il LED.</li>
+  </ul>
+
+  <h3>Subroutine: send_char   <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf"> Datasheet </a> page 279</h3>
+  <ul>
+    <li><img src="foto/udr0.jpg"></li>
+    <li><code>sbrs r18, 5</code> → Attende che il buffer seriale sia pronto.</li>
+    <li><code>sts 0xC6, r16</code> → Invia r16 sulla seriale.</li>
+  </ul>
+
+  <hr>
+<h2>La vera programmazione: scrivere e leggere bit nei registri</h2>
+<p>
+  La comunicazione seriale nei microcontrollori (come gli ATmega) funziona scrivendo e leggendo dei bit in registri speciali, cioè piccole scatole di memoria con significati precisi.
+</p>
+<p>
+  Per esempio:
+</p>
+<ul>
+  <li><strong>Registri 0xC4 (UBRRL) e 0xC5 (UBRRH):</strong> qui scriviamo la velocità della comunicazione seriale, chiamata "baud rate". È come dire "parliamo a 9600 parole al secondo".</li>
+  <li><strong>Registro 0xC1 (UCSRC):</strong> serve per dire come sarà il formato dei dati. Con il comando <code>ldi r16, 0b00000110</code> diciamo: "8 bit per carattere, 1 bit di stop, senza parità".</li>
+  <li><strong>Registro 0xC0 (UCSRB):</strong> serve per attivare la ricezione e la trasmissione seriale. Con <code>ldi r16, 0b00011000</code> diciamo: "Accendi RX e TX", cioè abilitiamo il parlare e ascoltare via seriale.</li>
+  <li><strong>Registro 0xC6 (UDR):</strong> è come una buca delle lettere. Quando vogliamo inviare un carattere, lo scriviamo qui. Quando ne arriva uno, lo leggiamo da qui. Stesso registro, due funzioni.</li>
+  <li><strong>Registri 4 e 5 (PORTD):</strong> servono per impostare dei pin come uscite. Per esempio, possiamo dire che il pin 5 è in uscita e poi attivarlo (accendere un LED, ad esempio).</li>
+</ul>
+<p>
+  In pratica, tutta la magia avviene <strong>scrivendo o leggendo bit nei registri</strong>. Questa è la vera programmazione a basso livello, quella che succede "sotto il cofano". Molti programmatori moderni non la vedono mai, ma è qui che inizia tutto. Anche i microcontrollori più semplici fanno cose incredibili, solo leggendo e scrivendo nei registri.
+</p>
+
+
+  <hr>
+
+  <h2>🚀 Provalo subito</h2>
+  <p>Collega un Arduino Nano via USB, apri <a href="https://costycnc.it/avr1" target="_blank">costycnc.it/avr1</a>, incolla il codice e premi <strong>UPLOAD</strong>. Il LED lampeggerà con ogni carattere ricevuto!</p>
+
+  <p><strong>Vuoi vedere magia?</strong> Cambia <code>sbi 3,5</code> con <code>cbi 3,5</code>: il LED si spegnerà! Hai appena scritto e cancellato un bit in un vero registro hardware!</p>
+
+  <hr>
+  <p><em>Non stai solo programmando. Stai capendo il cuore dell'informatica.</em></p>
+
+</body>
+</html>
