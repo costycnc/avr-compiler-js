@@ -2,38 +2,38 @@
     rjmp RESET
 
 RESET:
-    ; Imposta il pin TRIG (PORTD2) come uscita
+    ; Set TRIG pin (PORTD2) as output
     sbi 0x0A, 2      ; DDRD |= (1 << 2)
 
 MAIN_LOOP:
-    ; Invia impulso TRIG alto per un breve periodo
+    ; Send a short HIGH pulse on TRIG pin
     sbi 0x0B, 2      ; PORTD |= (1 << 2)
 
-    ldi r20, 10      ; delay di ~10 cicli (~10us)
+    ldi r20, 10      ; delay ~10 cycles (~10us)
 DELAY_LOOP:
     dec r20
     brne DELAY_LOOP
 
-    cbi 0x0B, 2      ; PORTD &= ~(1 << 2), TRIG basso
+    cbi 0x0B, 2      ; PORTD &= ~(1 << 2), TRIG LOW
 
-    ; Aspetta che il segnale ECHO vada alto (PIND3)
+    ; Wait for ECHO to go HIGH (PIND3)
 WAIT_ECHO_HIGH:
-    sbic 0x09, 3     ; Se ECHO alto, salta la prossima
+    sbic 0x09, 3     ; skip next if ECHO is HIGH
     rjmp WAIT_ECHO_HIGH
 
-    clr r18          ; azzera contatore per durata HIGH
+    clr r18          ; clear counter for HIGH pulse duration
 
 WAIT_ECHO_LOW:
-    sbis 0x09, 3     ; Se ECHO basso, esci dal ciclo
-    rjmp END_MEASURE
+    sbis 0x09, 3     ; skip next if ECHO is LOW
+    rjmp END_MEASURE  ; if LOW, exit loop
 
-    inc r18          ; conta quanto tempo ECHO rimane alto
+    inc r18          ; count duration of HIGH pulse
     rjmp WAIT_ECHO_LOW
 
 END_MEASURE:
-    ; Controlla il bit 7 di r18 (valore >= 128)
-    sbi  0x0B, 4     ; accendi LED (PORTD4)
-    sbrs r18, 7      ; se bit7 = 1 salta la prossima
-    cbi  0x0B, 4     ; altrimenti spegni LED
+    ; Check bit 7 of r18 (>= 128)
+    sbi  0x0B, 4     ; turn ON LED (PORTD4)
+    sbrs r18, 7      ; skip next if bit7 is SET
+    cbi  0x0B, 4     ; else turn OFF LED
 
     rjmp MAIN_LOOP
