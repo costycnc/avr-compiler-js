@@ -1,39 +1,37 @@
 .org 0x0000
     rjmp RESET
 
+.org 0x60
 RESET:
-    ; Set TRIG pin (PORTD2) as output
-    sbi 0x0A, 2      ; DDRD |= (1 << 2)
+sbi 4,5
+sbi 4,0
+cbi 4,1
 
 MAIN_LOOP:
-    ; Send a short HIGH pulse on TRIG pin
-    sbi 0x0B, 2      ; PORTD |= (1 << 2)
-
-    ldi r20, 10      ; delay ~10 cycles (~10us)
-DELAY_LOOP:
+    sbi 5, 0    ;pulse triger
+    loop:
     dec r20
-    brne DELAY_LOOP
+    brne loop
+    cbi 5, 0   
 
-    cbi 0x0B, 2      ; PORTD &= ~(1 << 2), TRIG LOW
+ldi r28,25 ;wait echo long
+    loop1:
+    dec r27
+    brne loop1
+    dec r28
+    brne loop1
 
-    ; Wait for ECHO to go HIGH (PIND3)
-WAIT_ECHO_HIGH:
-    sbic 0x09, 3     ; skip next if ECHO is HIGH
-    rjmp WAIT_ECHO_HIGH
+    cbi 5,5 
+    sbic 3,1     ; check echo (led high/low)
+    sbi 5,5
 
-    clr r18          ; clear counter for HIGH pulse duration
+ldi r22,10 ;wait first to send new pulse
+sus:
+dec r20
+brne sus
+dec r21
+brne sus
+dec r22
+brne sus
 
-WAIT_ECHO_LOW:
-    sbis 0x09, 3     ; skip next if ECHO is LOW
-    rjmp END_MEASURE  ; if LOW, exit loop
-
-    inc r18          ; count duration of HIGH pulse
-    rjmp WAIT_ECHO_LOW
-
-END_MEASURE:
-    ; Check bit 7 of r18 (>= 128)
-    sbi  0x0B, 4     ; turn ON LED (PORTD4)
-    sbrs r18, 7      ; skip next if bit7 is SET
-    cbi  0x0B, 4     ; else turn OFF LED
-
-    rjmp MAIN_LOOP
+rjmp MAIN_LOOP
