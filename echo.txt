@@ -3,9 +3,9 @@
 
 .org 0x60
 RESET:
-sbi 4,5
-sbi 4,0
-cbi 4,1
+sbi 4,5;led onboard PB5 13
+sbi 4,0;triger PB0  8
+cbi 4,1;echo    PB1  9
 
 MAIN_LOOP:
     sbi 5, 0    ;pulse triger
