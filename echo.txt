@@ -3,35 +3,48 @@
 
 .org 0x60
 RESET:
-sbi 4,5;led onboard PB5 13
-sbi 4,0;triger PB0  8
-cbi 4,1;echo    PB1  9
+   rcall init
 
 MAIN_LOOP:
-    sbi 5, 0    ;pulse triger
-    loop:
-    dec r20
-    brne loop
-    cbi 5, 0   
+    rcall pulse
+    rcall check_echo
+    rcall wait
+rjmp MAIN_LOOP
 
-ldi r28,25 ;wait echo long
-    loop1:
+init:
+   sbi 4,5;led onboard PB5 13
+   sbi 4,0;triger PB0  8
+   cbi 4,1;echo    PB1  9
+ret
+
+pulse:
+    sbi 5, 0    ;pulse triger
+    puls:
+    dec r20
+    brne puls
+    cbi 5, 0 
+ret
+
+check_echo:
+    ldi r28,25 ;wait echo long
+    check:
     dec r27
-    brne loop1
+    brne check
     dec r28
-    brne loop1
+    brne check
 
     cbi 5,5 
     sbic 3,1     ; check echo (led high/low)
     sbi 5,5
+ret
 
-ldi r22,10 ;wait first to send new pulse
-sus:
-dec r20
-brne sus
-dec r21
-brne sus
-dec r22
-brne sus
-
-rjmp MAIN_LOOP
+wait:
+   ldi r22,10 ;wait first to send new pulse
+   sus:
+   dec r20
+   brne sus
+   dec r21
+   brne sus
+   dec r22
+   brne sus
+ret
