@@ -1,50 +1,54 @@
-.org 0x0000
-    rjmp RESET
+.org 0x0000        ; Set the program origin to address 0x0000 (reset vector)
+rjmp RESET         ; Jump to RESET label to start program execution
 
-.org 0x60
-RESET:
-   rcall init
+.org 0x60          ; Set another code origin at address 0x0060, where the main program starts
+RESET:             
+   rcall init      ; Call the initialization routine
 
 MAIN_LOOP:
-    rcall pulse
-    rcall check_echo
-    rcall wait
-rjmp MAIN_LOOP
+    rcall pulse     ; Send an ultrasonic pulse
+    rcall check_echo ; Wait and check for echo response
+    rcall wait       ; Wait before sending the next pulse
+    rjmp MAIN_LOOP   ; Repeat the main loop indefinitely
 
+; --- Initialization routine ---
 init:
-   sbi 4,5;led onboard PB5 13
-   sbi 4,0;triger PB0  8
-   cbi 4,1;echo    PB1  9
-ret
+   sbi 4,5         ; Set PB5 (pin 13) as output - onboard LED
+   sbi 4,0         ; Set bit 0 of I/O register 4 (PORTB0) - set trigger pin as output (pin 8)
+   cbi 4,1         ; Clear bit 1 of I/O register 4 (PORTB1) - ensure echo pin is low (pin 9)
+ret                ; Return from init
 
+; --- Pulse routine: send ultrasonic trigger pulse ---
 pulse:
-    sbi 5, 0    ;pulse triger
-    puls:
-    dec r20
-    brne puls
-    cbi 5, 0 
-ret
+    sbi 5, 0       ; Set bit 0 of I/O register 5 (PORTB0) - start trigger pulse
+puls:
+    dec r20        ; Decrement register r20 (delay loop)
+    brne puls      ; If r20 is not zero, loop again for delay
+    cbi 5, 0       ; Clear bit 0 of I/O register 5 - end trigger pulse
+ret                ; Return from pulse
 
+; --- Check echo signal and control LED ---
 check_echo:
-    ldi r28,25 ;wait echo long
-    check:
-    dec r27
-    brne check
-    dec r28
-    brne check
+    ldi r28,25     ; Load 25 into register r28 - outer delay loop counter
+check:
+    dec r27        ; Decrement inner loop counter r27
+    brne check     ; Repeat inner loop if r27 not zero
+    dec r28        ; Decrement outer loop counter r28
+    brne check     ; Repeat outer loop if r28 not zero
 
-    cbi 5,5 
-    sbic 3,1     ; check echo (led high/low)
-    sbi 5,5
-ret
+    cbi 5,5        ; Clear PORTB5 - turn off LED initially
+    sbic 3,1       ; Skip next instruction if bit 1 of PINB (echo pin) is clear
+    sbi 5,5        ; If echo pin is high, set PORTB5 - turn on LED
+ret                ; Return from check_echo
 
+; --- Wait routine before sending the next pulse ---
 wait:
-   ldi r22,10 ;wait first to send new pulse
-   sus:
-   dec r20
-   brne sus
-   dec r21
-   brne sus
-   dec r22
-   brne sus
-ret
+   ldi r22,10      ; Load 10 into r22 - outermost loop counter
+sus:
+   dec r20         ; Decrement innermost loop counter
+   brne sus        ; Loop if r20 not zero
+   dec r21         ; Decrement middle loop counter
+   brne sus        ; Loop if r21 not zero
+   dec r22         ; Decrement outermost loop counter
+   brne sus        ; Loop if r22 not zero
+ret                ; Return from wait
