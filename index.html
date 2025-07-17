@@ -245,7 +245,9 @@ border-radius: 5px;
 
 </div>
 
+<!--                         aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa    -->
 
+	
 <div class="w3-container w3-padding-32">
   <div class="w3-row w3-center w3-card w3-round-large">
 
@@ -253,74 +255,72 @@ border-radius: 5px;
       <img src="arduino-nano-pinout.jpg" alt="Immagine" class="w3-image w3-round-large" style="max-width:100%">
     </div>
 
-    <div class="w3-col s12 m6 l6 ">
-<!-- Sezione: Funzionamento microcontrollore -->
+<div class="w3-col s12 m6 l6 ">
+<!-- Section: Microcontroller Operation -->
 <div class="w3-container w3-padding w3-light-grey">
-  <h3>IDE Arduino vs costycnc.it/avr1</h3>
+  <h3>Arduino IDE vs costycnc.it/avr1</h3>
   <div class="w3-responsive">
     <table class="w3-table w3-bordered w3-striped w3-small">
       <thead>
         <tr class="w3-light-grey">
-          <th>Caratteristica</th>
-          <th>IDE Arduino</th>
+          <th>Feature</th>
+          <th>Arduino IDE</th>
           <th>costycnc.it/avr1</th>
         </tr>
       </thead>
       <tr>
-        <td>Installazione</td>
-        <td>Si (IDE + driver)</td>
-        <td>No, funziona direttamente dal browser</td>
+        <td>Installation</td>
+        <td>Yes (IDE + drivers)</td>
+        <td>No, works directly in the browser</td>
       </tr>
-        <td>Configurazione</td>
-        <td>Scegli scheda, porta, chip</td>
-        <td>Niente da configurare: plug and go</td>
+        <td>Configuration</td>
+        <td>Select board, port, chip</td>
+        <td>Nothing to configure: plug and go</td>
       </tr>
       <tr>
-        <td>Primo codice LED</td>
+        <td>First LED code</td>
         <td><code>setup(), loop(), digitalWrite()</code></td>
-        <td><code>sbi 0x4,5 -> il LED si accende (PB5)</code></td>
+        <td><code>sbi 0x4,5 -> the LED turns on (PB5)</code></td>
       </tr>
       <tr>
-        <td>Librerie</td>
-        <td>Tante, ma spesso nascondono tutto</td>
-        <td>Nessuna: vedi i registri reali</td>
+        <td>Libraries</td>
+        <td>Many, but often hide everything</td>
+        <td>None: you see the actual registers</td>
       </tr>
       <tr>
-        <td>Progetti complessi</td>
-        <td>Ideale, con molte librerie</td>
-        <td>Limitato all'apprendimento base</td>
+        <td>Complex projects</td>
+        <td>Ideal, with many libraries</td>
+        <td>Limited to basic learning</td>
       </tr>
       <tr>
-        <td>Curva di apprendimento</td>
-        <td>Piu "soft", ma meno trasparente</td>
-        <td>Piu diretta: impari come funziona davvero</td>
+        <td>Learning curve</td>
+        <td>Softer, but less transparent</td>
+        <td>More direct: you learn how it really works</td>
       </tr>
     </table>
   </div>
 </div>
 
-
-
-
-    </div>
+</div>
 <p>
-    Benvenuto su costycnc.it/avr1, una piattaforma pensata per farti capire che e possibile programmare i microcontrollori anche senza librerie, senza IDE - niente magia.
+    Welcome to costycnc.it/avr1 — a platform designed to show you that it's possible to program microcontrollers without libraries, without an IDE — no magic involved.
 </p>
 <p>
-    Con un click sul pulsante "Assemble", il sito trasforma automaticamente il tuo codice Assembly in un file HEX, pronto per essere caricato su un microcontrollore.
+    With just one click on the "Assemble" button, the site automatically turns your Assembly code into a HEX file, ready to upload to a microcontroller.
 
-Non servono compilatori installati. Tutto avviene direttamente nel browser!
+No compilers needed. Everything happens right in your browser!
 </p>
 <p>
-    Usa un semplice cavo USB per collegare la tua scheda (es. Arduino UNO) al computer.Clicca su uno dei pulsanti che rappresentano il microcontroller che stai usando(uno,nano,ecc).
-    Si aprira una finestra (Web Serial API) dove potrai selezionare la porta USB a cui e collegato il tuo Arduino.Basta cliccare su "Connetti" ... ed e fatta!
+    Use a simple USB cable to connect your board (e.g. Arduino UNO) to your computer. Click one of the buttons representing the microcontroller you're using (UNO, Nano, etc.).
+    A window (Web Serial API) will open where you can select the USB port connected to your Arduino. Just click "Connect" ... and you're done!
 </p>
 <p>
-    Subito dopo il caricamento, il LED integrato sul pin 13 (PB5) si accendera. Questo e il risultato del tuo codice puro in Assembly, senza nessuna libreria, IDE o software esterno.
+    Right after uploading, the onboard LED on pin 13 (PB5) will turn on. This is the result of your pure Assembly code — no libraries, no IDE, no external software.
     <a href="https://www.youtube.com/shorts/ZcSXHUBY7dc">VIDEO</a>
 </p>
-  </div>
 </div>
+</div>
+
 
 <div id="init"></div>
 <hr>
