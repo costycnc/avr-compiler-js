@@ -360,7 +360,8 @@ No compilers needed. Everything happens right in your browser!
 
   <div class="w3-container w3-half w3-blue">
 
-  <p><button id="btn-dasm">DisAssemble</button>  <input type="file" onchange="loadhex(this.files)"></p>
+  <p><button id="btn-dasm">DisAssemble</button>  <input type="file" onchange="loadhex(this.files)"><button id="downloadHexBtn">💾 Scarica HEX</button>
+</p>
 
     <textarea id="out-hex" style="width:100%;height:500px"></textarea>  
 
@@ -1524,6 +1525,29 @@ thumbnails.forEach(thumbnail => {
 });
 
 </script>
+
+<script>
+document.getElementById("downloadHexBtn").addEventListener("click", function () {
+  // Prende il contenuto della textarea
+  const hexText = document.getElementById("out-hex").value;
+
+  // Crea un blob (file virtuale)
+  const blob = new Blob([hexText], { type: "text/plain" });
+
+  // Crea un URL temporaneo
+  const url = URL.createObjectURL(blob);
+
+  // Crea un link finto per forzare il download
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "output.hex";
+  a.click();
+
+  // Libera la memoria usata dal blob
+  URL.revokeObjectURL(url);
+});
+</script>
+
 
 
 
