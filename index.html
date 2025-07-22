@@ -1525,25 +1525,15 @@ thumbnails.forEach(thumbnail => {
 });
 
 </script>
-
 <script>
 document.getElementById("downloadHexBtn").addEventListener("click", function () {
-  // Prende il contenuto della textarea
   const hexText = document.getElementById("out-hex").value;
-
-  // Crea un blob (file virtuale)
-  const blob = new Blob([hexText], { type: "text/plain" });
-
-  // Crea un URL temporaneo
+  const blob = new Blob([hexText], { type: "application/octet-stream" });
   const url = URL.createObjectURL(blob);
-
-  // Crea un link finto per forzare il download
   const a = document.createElement("a");
   a.href = url;
   a.download = "output.hex";
   a.click();
-
-  // Libera la memoria usata dal blob
   URL.revokeObjectURL(url);
 });
 </script>
