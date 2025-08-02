@@ -1,0 +1,20 @@
+    .org 0
+    rjmp init
+     .org 0x68
+    init:
+    ldi r16,255
+    out 4,r16
+    sus:
+    out 5,r16
+    inc r16
+    sbic r16,4
+    ldi r16,1
+    ldi r19,10
+    loop:
+    dec r17
+    brne loop
+    dec r18
+    brne loop
+    dec r19
+    brne loop
+    rjmp sus
