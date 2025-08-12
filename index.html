@@ -1381,6 +1381,81 @@ fetch("blink.txt")
 
 </script>
 
+<hr>
+	<!--        12.08.2025     -->
+	<div class="w3-container w3-padding-32">
+  <div class="w3-row w3-center w3-card w3-round-large">
+
+    <div class="w3-col s12 m6 l6">
+      <img src="arduino-nano-pinout.jpg" alt="Immagine" class="w3-image w3-round-large" style="max-width:100%">
+    </div>
+
+<div class="w3-col s12 m6 l6 ">
+<!-- Section: Microcontroller Operation -->
+<div class="w3-container w3-padding w3-light-grey">
+  <h3>Arduino IDE vs costycnc.it/avr1</h3>
+  <div class="w3-responsive">
+    <table class="w3-table w3-bordered w3-striped w3-small">
+      <thead>
+        <tr class="w3-light-grey">
+          <th>Feature</th>
+          <th>Arduino IDE</th>
+          <th>costycnc.it/avr1</th>
+        </tr>
+      </thead>
+      <tr>
+        <td>Installation</td>
+        <td>Yes (IDE + drivers)</td>
+        <td>No, works directly in the browser</td>
+      </tr>
+        <td>Configuration</td>
+        <td>Select board, port, chip</td>
+        <td>Nothing to configure: plug and go</td>
+      </tr>
+      <tr>
+        <td>First LED code</td>
+        <td><code>setup(), loop(), digitalWrite()</code></td>
+        <td><code>sbi 0x4,5 -> the LED turns on (PB5)</code></td>
+      </tr>
+      <tr>
+        <td>Libraries</td>
+        <td>Many, but often hide everything</td>
+        <td>None: you see the actual registers</td>
+      </tr>
+      <tr>
+        <td>Complex projects</td>
+        <td>Ideal, with many libraries</td>
+        <td>Limited to basic learning</td>
+      </tr>
+      <tr>
+        <td>Learning curve</td>
+        <td>Softer, but less transparent</td>
+        <td>More direct: you learn how it really works</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+</div>
+<p>
+    Welcome to costycnc.it/avr1 — a platform designed to show you that it's possible to program microcontrollers without libraries, without an IDE — no magic involved.
+</p>
+<p>
+    With just one click on the "Assemble" button, the site automatically turns your Assembly code into a HEX file, ready to upload to a microcontroller.
+
+No compilers needed. Everything happens right in your browser!
+</p>
+<p>
+    Use a simple USB cable to connect your board (e.g. Arduino UNO) to your computer. Click one of the buttons representing the microcontroller you're using (UNO, Nano, etc.).
+    A window (Web Serial API) will open where you can select the USB port connected to your Arduino. Just click "Connect" ... and you're done!
+</p>
+<p>
+    Right after uploading, the onboard LED on pin 13 (PB5) will turn on. This is the result of your pure Assembly code — no libraries, no IDE, no external software.
+    <a href="https://www.youtube.com/shorts/ZcSXHUBY7dc">VIDEO</a>
+</p>
+</div>
+</div>
+
 <!--                      17.01.25                    -->
 
 <hr>
@@ -1540,6 +1615,7 @@ check_throttle:
 </body>
 
 </html>
+
 
 
 
