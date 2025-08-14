@@ -1,9 +1,7 @@
 .org 0
 rjmp init
-
 .org 0x20
 rjmp int
-
 .org 0x60
 init:
 sbi 4,5
