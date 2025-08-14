@@ -325,7 +325,7 @@ border-radius: 5px;
    <p><a href="#init"><button onclick='start("pwm/pwm-no-int");'>Assemble</button></a>&nbsp;&nbsp; 
 	   <a href="https://www.youtube.com/shorts/VHd8X3kTcAE">watch video</a> 
 	   &nbsp;&nbsp;<a href="https://www.instructables.com/Atduino-Timer0-Interrupt-Bare-Metal-Avr-Assembly/">Instructables</a></p>
-    <textarea  id="pwm/pwm-no-int" style="left:0%;width:100%;height:300px">
+    <textarea  id="pwmpwm-no-int" style="left:0%;width:100%;height:300px">
     </textarea>
 
   </div>
@@ -334,7 +334,7 @@ border-radius: 5px;
         fetch("pwm/pwm-no-int.txt")
           .then(response => response.text())
           .then(text => {
-            document.getElementById("pwm/pwm-no-int").value = text;
+            document.getElementById("pwmpwm-no-int").value = text;
           });
       });
     </script>
@@ -1638,6 +1638,7 @@ check_throttle:
 </body>
 
 </html>
+
 
 
 
