@@ -10,7 +10,7 @@ sbi 4,5
 ldi r16,0b101
 out 0x25,r16
 ldi r16,1
-sts 0x6e
+sts 0x6e,r16
 sei
 
 loop:
