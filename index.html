@@ -349,7 +349,7 @@ border-radius: 5px;
   </div>
     <script>
       window.addEventListener("load", () => {
-        fetch("pwm/timer0-int.txt")
+        fetch("pwm/pwm-no-int.txt")
           .then(response => response.text())
           .then(text => {
             document.getElementById("pwmtimer0-int").value = text;
@@ -1658,6 +1658,7 @@ check_throttle:
 </body>
 
 </html>
+
 
 
 
