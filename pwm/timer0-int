@@ -14,7 +14,7 @@ sts 0x6e,r16
 sei
 
 loop:
-RJMP loop
+rjmp loop
 
 int:
 sbi 3,5
