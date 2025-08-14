@@ -1,0 +1,21 @@
+.org 0
+rjmp init
+
+.org 0x20
+rjmp int
+
+.org 0x60
+init:
+sbi 4,5
+ldi r16,0b101
+out 0x25,r16
+ldi r16,1
+sts 0x6e
+sei
+
+loop:
+RJMP loop
+
+int:
+sbi 3,5
+reti
