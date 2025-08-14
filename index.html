@@ -344,18 +344,31 @@ border-radius: 5px;
 	   <a href="https://www.youtube.com/shorts/yWaeS00bWNQ">Video</a> 
        &nbsp;&nbsp;<a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf">Datasheet</a></p>
     <textarea  id="pwmtimer0-int" style="left:0%;width:100%;height:300px">
+		.org 0
+rjmp init
+
+.org 0x20
+rjmp int
+
+.org 0x60
+init:
+sbi 4,5
+ldi r16,0b101
+out 0x25,r16
+ldi r16,1
+sts 0x6e,r16
+sei
+
+loop:
+rjmp loop
+
+int:
+sbi 3,5
+reti
     </textarea>
 
   </div>
-    <script>
-      window.addEventListener("load", () => {
-        fetch("pwm/timer0-int.txt")
-          .then(response => response.text())
-          .then(text => {
-            document.getElementById("pwmtimer0-int").value = text;
-          });
-      });
-    </script>
+
 
 
 	
@@ -1658,6 +1671,7 @@ check_throttle:
 </body>
 
 </html>
+
 
 
 
