@@ -1,0 +1,15 @@
+.org 0
+rjmp init
+
+.org 0x60
+init:
+sbi 0x0A,6
+ldi r16,0b10000011
+out 0x24,r16
+ldi r16,0b00000011
+out 0x25,r16
+ldi r16,50
+out 0x27,r16
+
+loop:
+rjmp loop
