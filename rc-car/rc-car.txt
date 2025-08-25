@@ -1,0 +1,75 @@
+.org 0
+rjmp init
+
+.org 0x20
+rjmp int
+
+.org 0x60
+init:
+sbi 4,5
+ldi r16,0b1
+out 0x25,r16
+ldi r16,1
+sts 0x6e,r16
+sei
+
+loop:
+ldi r18,22
+              ;4 End Code
+              ;10 Forward 
+              ;16 Forward & Turbo 
+              ;22 Turbo 
+              ;28 Turbo & Forward 
+              ;34 Turbo & Forward & Right 
+              ;40 Backward 
+              ;46 Backward & Right 
+              ;52 Backward & Left 
+              ;58 Left 
+              ;64 Right 
+
+
+rcall go
+rjmp loop
+
+go:
+ldi r17,4
+repeatw2:
+rcall w2
+dec r17
+brne repeatw2
+repeatw1:
+rcall w1
+dec r18
+brne repeatw1
+ret
+
+w1:
+sbi 5,5
+ldi r16,31
+loop1:
+tst r16
+brne loop1
+cbi 5,5
+ldi r16,31
+loop2:
+tst r16
+brne loop2
+ret
+
+w2:
+sbi 5,5
+ldi r16,93
+loop3:
+tst r16
+brne loop3
+cbi 5,5
+ldi r16,31
+loop4:
+tst r16
+brne loop4
+ret
+
+int:
+dec r16
+reti
+    
