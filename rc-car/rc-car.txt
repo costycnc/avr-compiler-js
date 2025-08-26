@@ -6,15 +6,15 @@ rjmp int
 
 .org 0x60
 init:
-sbi 4,5
-ldi r16,0b1
+sbi 4,5       ;pin D13 as output
+ldi r16,1  ; start Timer0
 out 0x25,r16
-ldi r16,1
+ldi r16,1     ; activate Tcnt0 overflow interrupt
 sts 0x6e,r16
 sei
 
 loop:
-ldi r18,22
+ldi r18,10 ;forward
               ;4 End Code
               ;10 Forward 
               ;16 Forward & Turbo 
@@ -32,37 +32,39 @@ rcall go
 rjmp loop
 
 go:
-ldi r17,4
+ldi r17,4 ; 4 long pulse
 repeatw2:
 rcall w2
 dec r17
 brne repeatw2
 repeatw1:
 rcall w1
-dec r18
+dec r18 ; x short pulse
 brne repeatw1
 ret
 
-w1:
-sbi 5,5
-ldi r16,31
+w1: 
+;short pulse
+sbi 5,5  
+ldi r16,31 ;high pulse 0.5ms
 loop1:
 tst r16
 brne loop1
 cbi 5,5
-ldi r16,31
+ldi r16,31 ;low pulse 0.5ms
 loop2:
 tst r16
 brne loop2
 ret
 
 w2:
+;long pulse
 sbi 5,5
-ldi r16,93
+ldi r16,93 ;high long pulse 1.5ms
 loop3:
 tst r16
 brne loop3
-cbi 5,5
+cbi 5,5    ;low short pulse 0.5ms
 ldi r16,31
 loop4:
 tst r16
@@ -70,6 +72,8 @@ brne loop4
 ret
 
 int:
+;overflow interrupt
 dec r16
 reti
+
     
