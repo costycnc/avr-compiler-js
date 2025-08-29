@@ -1,6 +1,6 @@
 ; ***** BLINK **************
 .org 0
-JMP init
+rjmp init
 .org 0x60
 init:
 sbi 4,5
@@ -12,4 +12,5 @@ dec r18
 brne init
 ldi r18,50
 sbi 3,5
+
 rjmp init
