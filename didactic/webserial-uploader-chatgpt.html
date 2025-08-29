@@ -194,7 +194,7 @@
           const wordAddress=offset>>>1;
           await stkLoadAddress(wordAddress);
           await stkProgPage(chunk);
-          log(`Wrote page @ ${hex(offset,4)} (${chunk.length}B)`);
+          log(`Wrote page @ ${hex(offset,4)} $(chunk)`);
           await sleep(5);
         }
 
@@ -210,3 +210,4 @@
   </script>
 </body>
 </html>
+
