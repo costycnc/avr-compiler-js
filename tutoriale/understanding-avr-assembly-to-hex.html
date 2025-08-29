@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AVR Assembly to HEX Tutorial for ATmega328 | Learn Microcontroller Programming</title>
+  <meta name="description" content="Learn how AVR assembly code is compiled into HEX for ATmega328. Step-by-step guide with little-endian encoding, HEX modification, and checksum explanation for students of embedded systems and microcontrollers.">
+  <meta name="keywords" content="AVR, ATmega328, assembly, HEX, microcontroller, embedded systems, programming tutorial, little endian, checksum, students, learning">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: auto; }
+    h1, h2 { color: #2c3e50; }
+    pre, code { background: #f4f4f4; padding: 10px; border-radius: 6px; display: block; overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+    table, th, td { border: 1px solid #ccc; }
+    th, td { padding: 8px; text-align: center; }
+    th { background: #2c3e50; color: #fff; }
+    .highlight { background: #ffeaa7; font-weight: bold; }
+    a { color: #0984e3; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>AVR Assembly to HEX Tutorial for ATmega328</h1>
+
+  <p>Welcome! This tutorial is designed for students and enthusiasts who want to deeply understand how <strong>AVR assembly code</strong> is compiled into <strong>HEX</strong> for the <strong>ATmega328 microcontroller</strong>. We'll go step by step, explaining little-endian encoding, HEX modification, and checksums. You can compile the code online using <a href="https://costycnc.github.io/avr-compiler-js/" target="_blank">AVR Compiler JS</a>.</p>
+
+  <h2>1. Assembly Source</h2>
+  <pre><code>.org 0
+    rjmp init
+.org 0x60
+init:
+    sbi 4,5
+    inc r16
+    brne init
+    inc r17
+    brne init
+    dec r18
+    brne init
+    ldi r18,0x10
+    sbi 3,5
+    rjmp init</code></pre>
+
+  <h2>2. Full HEX File Generated</h2>
+  <pre><code>:020000020000FC
+:100000000C946000000000000000000000000000F0
+:1000100000000000000000000000000000000000E0
+:1000200000000000000000000000000000000000D0
+:1000300000000000000000000000000000000000C0
+:1000400000000000000000000000000000000000B0
+:1000500000000000000000000000000000000000A0
+:100060009A9A0F921F922F933F934F931F921F9281
+:1000700025970395E9F71395D9F72A95C9F722E30D
+:100080001D9A00E010E08A9A0C9400600C9400600E
+:00000001FF</code></pre>
+
+  <h2>3. Example Instruction Encoding</h2>
+  <p>Focus on this instruction:</p>
+  <pre><code>ldi r18, 0x10</code></pre>
+
+  <table>
+    <tr>
+      <th>ASM</th>
+      <th>Opcode Format</th>
+      <th>Binary</th>
+      <th>HEX</th>
+      <th>Stored in Flash (Little Endian)</th>
+    </tr>
+    <tr>
+      <td>ldi r18,0x10</td>
+      <td>1110 KKKK dddd KKKK</td>
+      <td>1110 0010 0010 0000</td>
+      <td>E2 10</td>
+      <td class="highlight">10 E2</td>
+    </tr>
+  </table>
+
+  <h2>4. Where to Find It in HEX</h2>
+  <p>In the Intel HEX file, the instruction appears here:</p>
+  <pre><code>:100080001D9A00E0<strong class="highlight">10E2</strong>8A9A0C9400600C9400600E</code></pre>
+  <p>The bytes <span class="highlight">10 E2</span> correspond to <code>ldi r18,0x10</code> in little-endian format.</p>
+
+  <h2>5. Modifying the Value</h2>
+  <p>To change <code>ldi r18,0x10</code> into <code>ldi r18,0x20</code>:</p>
+  <table>
+    <tr>
+      <th>ASM</th>
+      <th>Opcode</th>
+      <th>Little Endian</th>
+      <th>HEX Line</th>
+    </tr>
+    <tr>
+      <td>ldi r18,0x20</td>
+      <td>E2 20</td>
+      <td class="highlight">20 E2</td>
+      <td>:100080001D9A00E0<strong class="highlight">20E2</strong>8A9A0C9400600C940060FE</td>
+    </tr>
+  </table>
+
+  <h2>6. Importance of Checksum</h2>
+  <p>Every line in an Intel HEX file ends with a checksum byte, ensuring data integrity. The microcontroller uses it to detect corrupted data. Checksum calculation:</p>
+  <pre><code>Checksum = (sum of all bytes in the record, excluding ':' and checksum) & 0xFF
+Then take 2's complement (invert bits + 1)</code></pre>
+  <p>Online tools like <a href="https://costycnc.github.io/avr-compiler-js/" target="_blank">AVR Compiler JS</a> compute checksums automatically when generating HEX.</p>
+
+  <h2>7. Why This Matters</h2>
+  <p>Understanding ASM → HEX → little-endian → checksum gives students a strong foundation in embedded systems. It shows how a microcontroller executes instructions and teaches universal principles of data integrity applicable in modern software and hardware.</p>
+
+  <hr>
+  <p><em>Prepared as an educational example for ATmega328 programming. Compile this code online with <a href="https://costycnc.github.io/avr-compiler-js/" target="_blank">AVR Compiler JS</a>.</em></p>
+</body>
+</html>
