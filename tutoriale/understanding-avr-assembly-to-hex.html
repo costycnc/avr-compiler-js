@@ -80,11 +80,12 @@ init:
 
   <h2>4. Where to Find It in HEX</h2>
   <p>In the Intel HEX file, the instruction appears here:</p>
-  <pre><code>:100080001D9A00E0<strong class="highlight">10E2</strong>8A9A0C9400600C9400600E</code></pre>
-  <p>The bytes <span class="highlight">10 E2</span> correspond to <code>ldi r18,0x10</code> in little-endian format.</p>
+  <pre><code>:1000C000259A0395E9F71395D9F72A95C9F7<strong class="highlight">20E1</strong>01</code></pre>
+ 
+  <p>The bytes <span class="highlight">20 E1</span> correspond to <code>ldi r18,0x10</code> in little-endian format.</p>
 
   <h2>5. Modifying the Value</h2>
-  <p>To change <code>ldi r18,0x10</code> into <code>ldi r18,0x20</code>:</p>
+  <p>To change <code>ldi r18,0x10</code> into <code>ldi r18,0xf0</code>:</p>
   <table>
     <tr>
       <th>ASM</th>
@@ -93,10 +94,10 @@ init:
       <th>HEX Line</th>
     </tr>
     <tr>
-      <td>ldi r18,0x20</td>
-      <td>E2 20</td>
-      <td class="highlight">20 E2</td>
-      <td>:100080001D9A00E0<strong class="highlight">20E2</strong>8A9A0C9400600C940060FE</td>
+      <td>ldi r18,0xf0</td>
+      <td>EF 20</td>
+      <td class="highlight">20 EF</td>
+      <td>:1000C000259A0395E9F71395D9F72A95C9F7<strong class="highlight">20EF</strong>F3</td>
     </tr>
   </table>
 
@@ -113,5 +114,6 @@ Then take 2's complement (invert bits + 1)</code></pre>
   <p><em>Prepared as an educational example for ATmega328 programming. Compile this code online with <a href="https://costycnc.github.io/avr-compiler-js/" target="_blank">AVR Compiler JS</a>.</em></p>
 </body>
 </html>
+
 
 
