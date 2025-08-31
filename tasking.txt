@@ -1,0 +1,55 @@
+; ======================================================
+;   COOPERATIVE TASK EXAMPLE ON ATMEGA328
+;   - LED blinks using two alternating "tasks"
+;   - Timer0 overflow provides the time base
+;   - Tasks cooperate: each does a small part, then yields
+; ======================================================
+
+.org 0x00
+rjmp init             ; Reset → jump to initialization routine
+
+.org 0x20
+rjmp int              ; Timer0 overflow interrupt vector
+
+.org 0x60
+init:
+    sbi 4,5           ; Set PB5 (Arduino D13) as output for LED
+    ldi r16,2         
+    out 0x25,r16      ; Start Timer0
+    ldi r16,1         
+    sts 0x6e,r16      ; Enable Timer0 overflow interrupt
+    sei               ; Enable global interrupts
+
+; --- TASK0: LED ON ---
+task0:
+    cpi r16,1         ; Check if it's task0's turn
+    brne task1        ; If not, jump to task1
+    cpi r18,10        ; Wait until timer counter reaches 10
+    brcs task1        ; If less than 10, skip this task for now
+    sbi 5,5           ; Turn LED ON
+    clr r18           ; Reset timer counter for next task
+    ldi r16,2         ; Switch to task1 (cooperative multitasking means task voluntarily yields)
+
+; --- TASK1: LED OFF ---
+task1:
+    cpi r16,2         ; Check if it's task1's turn
+    brne task0        ; If not, jump to task0
+    cpi r18,10        ; Wait until timer counter reaches 10
+    brcs task0        ; If less than 10, skip this task for now
+    cbi 5,5           ; Turn LED OFF
+    clr r18           ; Reset timer counter for next task
+    ldi r16,1         ; Switch back to task0
+    rjmp task0        ; Repeat loop continuously
+
+; --- TIMER INTERRUPT: increments counters ---
+int:
+    inc r17           ; Increment fast counter on every timer overflow
+    brne int_end      ; If no overflow, skip next
+    inc r18           ; Increment slow counter used for task timing
+int_end:
+    reti               ; Return from interrupt
+
+; Cooperative multitasking explanation:
+; - Each task runs only a small portion and then yields control to the next task.
+; - The CPU is shared among tasks without preemption, making it simpler and predictable.
+; - Important for microcontrollers: avoids complex OS, ensures tasks do not block each other, and makes timing predictable.
