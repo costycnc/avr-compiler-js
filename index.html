@@ -427,6 +427,22 @@ reti
           });
       });
     </script>
+
+	  <div class="w3-container w3-third w3-border">
+   <p><a href="#init"><button onclick='start("tasking");'>Assemble colaborative tasking</button></a>(arduino nano) <a href="https://www.youtube.com/shorts/Xoj7h0j_57g">watch video</a> </p>
+    <textarea  id="tasking" style="left:0%;width:100%;height:300px">
+    </textarea>
+
+  </div>
+    <script>
+      window.addEventListener("load", () => {
+        fetch("tasking.txt")
+          .then(response => response.text())
+          .then(text => {
+            document.getElementById("tasking").value = text;
+          });
+      });
+    </script>
 	
 
   <div class="w3-container w3-third w3-border">
@@ -1707,6 +1723,7 @@ check_throttle:
 </body>
 
 </html>
+
 
 
 
