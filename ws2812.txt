@@ -19,12 +19,21 @@ rcall ld_loop;wait
 dec r17 ;repeat
 brne sus
 
-rcall ld_loop ; reset >50us (50.000 nanoseconds)
+rcall wait_50us ; reset >50us (50.000 nanoseconds)
 rjmp loop
 
 ld_loop:
 dec r16
 brne ld_loop
+ret
+
+wait_50us:
+ldi r18,5
+wt:
+dec r16
+brne wait_50us
+dec r18
+brne wait_50us
 ret
 
 
