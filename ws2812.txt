@@ -8,16 +8,18 @@ loop:
 
 ldi r17,240 ; 24bit/led X 10led=240 bit
 sus:
-sbi 5,0
-ldi r16,18
-rcall ld_loop
-cbi 5,0
-ldi r16,13
-rcall ld_loop
-dec r17
+; bit  high routine
+; time high+low normal-1250 +/- 250 nanoseconds (1050-1450 nanoseconds)
+sbi 5,0  ; pulse high
+ldi r16,18 ; time to wait pulse on high,for 1 (18)- min-500  max-850  normal-700 nanoseconds
+rcall ld_loop ;wait
+cbi 5,0 ;pulse low
+ldi r16,13 ; time to wait pulse on low,for 1 (13)- min-450  max-1000  normal-600 nanoseconds
+rcall ld_loop;wait
+dec r17 ;repeat
 brne sus
 
-rcall wait_50us
+rcall wait_50us ; reset >50us (50.000 nanoseconds)
 rjmp loop
 
 ld_loop:
