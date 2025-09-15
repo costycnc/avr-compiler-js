@@ -1,39 +1,44 @@
-    .org 0
-    rjmp init
-     .org 0x68
-    init:
-    sbi 4,0
+; first LED on ws2816 high white
+
+.org 0
+    rjmp init        ; reset vector -> jump to program start
+
+.org 0x68           ; (arbitrary start address depending on flash map)
+init:
+    sbi 4,0          ; set bit in I/O register: DDRB0 = 1 (set PB0 as output)
+
 loop:
 
-
-ldi r17,240 ; 24bit/led X 10led=240 bit
+    ldi r17,24       ; number of bits to send = 24 (1 LED x 24 bits)
 sus:
-; bit  high routine
-; time high+low normal-1250 +/- 250 nanoseconds (1050-1450 nanoseconds)
-sbi 5,0  ; pulse high
-ldi r16,18 ; time to wait pulse on high,for 1 (18)- min-500  max-850  normal-700 nanoseconds
-rcall ld_loop ;wait
-cbi 5,0 ;pulse low
-ldi r16,13 ; time to wait pulse on low,for 1 (13)- min-450  max-1000  normal-600 nanoseconds
-rcall ld_loop;wait
-dec r17 ;repeat
-brne sus
+    ; --- BIT "1" routine ---
+    ; total time per bit = 1.25 µs ± 250 ns (valid range 1.05 – 1.45 µs)
 
-rcall wait_50us ; reset >50us (50.000 nanoseconds)
-rjmp loop
+    sbi 5,0          ; set pin high = start of bit
+    ldi r16,14       ; delay for HIGH period (~700 ns, range 500–850 ns)
+    rcall ld_loop    ; wait loop for HIGH
 
+    cbi 5,0          ; clear pin low = end of HIGH
+    ldi r16,12       ; delay for LOW period (~600 ns, range 450–1000 ns)
+    rcall ld_loop    ; wait loop for LOW
+
+    dec r17          ; decrement bit counter
+    brne sus         ; if not zero, send next bit
+
+    ; --- Reset frame ---
+    ; needed to latch data into WS2816 LEDs
+    rcall ld_loop    ; here used as reset delay (>50 µs)
+    rjmp loop        ; repeat the process forever
+
+; ----------------------------------------------------
+; Subroutine: ld_loop
+; Provides a simple delay
+; Each iteration ≈ 50 ns (at 16 MHz)
+; Input: r16 = loop count
+; ----------------------------------------------------
 ld_loop:
-dec r16
-brne ld_loop
-ret
-
-wait_50us:
-ldi r18,5
-wt:
-dec r16
-brne wait_50us
-dec r18
-brne wait_50us
-ret
-
-
+    nop              ; no operation (~62.5 ns each at 16 MHz)
+    nop
+    dec r16
+    brne ld_loop     ; repeat until r16 = 0
+    ret
