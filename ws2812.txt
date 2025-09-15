@@ -6,7 +6,7 @@
 loop:
 
 
-ldi r17,240
+ldi r17,240 ; 24bit/led X 10led=240 bit
 sus:
 sbi 5,0
 ldi r16,18
