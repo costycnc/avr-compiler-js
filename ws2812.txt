@@ -1,0 +1,35 @@
+    .org 0
+    rjmp init
+     .org 0x68
+    init:
+    sbi 4,0
+loop:
+
+
+ldi r17,48
+sus:
+sbi 5,0
+ldi r16,18
+rcall ld_loop
+cbi 5,0
+ldi r16,13
+rcall ld_loop
+dec r17
+brne sus
+
+rcall wait_50us
+rjmp loop
+
+ld_loop:
+dec r16
+brne ld_loop
+ret
+
+wait_50us:
+ldi r18,5
+wt:
+dec r16
+brne wait_50us
+dec r18
+brne wait_50us
+ret
