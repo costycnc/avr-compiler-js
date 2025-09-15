@@ -6,7 +6,7 @@
 loop:
 
 
-ldi r17,48
+ldi r17,240
 sus:
 sbi 5,0
 ldi r16,18
