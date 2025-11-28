@@ -277,13 +277,45 @@ border-radius: 5px;
   <p><button onclick="start('in-asm');">Assemble</button> <a href="https://www.youtube.com/shorts/ZcSXHUBY7dc"><button>watch video</a></button> </p>
 
     <textarea id="in-asm" style="width:100%;height:500px">
+    init
+LOOP:
+    ledon
+    wait 3
+    ledoff
+    wait 0
+rjmp LOOP
+
+;------------------- MACRO ZONE ------------------------------------
+
+.macro init
     .org 0
     rjmp init
-     .org 0x68
+     .org 0x60
     init:
     sbi 4,5
+.endmacro
+
+.macro ledon
     sbi 5,5
-    rjmp init
+.endmacro
+
+.macro ledoff
+    cbi 5,5
+.endmacro
+
+.macro wait
+     ldi r18,@0
+     rcall wait1
+.endmacro
+
+wait1:
+inc r16
+brne wait1
+inc r17
+brne wait1
+dec r18
+brne wait1
+ret
     </textarea> 
 
   </div>
@@ -1740,6 +1772,7 @@ check_throttle:
 </body>
 
 </html>
+
 
 
 
