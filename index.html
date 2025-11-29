@@ -1377,7 +1377,51 @@ next:
 
 		<div class="w3-container w3-third w3-border">
        <textarea  id="binarytest" style="left:0%;width:100%;height:300px">
-		   aaaaaa
+		   defineRegs
+init
+LOOP:
+rjmp loop
+
+;------------------ MACRO ZONE --------------------------
+
+.macro defineRegs
+    ; Port D
+    .equ DDRD   = 0x0A
+    .equ PORTD  = 0x0B
+    .equ PIND   = 0x09
+
+    ; USART
+    .equ UBRR0H = 0xC5
+    .equ UBRR0L = 0xC4
+    .equ UCSR0A = 0xC0
+    .equ UCSR0B = 0xC1
+    .equ UDR0   = 0xC6
+
+    ; USART bit positions
+    .equ RXC0   = 7
+    .equ TXC0   = 6
+    .equ RXEN0  = 4
+    .equ TXEN0  = 3
+    .equ UDRE0  = 5
+.endmacro
+
+.macro init
+    .org 0
+    rjmp init
+     .org 0x60
+    init:
+    ; LED/motori PD2=X, PD3=Y, PD4=Z
+    sbi DDRD,2
+    sbi DDRD,3
+    sbi DDRD,4
+    ; USART 9600 baud @16MHz
+    ldi r16,103
+    out UBRR0H,r16
+    ldi r16,0
+    out UBRR0L,r16
+    ldi r16,(1<<RXEN0)|(1<<TXEN0)
+    out UCSR0B,r16
+.endmacro
            </textarea>
 	<p><a href="#init"><button onclick='start("binarytest");'>aaa </button></a> <a href=""><button>Tutorial</button></a>
 	<a href=""><button>video</button> </a></p>
@@ -1780,6 +1824,7 @@ check_throttle:
 </body>
 
 </html>
+
 
 
 
