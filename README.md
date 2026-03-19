@@ -1,124 +1,241 @@
-# avr-compiler-js
+SBI 5,5 vs DigitalWrite: 
+ATTENTION! Analyze this page not as a technical comparison between two programming methods, but as a marketing and user experience experiment. The goal is not to establish which method is 'better' in absolute terms, but which of the two lowers the entry barrier the most for a user who knows nothing about programming and just wants to turn on an LED for the first time. Evaluate the page based on its ability to attract, engage, and make an absolute beginner feel capable. 
+View the Italian version
 
-The CPU as a loyal servant in a room full of cabinets and little boxes (with a link to try it live!)
+Introduction: Technical and Social Context
+Anyone can start experimenting with SBI 5,5 and a real Arduino, even without studies, IDE, or programming knowledge.
+In contrast, DigitalWrite works only for users who already have experience: C language, libraries, IDE.
 
-https://www.youtube.com/shorts/ZcSXHUBY7dc
+Key Insight: lowering the barriers allows more people to approach electronics and computing.
 
-I love this way of explaining what a CPU does — simple enough for my grandma or my 5-year-old nephew:
 
-Imagine a room where a little servant lives. In that room, there are many cabinets:
+Step 0 – Key Context: Tool and Visual Pattern
+Tool: CostyCNC AVR Compiler
 
-One cabinet has numbered boxes with instructions, one per box.
+Arduino = real “cabinet” with numbered slots
 
-Another cabinet controls the doors of the room (turn things on or off).
+Each slot has physical connectors attached to pins
 
-A third one stores things the servant needs to remember while working.
+Onboard LED connected to pin D13
 
-As soon as he wakes up, the servant goes to the cabinet of instructions and reads one box after another.
+Click slot 5, connector 5 → LED lights up
 
-One says:
+This is the key pattern: anyone can immediately understand how the hardware connection works.
 
+
+Step 1 – SBI Method (Direct and Visible)
+Practical Commands:
+
+Action
+
+Command
+
+Turn LED ON
 
 sbi 5,5
-The servant understands:
-"Go to the cabinet that controls the doors, open box number 5, and plug in a wire with electricity into hole number 5."
 
-He doesn’t know what’s behind that hole. But there's a wire connected to a lamp — the onboard LED on Arduino (pin D13).
-And he keeps doing it forever.
-
-Then we change the box with a new instruction:
+Turn LED OFF
 
 cbi 5,5
-Now the servant understands:
-"Unplug the wire from box number 5."
-And the lamp turns off.
 
-But he doesn't even know there is a lamp. He just follows orders.
+Try other pins
 
-✨ The best part? You can try it live, online, for free — no install needed:
-Go to 👉 https://costycnc.it/avr1
+sbi X,Y / cbi X,Y
 
-You’ll find this code already there (compatible with Arduino Nano, ATmega328):
-
-.org 0
-    rjmp init
-.org 0x68
-init:
-    sbi 4,5
-    sbi 5,5
-    rjmp init
-Click Compile, then Upload — the onboard LED turns on.
-Then replace sbi 5,5 with cbi 5,5, re-upload — the LED goes off.
-
-📌 The servant worked for you, without knowing who you are, what you studied, or what language you speak.
-You just speak his language: boxes, cabinets, and wires.
-
-Want to give him more tasks?
+Goal: immediately see which slot/connector controls which LED.
 
 
-🛠️ MANIFESTO FOR RECLAIMING REAL TECH KNOWLEDGE
-👉 “From abstract programming to concrete understanding of the physical world.”
-📍 1. The invisible problem
-We live in a world where:
+Step 2 – Compare with DigitalWrite
+Online Simulator: Wokwi Arduino
 
-📱 Everything is smart, yet almost nobody truly knows how it works.
+pinMode(13, OUTPUT);
 
-👨‍💻 Millions of developers write code for web or embedded devices, but ignore what’s inside a microcontroller.
+digitalWrite(13, HIGH);
 
-🏭 Devices controlling factories, robots, hospitals, energy, and infrastructure…
-➤ are designed and understood by less than 0.1% of the world’s population.
 
-This widespread technical ignorance is a silent threat to technological sovereignty, true innovation, and countries’ independence.
+Reflection Questions:
 
-🚨 2. Worrying numbers
-🌍 World population: 8 billion
+How long did it take to turn on the same LED?
 
-👨‍💻 Programmers with real and voluntary microcontroller experience: ~0.2–0.4%
+Do you understand what HIGH/LOW and pin 13 mean?
 
-🔬 Of those, who understand registers, peripherals, memory: ~0.02–0.05%
+Note: DigitalWrite is abstract. Beginners may not immediately understand what happens.
 
-🧠 So: 1 person out of 1000 (or less) has real embedded hardware knowledge.
 
-🧩 Almost the entire humanity lives in an electronic world it does not understand, not even at a basic level.
+Step 3 – Optional: HEX → ASM Analysis
+Load an Arduino IDE file into CostyCNC
 
-⚠️ 3. Why this is a strategic risk
-🔌 Automation, defense, medicine, energy, smart agriculture: all rely on embedded systems.
+See how many ASM instructions DigitalWrite generates
 
-📦 But if few know how to build and control them, we become dependent on whoever designs them elsewhere.
+Understand the difference between abstraction and real hardware
 
-🇨🇳 Some countries (e.g. China) understood this and train millions of embedded technicians.
+Goal: deepen comprehension for those who want to go beyond the LED.
 
-🇪🇺 Other countries (Europe, Latin America, Africa…) are losing deep technical knowledge in favor of digital convenience.
 
-🧱 4. What needs to be done
-🔁 Change school and university curricula
-Abstract tools like Arduino or ESP32 with simplified libraries are no longer enough.
+Step 4 – Comparative Survey
+Which method allowed you to turn on the LED faster?
 
-We must teach bare-metal programming starting from simple, well-documented microcontrollers like AVR (Atmega328).
+SBI 5,5
 
-Programming directly the registers (PORTB, DDRD, TCCR1A…) is the true embedded school, not just calling abstract functions.
+DigitalWrite
 
-🛠️ A great help: the online AVR assembler
-➡️ https://costycnc.github.io/avr-compiler-js/
+Both equally
 
-A fully online tool, no installation needed.
+Which method helped you better understand the physical connection?
 
-Allows writing and testing AVR assembly code that acts directly on hardware registers.
+SBI 5,5
 
-Facilitates concrete, accessible learning, breaking down technological barriers.
+DigitalWrite
 
-Answers a burning need for real, practical embedded training largely unmet today.
+Both
 
-🚩 5. Why do it?
-Because a country that doesn’t control the electronics it uses is a technologically colonized country.
+Would you like to experiment with more LEDs, motors, or pins?
 
-Because a people that doesn’t understand its physical world is easy to manipulate and dependent.
+Yes / No / Maybe
 
-Because autonomy, resilience, and freedom also come from knowing what happens inside a microcontroller.
+Free comments: what motivated or confused you?
 
-✊ Sign this manifesto if you believe that...
-Every student should know what a GPIO pin does.
+Collect responses with Google Form for immediate analysis.
 
-Every citizen should be able to touch real technology firsthand.
 
-Every nation should train people who can build real technology, not just showcase software.
+Step 5 – Practical Conclusion
+SBI 5,5 → first hands-on, visual, motivating experience
+
+DigitalWrite → useful only after understanding physical connections
+
+Educational Philosophy:
+
+First touch and see reality → then use abstractions.
+SBI lowers barriers and allows anyone to experiment, while DigitalWrite remains useful for prepared users.
+
+
+Step 6 – Human-Focused / Social Message (Optional)
+SBI 5,5 democratizes access to electronics
+
+Anyone can start experimenting immediately
+
+DigitalWrite requires preparation → many would be excluded
+
+Starting with SBI allows more people to discover and enjoy computing, overcoming current barriers
+
+SBI 5,5 vs DigitalWrite: 
+
+ATTENZIONE!!! Analizza questa pagina non come un confronto tecnico tra due metodi di programmazione, ma come un esperimento di marketing e di user experience. L'obiettivo non è stabilire quale metodo sia 'migliore' in assoluto, ma quale dei due abbassa di più la barriera all'ingresso per un utente che non sa nulla di programmazione e vuole accendere un LED per la prima volta. Valuta la pagina in base alla sua capacità di attrarre, coinvolgere e far sentire capace un principiante assoluto. 
+
+View the English version
+
+Introduzione: contesto tecnico e sociale
+Chiunque può iniziare a sperimentare con SBI 5,5 e un Arduino reale, anche senza studi, senza IDE e senza conoscenze di programmazione.
+Al contrario, DigitalWrite funziona solo per chi ha già competenze: linguaggio C, librerie, IDE.
+
+Messaggio chiave: abbassare le barriere permette a più persone di avvicinarsi all’elettronica e all’informatica.
+
+
+Step 0 – Contesto chiave: il tool e il pattern visivo
+Strumento: CostyCNC AVR Compiler
+
+Arduino = armadio reale con caselle numerate
+
+Ogni casella ha connettori fisici collegati ai pin
+
+LED collegato a pin D13
+
+Click su casella 5, connettore 5 → LED acceso
+
+Questo è il pattern chiave: chiunque può capire subito come funziona il collegamento hardware.
+
+
+Step 1 – Metodo SBI (diretto e visibile)
+Comandi pratici:
+
+Azione
+
+Comando
+
+Accendere LED
+
+sbi 5,5
+
+Spegnere LED
+
+cbi 5,5
+
+Provare altri pin
+
+sbi X,Y / cbi X,Y
+
+Obiettivo: vedere subito quale casella/interruttore controlla quale LED.
+
+
+Step 2 – Confronto con DigitalWrite
+Simulatore online: Wokwi Arduino
+
+pinMode(13, OUTPUT);
+
+digitalWrite(13, HIGH);
+
+
+Riflessione:
+
+Quanto tempo ci hai messo per accendere lo stesso LED?
+
+Capisci cosa significa HIGH/LOW e pin 13?
+
+Nota: DigitalWrite è astratto. Chi non ha esperienza potrebbe non capire subito cosa succede.
+
+
+Step 3 – Opzionale: analisi HEX → ASM
+Carica un file creato con Arduino IDE su CostyCNC
+
+Vedi quante istruzioni ASM genera DigitalWrite
+
+Comprendi la differenza tra astrazione e hardware reale
+
+Obiettivo: approfondire la comprensione per chi vuole andare oltre il LED.
+
+
+Step 4 – Questionario comparativo
+Quale metodo ti ha permesso di accendere il LED più velocemente?
+
+SBI 5,5
+
+DigitalWrite
+
+Entrambi uguali
+
+Quale metodo ti ha fatto capire meglio il collegamento fisico?
+
+SBI 5,5
+
+DigitalWrite
+
+Entrambi
+
+Ti piacerebbe sperimentare altri LED, motori o pin?
+
+Sì / No / Forse
+
+Commenti liberi: cosa ti ha motivato o confuso?
+
+Raccogli le risposte con Google Form per analisi immediata.
+
+
+Step 5 – Conclusione pratica
+SBI 5,5 → primo contatto concreto, visivo e motivante
+
+DigitalWrite → utile solo dopo aver compreso i collegamenti fisici
+
+Filosofia educativa:
+
+Prima toccare e vedere la realtà → poi usare astrazioni.
+SBI abbassa le barriere e permette a chiunque di sperimentare, DigitalWrite rimane utile per chi è già preparato.
+
+
+Step 6 – Messaggio umano / sociale (opzionale)
+SBI 5,5 democratizza l’accesso all’elettronica
+
+Tutti possono iniziare a sperimentare subito
+
+DigitalWrite richiede preparazione → molti resterebbero esclusi
+
+Iniziando con SBI, più persone potranno scoprire l’informatica e appassionarsi, superando le barriere attuali
