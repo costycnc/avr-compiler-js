@@ -340,27 +340,42 @@ ret
 	   <a href="https://www.youtube.com/shorts/yWaeS00bWNQ">Video</a> 
        &nbsp;&nbsp;<a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf">Datasheet</a></p>
     <textarea  id="pwmtimer0-int" style="left:0%;width:100%;height:300px">
-		.org 0
-rjmp init
 
-.org 0x20
-rjmp int
+.org 0x0000
+    jmp RESET
 
-.org 0x60
-init:
-sbi 4,5
-ldi r16,0b101
-out 0x25,r16
-ldi r16,1
-sts 0x6e,r16
-sei
+.org 0x0024        ; USART RX Complete Interrupt
+    jmp costycnc
+    
+.org 0x0060
+RESET:
+    sbi 0x04, 5    ; DDRB: PB5 come uscita
+    
+    ; 1. Configura Baud Rate 9600 (per 16MHz)
+    ldi r16, 103
+    sts 0xC4, r16  ; UBRR0L
+    
+    ; 2. Configura UCSR0C: 8 bit, 1 stop, no parity
+    ldi r16, 0b00000110 ; Bit 2 e 1 impostati (UCSZ01 e UCSZ00)
+    sts 0xC2, r16      ; Scrivi in UCSR0C
+
+    ; 3. Abilita Ricezione e Interrupt RX
+    ldi r16, 0b10010000 
+    sts 0xC1, r16      ; UCSR0B
+    sei                ; Abilita interruzioni
 
 loop:
-rjmp loop
+    rjmp loop
 
-int:
-sbi 3,5
-reti
+costycnc:
+    cbi 0x05, 5    ; Spegne LED (default)
+    lds r18, 0xC6  ; Leggi UDR0
+    cpi r18, 'A'   ; È una 'A'?
+    brne jos
+    sbi 0x05, 5    ; Accendi se è 'A'
+jos:
+    reti
+        
     </textarea>
   </div>
 
