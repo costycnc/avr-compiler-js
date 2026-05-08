@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>AVR Control - Configurazione UCSR0C</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; }
+        .panel { background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        h1 { color: #38bdf8; }
+        .btn { background: #38bdf8; color: #0f172a; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 6px; margin: 5px; transition: 0.3s; }
+        .btn:hover { background: #7dd3fc; }
+        .btn-off { background: #f43f5e; color: white; }
+        .btn-copy { background: #10b981; color: white; padding: 8px 16px; font-size: 14px; margin-top: 10px; }
+        #status { font-weight: bold; margin: 15px 0; color: #94a3b8; font-family: monospace; }
+        pre { background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #38bdf8; text-align: left; overflow-x: auto; }
+        code { color: #fbbf24; font-family: 'Consolas', monospace; }
+        .section { background: #1e293b; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #334155; }
+        .highlight { color: #38bdf8; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="panel">
+        <h1>AVR Control: Full Serial Config</h1>
+        <div id="status">STATO: DISCONNESSO ❌</div>
+        <button id="connectBtn" class="btn">1. CONNETTI SERIALE</button>
+        <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+        <button id="sendABtn" class="btn" disabled>INVIA 'A' (ACCENDI)</button>
+        <button id="sendXBtn" class="btn btn-off" disabled>INVIA 'X' (SPEGNI)</button>
+    </div>
+
+    <div class="section">
+        <h2>Codice ASM con UCSR0C (8N1)</h2>
+        <p>Configurazione binaria per <strong>UCSR0C</strong>: <code>0b00000110</code></p>
+        <button class="btn btn-copy" onclick="copyCode()">COPIA CODICE PER COSTYCNC.IT</button>
+        <pre><code id="asmCode">
+.org 0x0000
+    jmp RESET
+
+.org 0x0024        ; USART RX Complete Interrupt
+    jmp costycnc
+    
+.org 0x0060
+RESET:
+    sbi 0x04, 5    ; DDRB: PB5 come uscita
+    
+    ; 1. Configura Baud Rate 9600 (per 16MHz)
+    ldi r16, 103
+    sts 0xC4, r16  ; UBRR0L
+    
+    ; 2. Configura UCSR0C: 8 bit, 1 stop, no parity
+    <span class="highlight">ldi r16, 0b00000110</span> ; Bit 2 e 1 impostati (UCSZ01 e UCSZ00)
+    <span class="highlight">sts 0xC2, r16</span>      ; Scrivi in UCSR0C
+
+    ; 3. Abilita Ricezione e Interrupt RX
+    ldi r16, 0b10010000 
+    sts 0xC1, r16      ; UCSR0B
+    sei                ; Abilita interruzioni
+
+loop:
+    rjmp loop
+
+costycnc:
+    cbi 0x05, 5    ; Spegne LED (default)
+    lds r18, 0xC6  ; Leggi UDR0
+    cpi r18, 'A'   ; È una 'A'?
+    brne jos
+    sbi 0x05, 5    ; Accendi se è 'A'
+jos:
+    reti
+        </code></pre>
+    </div>
+</div>
+
+<script>
+    let port, writer;
+    const connectBtn = document.getElementById('connectBtn');
+    const sendABtn = document.getElementById('sendABtn');
+    const sendXBtn = document.getElementById('sendXBtn');
+    const status = document.getElementById('status');
+
+    function copyCode() {
+        const codeText = document.getElementById('asmCode').innerText;
+        navigator.clipboard.writeText(codeText);
+        alert("Codice con configurazione 8N1 copiato!");
+    }
+
+    connectBtn.addEventListener('click', async () => {
+        try {
+            port = await navigator.serial.requestPort();
+            await port.open({ baudRate: 9600 });
+            writer = port.writable.getWriter();
+            status.innerHTML = "STATO: CONNESSO ✅";
+            connectBtn.disabled = true;
+            sendABtn.disabled = false;
+            sendXBtn.disabled = false;
+        } catch (err) {
+            status.innerHTML = "ERRORE: " + err;
+        }
+    });
+
+    async function sendChar(char) {
+        if (writer) {
+            const data = new TextEncoder().encode(char);
+            await writer.write(data);
+            status.innerHTML = "INVIATO: '" + char + "' ⚡";
+            setTimeout(() => { status.innerHTML = "STATO: CONNESSO ✅"; }, 700);
+        }
+    }
+
+    sendABtn.addEventListener('click', () => sendChar('A'));
+    sendXBtn.addEventListener('click', () => sendChar('X'));
+</script>
+
+</body>
+</html>
