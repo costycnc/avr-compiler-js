@@ -337,11 +337,21 @@ ret
 	
 <!--             inceput       -->
 
-	  <div class="w3-container w3-third w3-border">
-   <p><a href="#init"><button onclick='start("usart-rx-complete");'>Assemble usart rx int</button></a>&nbsp;&nbsp; 
+<script>
+function caricaVersione(idVersione) {
+    const principale = document.getElementById('first-asm');
+    const versione = document.getElementById(idVersione);
+    
+    principale.innerHTML = versione.innerHTML;
+    principale.querySelector('button').outerHTML = '<button onclick="start(\'in-asm\');">Assemble</button>';
+    principale.querySelector('textarea').setAttribute('style', 'width:100%;height:500px');  
+}
+</script>
+	  <div id="usart-rx-complete" class="w3-container w3-third w3-border">
+   <p><a href="#init"><button onclick='caricaVersione("usart-rx-complete");'>Assemble usart rx int</button></a>&nbsp;&nbsp;  
 	   <a href="https://costycnc.github.io/avr-compiler-js/usart-rx-int/">Tutorial</a> 
        &nbsp;&nbsp;<a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf">Datasheet</a></p>
-    <textarea  id="usart-rx-complete" style="left:0%;width:100%;height:300px">
+    <textarea style="left:0%;width:100%;height:300px">
 
 .org 0x0000
     jmp RESET
