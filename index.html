@@ -340,7 +340,7 @@ ret
 function caricaVersione(idVersione) {
 	console.log(idVersione);
     const principale = document.getElementById('first-asm');
-    const versione = document.getElementById('usart-rx-complete');
+    const versione = document.getElementById(idVersione);
     principale.innerHTML = versione.innerHTML;
     principale.querySelector('button').outerHTML = '<button onclick="start(\'in-asm\');">Assemble</button>';
     principale.querySelector('textarea').setAttribute('style', 'width:100%;height:500px');  
