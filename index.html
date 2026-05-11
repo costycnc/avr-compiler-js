@@ -416,7 +416,7 @@ jos:
 init:
     cbi 11,2       ; Direction PD2 2
     sbi 9,5       ; Step PD5 5
-	ldi r18,20  ; Speed - High value=low speed
+	   ldi r18,20  ; Speed - High value=low speed
     call wait
     rjmp init
 
