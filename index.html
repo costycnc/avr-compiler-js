@@ -279,6 +279,75 @@ border-radius: 5px;
   <p><button onclick="start('in-asm');">Assemble</button> <a href="https://www.youtube.com/shorts/n9jkkUmEvIY"><button>watch video</button></a> </p>
 
     <textarea id="in-asm" style="width:100%;height:500px">
+; ----------------------------------------------
+; EXPLANATION FOR ABSOLUTE BEGINNERS
+; ----------------------------------------------
+; Think of a "register" as a box with 8 light switches.
+; Each switch = one bit.
+; Switch UP   (1) = electricity flows
+; Switch DOWN (0) = no electricity
+;
+; Box #4 controls whether each wire is INPUT or OUTPUT
+; Box #5 controls whether each wire has POWER (1) or NOT (0)
+; ----------------------------------------------
+
+.org 0
+    rjmp start
+
+.org 0x68
+start:
+    sbi 4,5   ; Flip switch #5 in box #4 to ON
+              ; Wire D13 is now an OUTPUT
+              ; [0][0][1][0][0][0][0][0]
+
+    sbi 5,5   ; Flip switch #5 in box #5 to ON
+              ; Wire D13 now has POWER → LED lights up
+              ; [0][0][1][0][0][0][0][0]
+
+    rjmp start ; Do it again forever
+               ; (Microcontrollers panic if the program ends!)
+    </textarea> 
+
+  </div>
+
+  <div class="w3-container w3-half w3-blue">
+
+  <p><button id="btn-dasm">DisAssemble</button>  <input type="file" onchange="loadhex(this.files)"><button id="downloadHexBtn">💾 Scarica HEX</button>
+</p>
+
+    <textarea id="out-hex" style="width:100%;height:500px"></textarea>  
+
+  </div>
+
+</div>
+
+<div class="w3-row">
+	
+<!--             inceput       -->
+<script>
+function caricaVersione(buttonElement) {
+ 
+    const principale = document.getElementById('first-asm');
+    
+    principale.innerHTML = buttonElement.closest('.w3-container').innerHTML;
+    principale.querySelector('button').outerHTML = '<button onclick="start(\'in-asm\');">Assemble</button>';
+    principale.querySelector('textarea').setAttribute('style', 'width:100%;height:500px'); 
+    principale.querySelector('textarea').id = 'in-asm';
+    
+    // Aspetta un attimo prima di compilare
+    setTimeout(() => start('in-asm'), 100);
+}
+</script>
+
+	<!--     bbbbbbb   -->
+
+	
+	  <div class="w3-container w3-third w3-border">
+   <p><a href="#init"><button onclick='caricaVersione(this);'>Assemble</button></a>&nbsp;&nbsp;  
+	   <a href="https://costycnc.github.io/avr-compiler-js/usart-rx-int/">Tutorial</a> &nbsp;&nbsp;  
+	   <a href="https://www.youtube.com/shorts/qhzbllYnHjg">video</a>
+       &nbsp;&nbsp;<a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf">Datasheet</a></p>
+    <textarea style="left:0%;width:100%;height:300px">
     init
 LOOP:
     ledon
@@ -318,38 +387,41 @@ brne wait1
 dec r18
 brne wait1
 ret
-    </textarea> 
-
+        
+    </textarea>
   </div>
 
-  <div class="w3-container w3-half w3-blue">
 
-  <p><button id="btn-dasm">DisAssemble</button>  <input type="file" onchange="loadhex(this.files)"><button id="downloadHexBtn">💾 Scarica HEX</button>
-</p>
+<div class="w3-container w3-third w3-border">
+   <p>
+       <a href="#init"><button onclick='caricaVersione(this);'>Assemble</button></a>&nbsp;&nbsp;  
+       <a href="https://costycnc.github.io/avr-compiler-js/usart-rx-int/">Tutorial</a> &nbsp;&nbsp;  
+       <a href="https://www.youtube.com/shorts/qhzbllYnHjg">video</a>
+       &nbsp;&nbsp;<a href="https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf">Datasheet</a>
+   </p>
+   <textarea style="left:0%;width:100%;height:300px">
+	   ;----------------------------------------------
+	   ;Minimal stepper motor signal for cnc shield v4.0
+	   ;----------------------------------------------
+	   
+   .org 0x60
+init:
+    cbi 11,2       ; Direction PD2 2
+    sbi 9,5       ; Step PD5 5
+    ldi r18,255  ; Speed - High value=low speed
+    call wait
+    rjmp init
 
-    <textarea id="out-hex" style="width:100%;height:500px"></textarea>  
-
-  </div>
-
+wait:
+    inc r17
+    brne wait
+    dec r18
+    brne wait
+    ret
+   </textarea>
 </div>
-
-<div class="w3-row">
 	
-<!--             inceput       -->
-<script>
-function caricaVersione(buttonElement) {
- 
-    const principale = document.getElementById('first-asm');
-    
-    principale.innerHTML = buttonElement.closest('.w3-container').innerHTML;
-    principale.querySelector('button').outerHTML = '<button onclick="start(\'in-asm\');">Assemble</button>';
-    principale.querySelector('textarea').setAttribute('style', 'width:100%;height:500px'); 
-    principale.querySelector('textarea').id = 'in-asm';
-    
-    // Aspetta un attimo prima di compilare
-    setTimeout(() => start('in-asm'), 100);
-}
-</script>
+	
 
 	  <div class="w3-container w3-third w3-border">
    <p><a href="#init"><button onclick='caricaVersione(this);'>Assemble</button></a>&nbsp;&nbsp;  
