@@ -298,11 +298,9 @@ border-radius: 5px;
 start:
     sbi 4,5   ; Flip switch #5 in box #4 to ON
               ; Wire D13 is now an OUTPUT
-              ; [0][0][1][0][0][0][0][0]
 
     sbi 5,5   ; Flip switch #5 in box #5 to ON
               ; Wire D13 now has POWER → LED lights up
-              ; [0][0][1][0][0][0][0][0]
 
     rjmp start ; Do it again forever
                ; (Microcontrollers panic if the program ends!)
