@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------
-; EXPLANATION FOR ABSOLUTE BEGINNERS (THE ELECTRICAL CABINET)
+; VISUAL ASSEMBLY GUIDE: ULTRASONIC SENSOR FOR ABSOLUTE BEGINNERS
 ; ------------------------------------------------------------------
 ; Imagine the brain of the chip as a large electrical cabinet.
 ; Inside the cabinet, there are several numbered BOXES.
