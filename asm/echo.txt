@@ -1,0 +1,79 @@
+; ------------------------------------------------------------------
+; EXPLANATION FOR ABSOLUTE BEGINNERS (THE ELECTRICAL CABINET)
+; ------------------------------------------------------------------
+; Imagine the brain of the chip as a large electrical cabinet.
+; Inside the cabinet, there are several numbered BOXES.
+; Each box contains 8 SWITCHES (numbered from 0 to 7).
+;
+; Switch UP   (1) = Electricity flows / Function is ON
+; Switch DOWN (0) = No electricity / Function is OFF
+;
+; BOX number 4: Chooses the DIRECTION of the wires (Pins D8-D13).
+;               Switch UP   (1) = The wire is an OUTPUT (pushes power out).
+;               Switch DOWN (0) = The wire is an INPUT (receives power).
+;
+; BOX number 5: Controls the POWER of the wires (Pins D8-D13).
+;               Switch UP   (1) = Sends POWER to the wire (Turns ON).
+;               Switch DOWN (0) = Cuts POWER from the wire (Turns OFF).
+;
+; BOX number 3: Status spy window. Checks if power is coming in from the outside.
+;
+; HOW WAITING WORKS (THE BALL BUCKET):
+; To wait or make a pause, the chip takes a bucket filled with balls.
+; It removes ONE ball at a time. When the bucket is empty, the time is up!
+; ------------------------------------------------------------------
+
+.org 0x0000        ; Safe starting point of the cabinet when powered on
+rjmp RESET         ; Jump immediately to the startup instructions below
+
+.org 0x60          ; Space in the cabinet where we store the actual commands
+RESET:             
+   rcall init      ; Check and prepare the wires for the first time
+
+MAIN_LOOP:
+    rcall pulse     ; Send a mini-electrical pulse to start the sensor's wave
+    rcall check_echo ; Wait and check if the wave bounced back
+    rcall wait       ; Take a break before sending the next pulse
+    rjmp MAIN_LOOP   ; Go back to the start of the loop and repeat forever
+
+; --- Initial wire preparation ---
+init:
+   sbi 4,5         ; Flip switch 5 in box 4 UP -> The LED wire (Pin 13) becomes an output
+   sbi 4,0         ; Flip switch 0 in box 4 UP -> The Trigger wire (Pin 8) becomes an output
+   cbi 4,1         ; Flip switch 1 in box 4 DOWN -> The Echo wire (Pin 9) becomes an input
+ret                ; Preparation done, go back to the main loop
+
+; --- Send the electrical signal ---
+pulse:
+    sbi 5, 0       ; Flip switch 0 in box 5 UP -> Give power to the Trigger wire (Pin 8)
+puls:
+    dec r16        ; Take one ball out of bucket r16 to waste a little bit of time
+    brne puls      ; If bucket r16 is not empty yet, keep taking balls out
+    cbi 5, 0       ; Flip switch 0 in box 5 DOWN -> Cut power from the Trigger wire
+ret                ; Pulse finished, go back to the main loop
+
+; --- Check if the signal came back and move the LED ---
+check_echo:
+    ldi r17,25     ; Put 25 balls into bucket r17
+check:
+    dec r16        ; Take one ball out of the inner bucket r16
+    brne check     ; If r16 is not empty, keep taking balls out of it
+    dec r17        ; When r16 is empty, take one ball out of the outer bucket r17
+    brne check     ; If r17 is not empty, refill r16 and start over again
+
+    cbi 5,5        ; Flip switch 5 in box 5 DOWN -> Turn off the LED first to be safe
+    sbic 3,1       ; Look at switch 1 inside box 3. If it is DOWN (no echo), skip the next command
+    sbi 5,5        ; If the switch was UP (signal returned), flip switch 5 in box 5 UP -> Turn on the LED
+ret                ; Checking finished, go back to the main loop
+
+; --- Pause of waiting before the next pulse ---
+wait:
+   ldi r18,10      ; Put 10 balls into the big main bucket r18
+sus:
+   dec r16         ; Take one ball out of the smallest bucket r16
+   brne sus        ; If not empty, keep taking balls out of r16
+   dec r17         ; When r16 is empty, take one ball out of the medium bucket r17
+   brne sus        ; If r17 is not empty, refill the small bucket and keep going
+   dec r18         ; When r17 is empty, take one ball out of the big main bucket r18
+   brne sus        ; If r18 is not empty, refill the other buckets and restart the count
+ret                ; Big pause finished, go back to the main loop to do it all over again
