@@ -11,14 +11,6 @@
 ;    * If you send any other letter, the LED turns OFF.
 ; ==============================================================================
 
-; ==============================================================================
-; PART 1: NAKED CODE (WITHOUT COMMENTS) - This will be compiled
-; ==============================================================================
-; This section contains only the pure commands for the Arduino board.
-; There are no text explanations row by row so the computer does not get confused.
-; The computer will read and transform this part into real instructions for the chip.
-; ==============================================================================
-
 .org 0x0000
 	jmp RESET
 
