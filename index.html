@@ -280,13 +280,14 @@ border-radius: 5px;
 
     <textarea id="in-asm" style="width:100%;height:500px">
 .org 0
-    rjmp start
+    rjmp init
 
 .org 0x68
-start:
+init:
     sbi 4,5
     sbi 5,5
-    rjmp start
+loop:
+    rjmp loop
 
 ; ==============================================================================
 ; WHAT THIS ASSEMBLY (ASM) CODE DOES UNDER THE HOOD:
@@ -323,16 +324,16 @@ start:
 ; ----------------------------------------------
 ;
 ; .org 0               Set code position to the very beginning of memory
-;     rjmp start       Jump immediately to our start label
+;     rjmp init        Jump immediately to our start label
 ;
 ; .org 0x68            Move past the hardware alarm section to safety
-; start:               The program execution begins right here
+; init:                The program execution begins right here
 ;     sbi 4,5          Go to box 4, find switch #5, and flip it UP to 1 (D13 becomes OUTPUT)
 ;
 ;     sbi 5,5          Go to box 5, find switch #5, and flip it UP to 1 (D13 gets 5V POWER → LED ON)
 ;                      (The LED lights up only because this specific switch controls power to D13)
-;
-;     rjmp start       Jump backwards to start, repeating these steps in a circle forever
+; loop:
+;     rjmp loop       Jump backwards to start, repeating these steps in a circle forever
 
     </textarea> 
 
