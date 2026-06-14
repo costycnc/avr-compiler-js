@@ -301,12 +301,22 @@ start:
 ; Each switch is a "bit" numbered from 7 to 0 (from left to right).
 ; Switch UP   (1) = electricity flows or a function turns ON.
 ; Switch DOWN (0) = no electricity or a function turns OFF.
+;		
+; THE TRUE ROLE OF "sbi" AND "cbi" COMMANDS:
+; * "sbi" (Set Bit)   → Flips a specific switch UP (1) inside a box. 
+;                       It does NOT know what a LED is. It only changes a bit to 1.
+;                       The LED turns ON *only* because switch #5 in box 5 happens 
+;                       to be connected to the D13 LED wire.
+; * "cbi" (Clear Bit) → Flips a specific switch DOWN (0) inside a box.
+;                       If used on switch #5 in box 5, it cuts power and turns OFF the LED.
+;
+; If you use "sbi" or "cbi" on other switches or other boxes, they will do completely 
+; different jobs (like changing serial speed, enabling alarms, or configuring inputs).
 ;
 ; IMPORTANT NOTE ABOUT THE BOXES:
 ; These hardware boxes exist in EVERY microcontroller (MCU) in the world.
-; However, different chips put them in different places.
-; For example, another MCU might use completely different numbers (addresses) 
-; for the exact same function. In this specific chip (ATmega328P):
+; However, different chips put them in different places (different addresses).
+; In this specific chip (ATmega328P):
 ;
 ; Box 4 (DDRB):  controls whether wires D8 to D13 are INPUTS (0) or OUTPUTS (1).
 ; Box 5 (PORTB): gives POWER (1) or turns OFF (0) wires D8 to D13.
@@ -317,12 +327,12 @@ start:
 ;
 ; .org 0x68            Move past the hardware alarm section to safety
 ; start:               The program execution begins right here
-;     sbi 4,5          Go to box 4, find switch #5, and flip it UP (D13 becomes OUTPUT)
+;     sbi 4,5          Go to box 4, find switch #5, and flip it UP to 1 (D13 becomes OUTPUT)
 ;
-;     sbi 5,5          Go to box 5, find switch #5, and flip it UP (D13 gets 5V POWER)
+;     sbi 5,5          Go to box 5, find switch #5, and flip it UP to 1 (D13 gets 5V POWER → LED ON)
+;                      (The LED lights up only because this specific switch controls power to D13)
 ;
 ;     rjmp start       Jump backwards to start, repeating these steps in a circle forever
-
 
     </textarea> 
 
