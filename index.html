@@ -1403,7 +1403,7 @@ next:
 
     <script>
       window.addEventListener("load", () => {
-        fetch("serial-rec-A.txt")
+        fetch("https://costycnc.github.io/avr-compiler-js/asm/serial-rec-A.txt")
           .then(response => response.text())
           .then(text => {
             document.getElementById("serial-rec-A").value = text;
