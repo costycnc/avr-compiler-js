@@ -330,7 +330,7 @@ loop:
 ; init:                The program execution begins right here
 ;     sbi 4,5          Go to box 4, find switch #5, and flip it UP to 1 (D13 becomes OUTPUT)
 ;
-;     sbi 5,5          Go to box 5, find switch #5, and flip it UP to 1 (D13 gets 5V POWER → LED ON)
+;     sbi 5,5          Go to box 5, find switch #5, and flip it UP to 1 (D13 gets HIGH → LED ON)
 ;                      (The LED lights up only because this specific switch controls power to D13)
 ; loop:
 ;     rjmp loop       Jump backwards to start, repeating these steps in a circle forever
