@@ -279,31 +279,45 @@ border-radius: 5px;
   <p><button onclick="start('in-asm');">Assemble</button> <a href="https://www.youtube.com/shorts/n9jkkUmEvIY"><button>watch video</button></a> </p>
 
     <textarea id="in-asm" style="width:100%;height:500px">
-; ----------------------------------------------
-; EXPLANATION FOR ABSOLUTE BEGINNERS
-; ----------------------------------------------
-; Think of a "register" as a box with 8 light switches.
-; Each switch = one bit.
-; Switch UP   (1) = electricity flows
-; Switch DOWN (0) = no electricity
-;
-; Box #4 controls whether each wire D8-D13 is INPUT or OUTPUT
-; Box #5 controls whether each wire D8-D13 has POWER (1) or NOT (0)
-; ----------------------------------------------
-
 .org 0
     rjmp start
 
 .org 0x68
 start:
-    sbi 4,5   ; Flip switch #5 in box #4 to ON
-              ; Wire D13 is now an OUTPUT
+    sbi 4,5
+    sbi 5,5
+    rjmp start
 
-    sbi 5,5   ; Flip switch #5 in box #5 to ON
-              ; Wire D13 now has POWER → LED lights up
+; ==============================================================================
+; WHAT THIS ASSEMBLY (ASM) CODE DOES UNDER THE HOOD:
+; ==============================================================================
+; 1. It sets the built-in LED pin (D13) as an output.
+; 2. It turns on the power to that pin to light up the LED.
+; 3. It creates an infinite loop to keep the LED turned on forever.
+; ==============================================================================
+; COMMENTED CODE (FOR ABSOLUTE BEGINNERS) - Hidden from compiler
+; ==============================================================================
+; Think of a "register" as a box with 8 light switches.
+; Each switch is a "bit" numbered from 7 to 0 (from left to right).
+; Switch UP   (1) = electricity flows or a function turns ON.
+; Switch DOWN (0) = no electricity or a function turns OFF.
+;
+; Box 4 (DDRB):  controls whether wires D8 to D13 are INPUTS (0) or OUTPUTS (1).
+; Box 5 (PORTB): gives POWER (1) or turns OFF (0) wires D8 to D13.
+; ----------------------------------------------
+;
+; .org 0               Set code position to the very beginning of memory
+;     rjmp start       Jump immediately to our start label
+;
+; .org 0x68            Move past the hardware alarm section to safety
+; start:               The program execution begins right here
+;     sbi 4,5          Go to box 4, find switch #5, and flip it UP (D13 becomes OUTPUT)
+;
+;     sbi 5,5          Go to box 5, find switch #5, and flip it UP (D13 gets 5V POWER)
+;
+;     rjmp start       Jump backwards to start, repeating these steps in a circle forever
 
-    rjmp start ; Do it again forever
-               ; (Microcontrollers panic if the program ends!)
+
     </textarea> 
 
   </div>
