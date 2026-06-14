@@ -302,6 +302,12 @@ start:
 ; Switch UP   (1) = electricity flows or a function turns ON.
 ; Switch DOWN (0) = no electricity or a function turns OFF.
 ;
+; IMPORTANT NOTE ABOUT THE BOXES:
+; These hardware boxes exist in EVERY microcontroller (MCU) in the world.
+; However, different chips put them in different places.
+; For example, another MCU might use completely different numbers (addresses) 
+; for the exact same function. In this specific chip (ATmega328P):
+;
 ; Box 4 (DDRB):  controls whether wires D8 to D13 are INPUTS (0) or OUTPUTS (1).
 ; Box 5 (PORTB): gives POWER (1) or turns OFF (0) wires D8 to D13.
 ; ----------------------------------------------
