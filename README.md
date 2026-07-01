@@ -1,5 +1,11 @@
 Compiler Uploader Online https://costycnc.github.io/avr-compiler-js/
 
+source :
+
+https://github.com/dbuezas/arduino-web-uploader
+
+
+
 # 🪓 The "Wooden Toy" Philosophy behind avr-compiler-js
 
 Most modern IDEs and frameworks treat beginners like spoiled children. They hand them a high-tech, sealed electronic robot (like massive `.NET` frameworks or thick abstraction layers). The beginner presses a big green button, a LED blinks, and they feel like a giant. 
