@@ -4,6 +4,8 @@ source :
 
 https://github.com/dbuezas/arduino-web-uploader
 
+https://github.com/LingDong-/avrlass
+
 
 
 # 🪓 The "Wooden Toy" Philosophy behind avr-compiler-js
