@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATmega328 Adaptive Register Simulator</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f0ebd8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
+        h1 { color: #1d2d44; font-size: 1.6rem; text-align: center; border-bottom: 3px double #1d2d44; padding-bottom: 5px; }
+        
+        .board {
+            display: flex;
+            background: #fbfefb;
+            border: 3px solid #0d1b2a;
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.15);
+            width: 950px;
+            height: 480px;
+            position: relative;
+        }
+        
+        .column {
+            flex: 1;
+            border-right: 2px dashed #0d1b2a;
+            position: relative;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.2s;
+        }
+        .column:last-child { border-right: none; }
+        
+        .column.interactive { cursor: pointer; }
+        .column.interactive:hover { background-color: #f4f5f6; }
+        
+        .header {
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+            border-bottom: 2px solid #0d1b2a;
+            background: #e0e1dd;
+            padding: 5px;
+            margin: -15px -15px 15px -15px;
+            pointer-events: none;
+        }
+
+        .node {
+            width: 14px;
+            height: 14px;
+            background: #778da9;
+            border: 2px solid #0d1b2a;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .node::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            top: 3px; left: 3px;
+        }
+        .node-label {
+            position: absolute;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #0d1b2a;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .connector {
+            height: 6px;
+            background: #415a77;
+            border: 1px solid #0d1b2a;
+            position: absolute;
+            transform-origin: left center;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
+            box-shadow: 0px 3px 5px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+
+        .wire {
+            position: absolute;
+            background: #0d1b2a;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .resistor {
+            position: absolute;
+            width: 16px;
+            height: 40px;
+            background: repeating-linear-gradient(0deg, #e0e1dd, #e0e1dd 4px, #e07a5f 4px, #e07a5f 8px);
+            border: 2px solid #0d1b2a;
+            z-index: 2;
+            text-align: center;
+            font-size: 0.65rem;
+            font-weight: bold;
+            line-height: 40px;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .output-panel {
+            margin-top: 25px;
+            display: flex;
+            gap: 30px;
+            background: #0d1b2a;
+            padding: 15px 30px;
+            border-radius: 4px;
+            color: #f0ebd8;
+            align-items: center;
+            width: 890px;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+        }
+        .led-group { display: flex; flex-direction: column; align-items: center; min-width: 140px; }
+        .led {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #222;
+            border: 3px solid #f0ebd8;
+            margin-bottom: 5px;
+            transition: all 0.3s;
+        }
+        .led.off { background: #3a0000; box-shadow: none; }
+        .led.weak { background: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; }
+        .led.strong { background: #ff0000; box-shadow: 0 0 35px #ff0000, 0 0 10px #ff0000; }
+        
+        .led-green { width: 25px; height: 25px; border-radius: 50%; background: #003300; border: 2px solid #f0ebd8; transition: all 0.2s; }
+        .led-green.on { background: #00ff00; box-shadow: 0 0 12px #00ff00; }
+
+        .explanation-box {
+            flex: 1;
+            font-size: 0.85rem;
+            border-left: 2px solid #3e5c76;
+            padding-left: 20px;
+            line-height: 1.4;
+        }
+        .clickable-hint {
+            color: #e07a5f;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    </style>
+</head>
+<body>
+
+    <h1>ATmega328 Adaptive Simulation (Pin 13)</h1>
+    <div class="clickable-hint">🖲️ CLICK ANYWHERE INSIDE COLUMNS 4 OR 5 TO FLIP THE SWITCHES</div>
+
+    <div class="board">
+        
+        <!-- REG-3: INPUT-PINB -->
+        <div class="column" style="background-color: #faf0e6;">
+            <div class="header">REG-3 (INPUT-PINB)</div>
+            <div class="node" style="top: 250px; left: 140px;"></div>
+            <div class="node-label" style="top: 248px; left: 165px;">PINB.5 Reading</div>
+        </div>
+
+        <!-- REG-4: DIRECTION-DDRB -->
+        <div class="column interactive" id="col-ddrb" onclick="clickDDRB()">
+            <div class="header">REG-4 (DIRECTION-DDRB)</div>
+            <div class="node" style="top: 250px; left: 60px;"></div>
+            <div class="node-label" style="top: 248px; left: 25px; font-weight: 900; color: #e07a5f;">SBI</div>
+            
+            <div class="node" style="top: 170px; left: 220px;"></div>
+            <div class="node-label" style="top: 168px; left: 240px;">Terminal 0 (INPUT)</div>
+            
+            <div class="node" style="top: 330px; left: 220px;"></div>
+            <div class="node-label" style="top: 328px; left: 240px;">Terminal 1 (OUTPUT)</div>
+
+            <div class="connector" id="conn-ddrb" style="top: 254px; left: 67px; width: 162px;"></div>
+        </div>
+
+        <!-- REG-5: ADAPTIVE PORTB COLUMNS -->
+        <div class="column interactive" id="col-portb" style="background-color: #f4f4f9;" onclick="clickPORTB()">
+            <div class="header" id="reg5-title">REG-5 (OUT-PORTB & PULLUP)</div>
+            
+            <div class="node" style="top: 120px; left: 60px;"></div>
+            <div class="node-label" style="top: 118px; left: 20px; color: #e07a5f;">SBI/CBI</div>
+
+            <!-- Terminal 0 (Changes text dynamically) -->
+            <div class="node" style="top: 70px; left: 200px;"></div>
+            <div class="node-label" style="top: 68px; left: 220px; font-weight: bold;" id="label-t0">Terminal 0</div>
+
+            <!-- Terminal 1 (Changes text dynamically) -->
+            <div class="node" style="top: 190px; left: 200px;"></div>
+            <div class="node-label" style="top: 188px; left: 220px;" id="label-t1">Terminal 1</div>
+
+            <!-- MOVABLE NEEDLE -->
+            <div class="connector" id="conn-portb" style="top: 124px; left: 67px; width: 145px;"></div>
+
+            <!-- DYNAMIC COMPONENTS AREA -->
+            <div class="resistor" id="pullup-resistor" style="top: 250px; left: 198px;">40K</div>
+            <div class="wire" id="wire-top" style="top: 205px; left: 206px; width: 2px; height: 45px;"></div>
+            <div class="wire" style="top: 292px; left: 206px; width: 2px; height: 120px; background: #778da9;"></div>
+            
+            <div class="node" style="top: 405px; left: 200px;"></div>
+            <div class="node-label" style="top: 403px; left: 220px; font-weight: bold; color: red;" id="label-bottom">VCC (+5V)</div>
+        </div>
+    </div>
+
+    <!-- PANEL -->
+    <div class="output-panel">
+        <div class="led-group">
+            <span>REG_3: PINB</span>
+            <div class="led-green" id="pinb-led"></div>
+            <span id="pinb-text" style="font-size:0.8rem; margin-top:5px;">LOGIC: 0</span>
+        </div>
+        
+        <div class="led-group" style="border-left: 1px solid #3e5c76; padding-left: 20px;">
+            <span>PHYSICAL LED (Pin 13)</span>
+            <div class="led off" id="main-led"></div>
+            <span id="led-status-text" style="font-size:0.85rem; font-weight:bold; color:#e07a5f;">OFF</span>
+        </div>
+
+        <div class="explanation-box" id="explanation">
+            Loading simulation...
+        </div>
+    </div>
+
+    <script>
+        let posDDRB = 0; 
+        let posPORTB = 0;
+
+        function updateLayout() {
+            const connDDRB = document.getElementById('conn-ddrb');
+            const connPORTB = document.getElementById('conn-portb');
+            const mainLed = document.getElementById('main-led');
+            const pinbLed = document.getElementById('pinb-led');
+            const pinbText = document.getElementById('pinb-text');
+            const ledStatusText = document.getElementById('led-status-text');
+            const explanation = document.getElementById('explanation');
+            
+            // Dynamic elements
+            const reg5Title = document.getElementById('reg5-title');
+            const labelT0 = document.getElementById('label-t0');
+            const labelT1 = document.getElementById('label-t1');
+            const labelBottom = document.getElementById('label-bottom');
+            const pullupResistor = document.getElementById('pullup-resistor');
+            const wireTop = document.getElementById('wire-top');
+
+            // 1. Move needles
+
+connDDRB.style.transform = posDDRB === 0 ? "rotate(-26deg)" : "rotate(26deg)";
+connPORTB.style.transform = posPORTB === 0 ? "rotate(-20deg)" : "rotate(26deg)";
+// 2. ADAPTIVE GRAPHICS LOOK (Based on your new diagram drawings!)
+if (posDDRB === 0) {
+// INPUT MODE
+reg5Title.innerText = "REG-5 (PULLUP CONFIGURATION)";
+labelT0.innerHTML = "Terminal 0 (Floating / Air)";
+labelT1.innerHTML = "Terminal 1 (PULL-UP ENABLED)";
+labelBottom.innerText = "VCC (+5V)";
+labelBottom.style.color = "red";
+pullupResistor.style.opacity = "1";
+wireTop.style.opacity = "1";
+} else {
+// OUTPUT MODE
+reg5Title.innerText = "REG-5 (OUTPUT CMOS PUSH-PULL)";
+labelT0.innerHTML = "Terminal 0 GND";
+labelT1.innerHTML = "Terminal 1 (DIRECT VCC)";
+labelBottom.innerText = "LINE TO PIN 13";
+labelBottom.style.color = "#0d1b2a";
+pullupResistor.style.opacity = "0"; // Hide resistor in output mode
+wireTop.style.opacity = "0";
+}
+// 3. CIRCUITAL EVALUATION
+let pinb_read = 0;
+if (posDDRB === 1) {
+// OUTPUT MODE
+if (posPORTB === 1) {
+mainLed.className = "led strong";
+ledStatusText.innerText = "STRONG LIGHT (5V)";
+pinb_read = 1;
+explanation.innerHTML = "OUTPUT HIGH: DDRB is 1. PORTB needle links directly to Terminal 1 (Direct VCC line). The CMOS circuit pushes 5V directly to the pin. The LED glows at full power (STRONG LIGHT). PINB reads back a solid 1.";
+} else {
+mainLed.className = "led off";
+ledStatusText.innerText = "OFF (GND)";
+pinb_read = 0;
+explanation.innerHTML = "OUTPUT LOW: DDRB is 1. PORTB needle flips to Terminal 0 (GND). The pin is tied directly to ground, draining all voltage. The LED is completely OFF.";
+}
+} else {
+// INPUT MODE
+if (posPORTB === 1) {
+mainLed.className = "led weak";
+ledStatusText.innerText = "WEAK LIGHT (Pull-Up)";
+pinb_read = 0;
+explanation.innerHTML = "INPUT WITH PULL-UP: DDRB is 0. PORTB switches to Terminal 1, activating the 40kΩ internal resistor linked to VCC. The high resistance chokes the current, giving the LED a WEAK LIGHT.";
+} else {
+mainLed.className = "led off";
+ledStatusText.innerText = "OFF (Floating / Hi-Z)";
+pinb_read = 0;
+explanation.innerHTML = "INPUT TRISTATE: DDRB is 0 and PORTB is 0. The needle points to a dead end (Floating / In Air). The pin is disconnected from any voltage source. The LED is OFF.";
+}
+}
+// Update board logic monitor
+pinbText.innerText = "LOGIC: " + pinb_read;
+if (pinb_read === 1) {
+pinbLed.classList.add('on');
+} else {
+pinbLed.classList.remove('on');
+}
+}
+function clickDDRB() {
+posDDRB = posDDRB === 0 ? 1 : 0;
+updateLayout();
+}
+function clickPORTB() {
+posPORTB = posPORTB === 0 ? 1 : 0;
+updateLayout();
+}
+updateLayout();
+</script>
+
+</body>
+</html>
