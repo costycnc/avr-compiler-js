@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATmega328 Register Simulator (8-Relay Rows)</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+        }
+        h1 {
+            color: #4fc1ff;
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .description {
+            text-align: center;
+            color: #85c46c;
+            margin-bottom: 30px;
+        }
+        .register-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #252526;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .register-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #2d2d30;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 5px solid #007acc;
+        }
+        .register-info {
+            flex: 1;
+        }
+        .register-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #569cd6;
+        }
+        .register-addr {
+            font-size: 0.85rem;
+            color: #858585;
+        }
+        .switches-group {
+            display: flex;
+            gap: 10px;
+            flex: 2;
+            justify-content: center;
+        }
+        .switch-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .bit-label {
+            font-size: 0.75rem;
+            color: #858585;
+            margin-bottom: 4px;
+        }
+        /* Stile grafico degli Switch (Relè) */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 24px;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #a6a6a6;
+            transition: .3s;
+            border-radius: 4px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 4px; bottom: 4px;
+            background-color: #1e1e1e;
+            transition: .3s;
+            border-radius: 2px;
+        }
+        input:checked + .slider {
+            background-color: #4fc1ff;
+            box-shadow: 0 0 10px #4fc1ff;
+        }
+        input:checked + .slider:before {
+            transform: translateX(16px);
+            background-color: #fff;
+        }
+        /* Valori in tempo reale */
+        .register-values {
+            flex: 1;
+            text-align: right;
+            font-size: 1.1rem;
+        }
+        .val-bin { color: #ce9178; }
+        .val-hex { color: #dcdcdc; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>ATmega328 Register Simulator</h1>
+    <div class="description">
+        Visualizing 8-bit registers like rows of 8 mechanical switches/relays.
+    </div>
+
+    <div class="register-container">
+        <!-- Registro PINB -->
+        <div class="register-row" style="border-left-color: #ce9178;">
+            <div class="register-info">
+                <div class="register-name">PINB</div>
+                <div class="register-addr">Addr: 0x03 (Input)</div>
+            </div>
+            <div class="switches-group" id="group-PINB"></div>
+            <div class="register-values">
+                <span class="val-bin" id="bin-PINB">00000000b</span><br>
+                <span class="val-hex" id="hex-PINB">0x00</span>
+            </div>
+        </div>
+
+        <!-- Registro DDRB -->
+        <div class="register-row" style="border-left-color: #4fc1ff;">
+            <div class="register-info">
+                <div class="register-name">DDRB</div>
+                <div class="register-addr">Addr: 0x04 (Direction)</div>
+            </div>
+            <div class="switches-group" id="group-DDRB"></div>
+            <div class="register-values">
+                <span class="val-bin" id="bin-DDRB">00000000b</span><br>
+                <span class="val-hex" id="hex-DDRB">0x00</span>
+            </div>
+        </div>
+
+        <!-- Registro PORTB -->
+        <div class="register-row" style="border-left-color: #608b4e;">
+            <div class="register-info">
+                <div class="register-name">PORTB</div>
+                <div class="register-addr">Addr: 0x05 (Output)</div>
+            </div>
+            <div class="switches-group" id="group-PORTB"></div>
+            <div class="register-values">
+                <span class="val-bin" id="bin-PORTB">00000000b</span><br>
+                <span class="val-hex" id="hex-PORTB">0x00</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const registers = ['PINB', 'DDRB', 'PORTB'];
+
+        // Funzione per generare gli 8 switch per ogni registro
+        function createSwitches() {
+            registers.forEach(reg => {
+                const container = document.getElementById(`group-${reg}`);
+                // Generiamo i bit da 7 a 0 (da sinistra a destra come nei datasheet)
+                for (let i = 7; i >= 0; i--) {
+                    const switchContainer = document.createElement('div');
+                    switchContainer.className = 'switch-container';
+
+                    const label = document.createElement('span');
+                    label.className = 'bit-label';
+                    label.innerText = `b${i}`;
+
+                    const labelSwitch = document.createElement('label');
+                    labelSwitch.className = 'switch';
+
+                    const input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.id = `bit-${reg}-${i}`;
+                    // Ascolta il click per aggiornare i calcoli esadecimali e binari
+                    input.addEventListener('change', () => updateRegisterValue(reg));
+
+                    const slider = document.createElement('span');
+                    slider.className = 'slider';
+
+                    labelSwitch.appendChild(input);
+                    labelSwitch.appendChild(slider);
+                    switchContainer.appendChild(label);
+                    switchContainer.appendChild(labelSwitch);
+                    container.appendChild(switchContainer);
+                }
+            });
+        }
+
+        // Funzione che legge gli interruttori e calcola il valore Binario ed Esadecimale (0x)
+        function updateRegisterValue(reg) {
+            let decimalValue = 0;
+            let binaryString = "";
+
+            for (let i = 7; i >= 0; i--) {
+                const checkbox = document.getElementById(`bit-${reg}-${i}`);
+                if (checkbox.checked) {
+                    decimalValue += Math.pow(2, i);
+                    binaryString += "1";
+                } else {
+                    binaryString += "0";
+                }
+            }
+
+            // Converte il totale in formato Esadecimale a due cifre (es: 46, 8C, FF)
+            let hexString = decimalValue.toString(16).toUpperCase().padStart(2, '0');
+
+            // Stampa i risultati a schermo in tempo reale
+            document.getElementById(`bin-${reg}`).innerText = binaryString + "b";
+            document.getElementById(`hex-${reg}`).innerText = "0x" + hexString;
+        }
+
+        // Avvia la creazione degli switch all'apertura della pagina
+        createSwitches();
+    </script>
+</body>
+</html>
