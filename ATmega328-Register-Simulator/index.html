@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATmega328 Register Simulator (8-Relay Rows)</title>
+    <title>ATmega328 Register Simulator (Arduino Pins)</title>
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
@@ -23,7 +23,7 @@
             margin-bottom: 30px;
         }
         .register-container {
-            max-width: 800px;
+            max-width: 850px;
             margin: 0 auto;
             background: #252526;
             padding: 20px;
@@ -41,7 +41,7 @@
             border-left: 5px solid #007acc;
         }
         .register-info {
-            flex: 1;
+            flex: 1.2;
         }
         .register-name {
             font-size: 1.2rem;
@@ -54,8 +54,8 @@
         }
         .switches-group {
             display: flex;
-            gap: 10px;
-            flex: 2;
+            gap: 12px;
+            flex: 2.5;
             justify-content: center;
         }
         .switch-container {
@@ -67,6 +67,12 @@
             font-size: 0.75rem;
             color: #858585;
             margin-bottom: 4px;
+        }
+        .pin-label {
+            font-size: 0.8rem;
+            color: #ff8c00; /* Colore arancione per i pin di Arduino */
+            margin-top: 6px;
+            font-weight: bold;
         }
         /* Stile grafico degli Switch (Relè) */
         .switch {
@@ -119,7 +125,7 @@
 
     <h1>ATmega328 Register Simulator</h1>
     <div class="description">
-        Visualizing 8-bit registers like rows of 8 mechanical switches/relays.
+        Visualizing PORTB registers with Arduino digital pin mappings (D8 to D13).
     </div>
 
     <div class="register-container">
@@ -165,42 +171,62 @@
 
     <script>
         const registers = ['PINB', 'DDRB', 'PORTB'];
+        
+        // Mappatura dei pin di Arduino per la PORTB:
+        // b7, b6 non sono usati su Arduino Uno/Nano standard (sono per il quarzo XTAL)
+        // b5=D13, b4=D12, b3=D11, b2=D10, b1=D9, b0=D8
+        const arduinoPins = {
+            7: "XTAL2",
+            6: "XTAL1",
+            5: "D13",
+            4: "D12",
+            3: "D11",
+            2: "D10",
+            1: "D9",
+            0: "D8"
+        };
 
-        // Funzione per generare gli 8 switch per ogni registro
         function createSwitches() {
             registers.forEach(reg => {
                 const container = document.getElementById(`group-${reg}`);
-                // Generiamo i bit da 7 a 0 (da sinistra a destra come nei datasheet)
+                
                 for (let i = 7; i >= 0; i--) {
                     const switchContainer = document.createElement('div');
                     switchContainer.className = 'switch-container';
 
+                    // Etichetta del Bit superiore (es. b5)
                     const label = document.createElement('span');
                     label.className = 'bit-label';
                     label.innerText = `b${i}`;
 
+                    // Struttura dello Switch grafico
                     const labelSwitch = document.createElement('label');
                     labelSwitch.className = 'switch';
 
                     const input = document.createElement('input');
                     input.type = 'checkbox';
                     input.id = `bit-${reg}-${i}`;
-                    // Ascolta il click per aggiornare i calcoli esadecimali e binari
                     input.addEventListener('change', () => updateRegisterValue(reg));
 
                     const slider = document.createElement('span');
                     slider.className = 'slider';
 
+                    // Nuova etichetta inferiore per il Pin di Arduino (es. D13)
+                    const pinLabel = document.createElement('span');
+                    pinLabel.className = 'pin-label';
+                    pinLabel.innerText = arduinoPins[i];
+
+                    // Assemblaggio
                     labelSwitch.appendChild(input);
                     labelSwitch.appendChild(slider);
                     switchContainer.appendChild(label);
                     switchContainer.appendChild(labelSwitch);
+                    switchContainer.appendChild(pinLabel); // Messo sotto l'interruttore
                     container.appendChild(switchContainer);
                 }
             });
         }
 
-        // Funzione che legge gli interruttori e calcola il valore Binario ed Esadecimale (0x)
         function updateRegisterValue(reg) {
             let decimalValue = 0;
             let binaryString = "";
@@ -215,15 +241,12 @@
                 }
             }
 
-            // Converte il totale in formato Esadecimale a due cifre (es: 46, 8C, FF)
             let hexString = decimalValue.toString(16).toUpperCase().padStart(2, '0');
 
-            // Stampa i risultati a schermo in tempo reale
             document.getElementById(`bin-${reg}`).innerText = binaryString + "b";
             document.getElementById(`hex-${reg}`).innerText = "0x" + hexString;
         }
 
-        // Avvia la creazione degli switch all'apertura della pagina
         createSwitches();
     </script>
 </body>
