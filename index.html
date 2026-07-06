@@ -288,7 +288,7 @@ document.addEventListener("DOMContentLoaded", function() {
   <button arduino-uploader="" board="lgt8f328p" verify="" >LGT8F328P<span class="upload-progress"></span></button>
 <hr>
   <div class="w3-row w3-border">
-<div><input type="file" onchange="costyasm(this.files)"></div>
+<div><input type="file" onchange="costyasm(this.files)"><button id="downloadAsmBtn">💾 Scarica ASM</button></div>
   <div id="first-asm" class="w3-container w3-half w3-red">
 
   <p><button onclick="start('in-asm');">Assemble</button> <a href="https://www.youtube.com/shorts/n9jkkUmEvIY" target="_blank"><button>watch video</button></a> </p>
@@ -2122,6 +2122,17 @@ document.getElementById("downloadHexBtn").addEventListener("click", function () 
   a.click();
   URL.revokeObjectURL(url);
 });
+	
+	document.getElementById("downloadAsmBtn").addEventListener("click", function () {
+  const hexText = document.getElementById("in-asm").value;
+  const blob = new Blob([hexText], { type: "application/octet-stream" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "output.asm";
+  a.click();
+  URL.revokeObjectURL(url);
+});
 </script>
 
 
@@ -2181,35 +2192,4 @@ check_throttle:
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
