@@ -121,7 +121,18 @@ border-radius: 5px;
 
 <body style="font-size: 12px;">
 
-    
+   <div id="browser-warning" style="display: none; background-color: #ffcccc; color: #990000; padding: 15px; border: 1px solid #cc0000; border-radius: 5px; margin-bottom: 15px; font-family: sans-serif;">
+  <strong>⚠️ Browser Compatibility Notice:</strong> This browser does not support web-based hardware uploading. To upload code directly to your Arduino Nano, please use <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong>. 
+</div>
+	<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Controlla se il browser supporta la Web Serial API
+    if (!navigator.serial) {
+        // Se NON è supportata, mostra il blocco di avviso HTML
+        document.getElementById("browser-warning").style.display = "block";
+    }
+});
+	</script>
 
     <div class="w3-bar w3-black" >
 
