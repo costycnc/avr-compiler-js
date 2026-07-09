@@ -289,8 +289,26 @@ document.addEventListener("DOMContentLoaded", function() {
   <button arduino-uploader="" board="lgt8f328p" verify="" >LGT8F328P<span class="upload-progress"></span></button>
 <hr>
   <div class="w3-row w3-border">
-<div><input type="file" onchange="costyasm(this.files)"><button id="downloadAsmBtn">💾 Scarica ASM</button>
-		<h3 style="text-align: right;width: 100%;"><a href="https://github.com/costycnc/avr-compiler-js">SOURCE CODE OF THIS PAGE</a></h3></div>
+<div><input type="file" onchange="costyasm(this.files)"><button id="downloadAsmBtn">💾 Scarica ASM</button> <button onclick='caricaEsempio();'>function.S</button>
+		<p style="text-align: right;width: 100%;"><a href="https://github.com/costycnc/avr-compiler-js">SOURCE CODE OF THIS PAGE</a></p></div>
+
+    <script>
+function caricaEsempio() {
+  fetch("/function.S")
+    .then(response => response.text())
+    .then(text => {
+      document.getElementById("in-asm").value = text;
+    })
+    .catch(error => {
+      console.error("Errore nel caricamento del file:", error);
+    });
+}
+
+    </script>
+
+
+
+	  
   <div id="first-asm" class="w3-container w3-half w3-red">
 
   <p><button onclick="start('in-asm');">Assemble</button> <a href="https://www.youtube.com/shorts/n9jkkUmEvIY" target="_blank"><button>watch video</button></a> </p>
