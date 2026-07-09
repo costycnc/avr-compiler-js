@@ -294,7 +294,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     <script>
 function caricaEsempio() {
-  fetch("/function.S")
+  fetch("function.S")
     .then(response => response.text())
     .then(text => {
       document.getElementById("in-asm").value = text;
