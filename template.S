@@ -1,8 +1,8 @@
 #include <avr/io.h>
 
-.global mia_somma
+.global my_addition
 
-mia_somma:
+my_addition:
     ; --- Automatic Macro Start ---
     push r16          ; Save r16 for safety
     push r17          ; Save r17 for safety
