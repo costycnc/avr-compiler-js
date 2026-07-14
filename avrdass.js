@@ -186,13 +186,11 @@ var AVRDASS = new function(){let that = this;
 
          ||op_match(bytes,'BLD'    ,'1111_100d_dddd_0bbb',({d,b})=>[R(d),b])
       
-          ||op_match(bytes,'BRBC'   ,'1111_01kk_kkkk_ksss',({s,k})=>{
-              let alias = BRBC_ALIAS[s] || 'BRBC';
-              return [alias, L(pc+com2(k,64))];  // ← alias come op, non come operando
-          })
-          ||op_match(bytes,'BRBS'   ,'1111_00kk_kkkk_ksss',({s,k})=>{
-              let alias = BRBS_ALIAS[s] || 'BRBS';
-              return [alias, L(pc+com2(k,64))];  // ← alias come op, non come operando
+         ||op_match(bytes,'BRBC'   ,'1111_01kk_kkkk_ksss',({s,k})=>{
+            return [1, BRBC_ALIAS[s]||'BRBC', [L(pc+com2(k,64))]];
+         })
+         ||op_match(bytes,'BRBS'   ,'1111_00kk_kkkk_ksss',({s,k})=>{
+              return [1, BRBS_ALIAS[s]||'BRBS', [L(pc+com2(k,64))]];
           })
       
          ||op_match(bytes,'BREAK'  ,'1001_0101_1001_1000',_=>[])
