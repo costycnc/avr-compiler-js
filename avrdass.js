@@ -1,6 +1,6 @@
 // Costycnc MOD: Skip NOP from 0x0000 to 0x60 (righe 381-392) - 2026-07-14
 
-// costycnc: added BRANCH alias table at line 167, modified BRBC/BRBS at line 187 - 2026-07-14
+// costycnc: added BRANCH alias table at line 167, modified BRBC/BRBS at line 187 - 2026-07-14  line 105 due volte risolto
 
 var AVRDASS = new function(){let that = this;
 
@@ -102,9 +102,14 @@ var AVRDASS = new function(){let that = this;
 
     }
 
+    let result = fun(args);
+    
+    // costycnc: Se result è già [pcd, op, oo], restituiscilo direttamente
+    if (Array.isArray(result) && result.length === 3 && typeof result[0] === 'number') {
+        return result;
+    }
 
-
-    let oo = fun(args);
+    let oo = result;//fun(args)
 
     if (op.includes(".")){
 
