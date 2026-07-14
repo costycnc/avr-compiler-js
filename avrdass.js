@@ -1,5 +1,7 @@
 // Costycnc MOD: Skip NOP from 0x0000 to 0x60 (righe 381-392) - 2026-07-14
 
+// costycnc: added BRANCH alias table at line 167, modified BRBC/BRBS at line 187 - 2026-07-14
+
 var AVRDASS = new function(){let that = this;
 
   function from_ihex(str){
@@ -164,6 +166,10 @@ var AVRDASS = new function(){let that = this;
 
     let com2 = (x,n)=>(x>=n?(-(n*2-1-x)):(x+1))
 
+    // costycnc: branch alias tables (globali alla funzione disass_step)
+    const BRBC_ALIAS = {0:'BRCC',1:'BRNE',2:'BRPL',3:'BRVC',4:'BRGE',5:'BRHC',6:'BRTC',7:'BRID'};
+    const BRBS_ALIAS = {0:'BRCS',1:'BREQ',2:'BRMI',3:'BRVS',4:'BRLT',5:'BRHS',6:'BRTS',7:'BRIE'};
+
     return op_match(bytes,'ADC'    ,'0001_11rd_dddd_rrrr',({d,r})=>[R(d),R(r)])
 
          ||op_match(bytes,'ADD'    ,'0000_11rd_dddd_rrrr',({d,r})=>[R(d),R(r)])
@@ -179,11 +185,14 @@ var AVRDASS = new function(){let that = this;
          ||op_match(bytes,'BCLR'   ,'1001_0100_1sss_1000',({s})=>[s])
 
          ||op_match(bytes,'BLD'    ,'1111_100d_dddd_0bbb',({d,b})=>[R(d),b])
-
-         ||op_match(bytes,'BRBC'   ,'1111_01kk_kkkk_ksss',({s,k})=>[s,L(pc+com2(k,64))])
-
-         ||op_match(bytes,'BRBS'   ,'1111_00kk_kkkk_ksss',({s,k})=>[s,L(pc+com2(k,64))])
-
+      
+         ||op_match(bytes,'BRBC'   ,'1111_01kk_kkkk_ksss',({s,k})=>{
+             return [BRBC_ALIAS[s]||'BRBC', L(pc+com2(k,64))];
+         })
+         ||op_match(bytes,'BRBS'   ,'1111_00kk_kkkk_ksss',({s,k})=>{
+             return [BRBS_ALIAS[s]||'BRBS', L(pc+com2(k,64))];
+         })
+      
          ||op_match(bytes,'BREAK'  ,'1001_0101_1001_1000',_=>[])
 
          ||op_match(bytes,'BSET'   ,'1001_0100_0sss_1000',({s})=>[s])
