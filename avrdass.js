@@ -1,4 +1,4 @@
-// Costycnc MOD: Skip NOP from 0x0000 to 0x60 (righe 381-392) - 2026-07-14
+// Costycnc MOD: resove RRBC/S with BRNE and  skip NOP rourine from 0x0000 to 0x60 (righe 381-392) - 2026-07-14
 
 var AVRDASS = new function(){let that = this;
 
@@ -378,6 +378,10 @@ var AVRDASS = new function(){let that = this;
 
     let ret = [];
 
+        // costycnc: alias tables
+    const BRBC_ALIAS = {0:'BRCC',1:'BRNE',2:'BRPL',3:'BRVC',4:'BRGE',5:'BRHC',6:'BRTC',7:'BRID'};
+    const BRBS_ALIAS = {0:'BRCS',1:'BREQ',2:'BRMI',3:'BRVS',4:'BRLT',5:'BRHS',6:'BRTS',7:'BRIE'};
+
         // costycnc-Salta i NOP da 0x0000 a 0x0060 (spazio riservato per vettori di interrupt)
     const SKIP_NOP_UNTIL = 0x60;
 
@@ -388,6 +392,22 @@ var AVRDASS = new function(){let that = this;
       if (o){
 
         let [pcd,op,oo] = o;
+
+                    // costycnc: sostituisci BRBC/BRBS con alias
+            if (op == 'BRBC') {
+                let alias = BRBC_ALIAS[oo[0]];
+                if (alias !== undefined) {
+                    op = alias;
+                    oo.shift();
+                }
+            }
+            if (op == 'BRBS') {
+                let alias = BRBS_ALIAS[oo[0]];
+                if (alias !== undefined) {
+                    op = alias;
+                    oo.shift();
+                }
+            }
 
                     // costycnc-Se è un NOP e siamo nella zona da saltare, lo ignoriamo
             if (op == 'NOP' && pc < SKIP_NOP_UNTIL) {
