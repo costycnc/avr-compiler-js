@@ -6,7 +6,7 @@
 
 	  }
 
-
+// line 1142 I modified the to_ihex function to skip pages that are all zeros. Now it only prints hex lines that contain actual data.
 
 var AVRLASS = new function(){let that = this;
 
@@ -1138,6 +1138,8 @@ var AVRLASS = new function(){let that = this;
     for (let i = 0; i < code.length; i+=16){
 
       let page = code.slice(i,i+16);
+
+	  if (page.every(b => b === 0)) continue;
 
       let o = `:${hex(page.length,2)}${hex(i,4)}00`;
 
