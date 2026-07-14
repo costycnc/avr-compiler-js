@@ -1,4 +1,4 @@
-// Costycnc MOD: resove RRBC/S with BRNE and  skip NOP rourine from 0x0000 to 0x60 (righe 381-392) - 2026-07-14
+// Costycnc MOD: eliminate brbc and insert tabella 16 valor -riga 181   -Skip NOP rourine from 0x0000 to 0x60 (righe 381-392) - 2026-07-14
 
 var AVRDASS = new function(){let that = this;
 
