@@ -1,3 +1,5 @@
+// Costycnc MOD: Skip NOP from 0x0000 to 0x60 (righe 381-392) - 2026-07-14
+
 var AVRDASS = new function(){let that = this;
 
   function from_ihex(str){
@@ -378,6 +380,9 @@ var AVRDASS = new function(){let that = this;
 
     let ret = [];
 
+        // costycnc-Salta i NOP da 0x0000 a 0x0060 (spazio riservato per vettori di interrupt)
+    const SKIP_NOP_UNTIL = 0x60;
+
     while (bytes.length){
 
       let o = disass_step(pc,bytes);
@@ -385,6 +390,16 @@ var AVRDASS = new function(){let that = this;
       if (o){
 
         let [pcd,op,oo] = o;
+
+                    // costycnc-Se è un NOP e siamo nella zona da saltare, lo ignoriamo
+            if (op == 'NOP' && pc < SKIP_NOP_UNTIL) {
+                for (let i = 0; i < pcd; i++){
+                    bytes.shift();
+                    bytes.shift();
+                    pc++;
+                }
+                continue;
+            }
 
         ret.push(label_addr(pc)+":\t"+op+"\t"+oo.join(",\t"));
 
