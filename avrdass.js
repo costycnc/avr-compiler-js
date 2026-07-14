@@ -178,9 +178,23 @@ var AVRDASS = new function(){let that = this;
 
          ||op_match(bytes,'BLD'    ,'1111_100d_dddd_0bbb',({d,b})=>[R(d),b])
       
-         ||op_match(bytes,'BRBC'   ,'1111_01kk_kkkk_ksss',({s,k})=>[s,L(pc+com2(k,64))])
-
-         ||op_match(bytes,'BRBS'   ,'1111_00kk_kkkk_ksss',({s,k})=>[s,L(pc+com2(k,64))])
+// costycnc: branch alias instructions (all 16 aliases)
+||op_match(bytes,'BRCC'   ,'1111_01kk_kkkk_k000',({s,k})=>[1, 'BRCC', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRCS'   ,'1111_00kk_kkkk_k000',({s,k})=>[1, 'BRCS', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRNE'   ,'1111_01kk_kkkk_k001',({s,k})=>[1, 'BRNE', [L(pc+com2(k,64))]])
+||op_match(bytes,'BREQ'   ,'1111_00kk_kkkk_k001',({s,k})=>[1, 'BREQ', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRPL'   ,'1111_01kk_kkkk_k010',({s,k})=>[1, 'BRPL', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRMI'   ,'1111_00kk_kkkk_k010',({s,k})=>[1, 'BRMI', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRVC'   ,'1111_01kk_kkkk_k011',({s,k})=>[1, 'BRVC', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRVS'   ,'1111_00kk_kkkk_k011',({s,k})=>[1, 'BRVS', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRGE'   ,'1111_01kk_kkkk_k100',({s,k})=>[1, 'BRGE', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRLT'   ,'1111_00kk_kkkk_k100',({s,k})=>[1, 'BRLT', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRHC'   ,'1111_01kk_kkkk_k101',({s,k})=>[1, 'BRHC', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRHS'   ,'1111_00kk_kkkk_k101',({s,k})=>[1, 'BRHS', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRTC'   ,'1111_01kk_kkkk_k110',({s,k})=>[1, 'BRTC', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRTS'   ,'1111_00kk_kkkk_k110',({s,k})=>[1, 'BRTS', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRID'   ,'1111_01kk_kkkk_k111',({s,k})=>[1, 'BRID', [L(pc+com2(k,64))]])
+||op_match(bytes,'BRIE'   ,'1111_00kk_kkkk_k111',({s,k})=>[1, 'BRIE', [L(pc+com2(k,64))]])
 
          ||op_match(bytes,'BREAK'  ,'1001_0101_1001_1000',_=>[])
 
@@ -378,10 +392,6 @@ var AVRDASS = new function(){let that = this;
 
     let ret = [];
 
-        // costycnc: alias tables
-    const BRBC_ALIAS = {0:'BRCC',1:'BRNE',2:'BRPL',3:'BRVC',4:'BRGE',5:'BRHC',6:'BRTC',7:'BRID'};
-    const BRBS_ALIAS = {0:'BRCS',1:'BREQ',2:'BRMI',3:'BRVS',4:'BRLT',5:'BRHS',6:'BRTS',7:'BRIE'};
-
         // costycnc-Salta i NOP da 0x0000 a 0x0060 (spazio riservato per vettori di interrupt)
     const SKIP_NOP_UNTIL = 0x60;
 
@@ -392,22 +402,6 @@ var AVRDASS = new function(){let that = this;
       if (o){
 
         let [pcd,op,oo] = o;
-
-                    // costycnc: sostituisci BRBC/BRBS con alias
-            if (op == 'BRBC') {
-                let alias = BRBC_ALIAS[oo[0]];
-                if (alias !== undefined) {
-                    op = alias;
-                    oo.shift();
-                }
-            }
-            if (op == 'BRBS') {
-                let alias = BRBS_ALIAS[oo[0]];
-                if (alias !== undefined) {
-                    op = alias;
-                    oo.shift();
-                }
-            }
 
                     // costycnc-Se è un NOP e siamo nella zona da saltare, lo ignoriamo
             if (op == 'NOP' && pc < SKIP_NOP_UNTIL) {
