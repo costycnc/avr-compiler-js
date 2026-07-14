@@ -101,15 +101,8 @@ var AVRDASS = new function(){let that = this;
       }
 
     }
-
-    let result = fun(args);
     
-    // costycnc: Se result è già [pcd, op, oo], restituiscilo direttamente
-    if (Array.isArray(result) && result.length === 3 && typeof result[0] === 'number') {
-        return result;
-    }
-
-    let oo = result;//fun(args)
+    let oo = fun(args)
 
     if (op.includes(".")){
 
@@ -171,10 +164,6 @@ var AVRDASS = new function(){let that = this;
 
     let com2 = (x,n)=>(x>=n?(-(n*2-1-x)):(x+1))
 
-    // costycnc: branch alias tables (globali alla funzione disass_step)
-    const BRBC_ALIAS = {0:'BRCC',1:'BRNE',2:'BRPL',3:'BRVC',4:'BRGE',5:'BRHC',6:'BRTC',7:'BRID'};
-    const BRBS_ALIAS = {0:'BRCS',1:'BREQ',2:'BRMI',3:'BRVS',4:'BRLT',5:'BRHS',6:'BRTS',7:'BRIE'};
-
     return op_match(bytes,'ADC'    ,'0001_11rd_dddd_rrrr',({d,r})=>[R(d),R(r)])
 
          ||op_match(bytes,'ADD'    ,'0000_11rd_dddd_rrrr',({d,r})=>[R(d),R(r)])
@@ -191,13 +180,10 @@ var AVRDASS = new function(){let that = this;
 
          ||op_match(bytes,'BLD'    ,'1111_100d_dddd_0bbb',({d,b})=>[R(d),b])
       
-         ||op_match(bytes,'BRBC'   ,'1111_01kk_kkkk_ksss',({s,k})=>{
-            return [1, BRBC_ALIAS[s]||'BRBC', [L(pc+com2(k,64))]];
-         })
-         ||op_match(bytes,'BRBS'   ,'1111_00kk_kkkk_ksss',({s,k})=>{
-              return [1, BRBS_ALIAS[s]||'BRBS', [L(pc+com2(k,64))]];
-          })
-      
+         ||op_match(bytes,'BRBC'   ,'1111_01kk_kkkk_ksss',({s,k})=>[s,L(pc+com2(k,64))])
+
+         ||op_match(bytes,'BRBS'   ,'1111_00kk_kkkk_ksss',({s,k})=>[s,L(pc+com2(k,64))])
+
          ||op_match(bytes,'BREAK'  ,'1001_0101_1001_1000',_=>[])
 
          ||op_match(bytes,'BSET'   ,'1001_0100_0sss_1000',({s})=>[s])
