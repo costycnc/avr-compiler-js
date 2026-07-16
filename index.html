@@ -297,8 +297,28 @@ document.addEventListener("DOMContentLoaded", function() {
   <button arduino-uploader="" board="lgt8f328p" verify="" >LGT8F328P<span class="upload-progress"></span></button>
 <hr>
   <div class="w3-row w3-border">
-<div><input type="file" onchange="costyasm(this.files)"><button id="downloadAsmBtn">💾 Scarica ASM</button> FOR ARDUINO extern "C" <button onclick='loadtemplate();'>Example template</button><button id="savetemplate">Export template</button>
-		     <a href="https://github.com" style="margin-left: auto; white-space: nowrap;">SOURCE CODE OF THIS PAGE</a></div><hr>
+<div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px; flex-wrap: wrap;">
+    
+    <!-- 1. BLOCCO DI SINISTRA -->
+    <div style="display: flex; gap: 5px; align-items: center;">
+        <input type="file" onchange="costyasm(this.files)">
+        <button id="downloadAsmBtn">💾 Scarica ASM</button> 
+    </div>
+    
+    <!-- 2. BLOCCO CENTRALE (A METÀ) -->
+    <div style="display: flex; gap: 5px; align-items: center; margin: 0 auto;">
+        <button>FOR ARDUINO extern "C"</button>
+        <button onclick="loadtemplate();">Example template</button>
+        <button id="savetemplate">Export template</button>
+    </div>
+    
+    <!-- 3. BLOCCO DI DESTRA -->
+    <div style="text-align: right;">
+        <a href="https://github.com" style="white-space: nowrap;">SOURCE CODE OF THIS PAGE</a>
+    </div>
+
+</div>
+<hr>
 
     <script>
 function loadtemplate() {
