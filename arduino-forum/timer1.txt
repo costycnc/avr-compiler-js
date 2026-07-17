@@ -1,0 +1,23 @@
+.org 0
+    rjmp start
+
+.org 0x60
+start:
+    sbi 4,5         ; [SETUP] Set PB5 (Pin D13) as an output in DDRB
+    ldi r16, 5      ; Set prescaler to 1024
+    sts 0x81, r16   ; Write to TCCR1B
+loop:
+    lds r16, 0x84   ; Read TCNT1L (AVR hardware rule: reading the Low byte FIRST locks the High byte value!)
+    lds r16, 0x85   ; Read TCNT1H into r16
+
+    cpi r16, 61     ; Compare TCNT1H with 61
+    brlo loop       ; If it's lower, keep looping and checking
+
+    ; Resetting the Timer (AVR hardware rule: write the High byte FIRST, then the Low byte!)
+    ldi r16, 0x00
+    sts 0x85, r16   ; Write 0 to TCNT1H
+    sts 0x84, r16   ; Write 0 to TCNT1L
+
+    sbi 3,5         ; Toggle the LED natively by writing 1 to PINB (Address 0x03, bit 5)
+
+    rjmp loop
