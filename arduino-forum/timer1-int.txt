@@ -1,0 +1,20 @@
+.org 0x0000
+    rjmp setup              ; Reset Handler jumping to initialization
+.org 0x001A                 ; Timer1 Overflow Interrupt Vector
+    rjmp overflow 
+	
+.org 0x60
+setup:
+    sbi 4,5                 ; Set PB5 as output (DDRB = 0x04)
+    ldi r16, 0x01           ; Load bit TOIE1 (Timer1 Overflow Interrupt Enable)
+    sts 0x6F, r16           ; Write to TIMSK1 to activate the interrupt
+
+    ldi r16, 5              ; Set Timer1 prescaler to 1024
+    sts 0x81, r16           ; Write to TCCR1B
+    sei                     ; Enable Global Interrupts (Set I-flag)
+loop:
+    rjmp loop               ; The CPU is now completely free to process other tasks!
+
+overflow:
+    sbi 3,5                 ; Atomic toggle of the D13 LED via PINB (Address 0x03, bit 5)
+    reti                    ; Return from interrupt
