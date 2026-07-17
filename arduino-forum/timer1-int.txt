@@ -9,7 +9,7 @@ setup:
     ldi r16, 0x01           ; Load bit TOIE1 (Timer1 Overflow Interrupt Enable)
     sts 0x6F, r16           ; Write to TIMSK1 to activate the interrupt
 
-    ldi r16, 5              ; Set Timer1 prescaler to 1024
+    ldi r16, 4              ; Set Timer1 prescaler to 256 -1 second
     sts 0x81, r16           ; Write to TCCR1B
     sei                     ; Enable Global Interrupts (Set I-flag)
 loop:
