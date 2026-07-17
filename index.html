@@ -2275,7 +2275,34 @@ check_throttle:
   </div>
 </section>
 
+<script>
+	// ============================================================
+// DATA: 17 LUGLIO 2026 - Caricamento automatico da URL
+// ============================================================
+// ?code=nomefile.txt  →  carica e assembla automaticamente
+// ============================================================
 
+window.addEventListener("DOMContentLoaded", function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const percorso = urlParams.get('code');
+  
+  if (percorso) {
+    fetch(percorso)
+      .then(response => {
+        if (!response.ok) throw new Error('File non trovato');
+        return response.text();
+      })
+      .then(text => {
+        document.getElementById("in-asm").value = text;
+        setTimeout(() => start('in-asm'), 100);
+      })
+      .catch(() => {
+        console.log("File non trovato:", percorso);
+        document.getElementById("in-asm").value = `; ERRORE: File "${percorso}" non trovato`;
+      });
+  }
+});
+</script>
 </body>
 
 </html>
