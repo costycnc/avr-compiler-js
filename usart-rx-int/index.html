@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AVR Control - Configurazione UCSR0C</title>
+    <title>AVR Control - UCSR0C Configuration</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: auto; }
@@ -24,50 +24,48 @@
 <div class="container">
     <div class="panel">
         <h1>AVR Control: Full Serial Config</h1>
-        <div id="status">STATO: DISCONNESSO ❌</div>
-        <button id="connectBtn" class="btn">1. CONNETTI SERIALE</button>
+        <div id="status">STATUS: DISCONNECTED ❌</div>
+        <button id="connectBtn" class="btn">1. CONNECT SERIAL PORT</button>
         <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
-        <button id="sendABtn" class="btn" disabled>INVIA 'A' (ACCENDI)</button>
-        <button id="sendXBtn" class="btn btn-off" disabled>INVIA 'X' (SPEGNI)</button>
+        <button id="sendABtn" class="btn" disabled>SEND 'A' (TOGGLE LED ONBOARD)</button>
     </div>
 
     <div class="section">
-        <h2>Codice ASM con UCSR0C (8N1)</h2>
-        <p>Configurazione binaria per <strong>UCSR0C</strong>: <code>0b00000110</code></p>
-        <button class="btn btn-copy" onclick="copyCode()">COPIA CODICE PER https://costycnc.github.io/avr-compiler-js/</button>
+        <h2>ASM Code with UCSR0C (8N1)</h2>
+        <p>Binary configuration for <strong>UCSR0C</strong>: <code>0b00000110</code></p>
+        <button class="btn btn-copy" onclick="copyCode()">COPY CODE FOR https://costycnc.github.io/avr-compiler-js/</button>
         <pre><code id="asmCode">
 .org 0x0000
     jmp RESET
 
-.org 0x0024        ; USART RX Complete Interrupt
+.org 0x0024        ; USART RX Complete Interrupt vector
     jmp costycnc
     
 .org 0x0060
 RESET:
-    sbi 0x04, 5    ; DDRB: PB5 come uscita
+    sbi 0x04, 5    ; DDRB: Set PB5 as output
     
-    ; 1. Configura Baud Rate 9600 (per 16MHz)
+    ; 1. Configure Baud Rate to 9600 (for 16MHz clock)
     ldi r16, 103
-    sts 0xC4, r16  ; UBRR0L
+    sts 0xC4, r16  ; Write to UBRR0L
     
-    ; 2. Configura UCSR0C: 8 bit, 1 stop, no parity
-    <span class="highlight">ldi r16, 0b00000110</span> ; Bit 2 e 1 impostati (UCSZ01 e UCSZ00)
-    <span class="highlight">sts 0xC2, r16</span>      ; Scrivi in UCSR0C
+    ; 2. Configure UCSR0C: 8 data bits, 1 stop bit, no parity
+    <span class="highlight">ldi r16, 0b00000110</span> ; Set UCSZ01 and UCSZ00 bits
+    <span class="highlight">sts 0xC2, r16</span>      ; Write to UCSR0C
 
-    ; 3. Abilita Ricezione e Interrupt RX
-    ldi r16, 0b10010000 
-    sts 0xC1, r16      ; UCSR0B
-    sei                ; Abilita interruzioni
+    ; 3. Enable Receiver and RX Interrupt
+    ldi r16, 0b10010000 ; Set RXCIE0 and RXEN0 bits
+    sts 0xC1, r16      ; Write to UCSR0B
+    sei                ; Enable global interrupts
 
 loop:
     rjmp loop
 
 costycnc:
-    cbi 0x05, 5    ; Spegne LED (default)
-    lds r18, 0xC6  ; Leggi UDR0
-    cpi r18, 'A'   ; È una 'A'?
+    lds r18, 0xC6  ; Read byte from UDR0
+    cpi r18, 'A'   ; Is it 'A'?
     brne jos
-    sbi 0x05, 5    ; Accendi se è 'A'
+    sbi 0x03, 5    ; Toggle PB5 (Built-in LED) on match
 jos:
     reti
         </code></pre>
@@ -84,7 +82,7 @@ jos:
     function copyCode() {
         const codeText = document.getElementById('asmCode').innerText;
         navigator.clipboard.writeText(codeText);
-        alert("Codice con configurazione 8N1 copiato!");
+        alert("8N1 configuration code copied to clipboard!");
     }
 
     connectBtn.addEventListener('click', async () => {
@@ -92,12 +90,12 @@ jos:
             port = await navigator.serial.requestPort();
             await port.open({ baudRate: 9600 });
             writer = port.writable.getWriter();
-            status.innerHTML = "STATO: CONNESSO ✅";
+            status.innerHTML = "STATUS: CONNECTED ✅";
             connectBtn.disabled = true;
             sendABtn.disabled = false;
             sendXBtn.disabled = false;
         } catch (err) {
-            status.innerHTML = "ERRORE: " + err;
+            status.innerHTML = "ERROR: " + err;
         }
     });
 
@@ -105,13 +103,13 @@ jos:
         if (writer) {
             const data = new TextEncoder().encode(char);
             await writer.write(data);
-            status.innerHTML = "INVIATO: '" + char + "' ⚡";
-            setTimeout(() => { status.innerHTML = "STATO: CONNESSO ✅"; }, 700);
+            status.innerHTML = "SENT: '" + char + "' ⚡";
+            setTimeout(() => { status.innerHTML = "STATUS: CONNECTED ✅"; }, 700);
         }
     }
 
     sendABtn.addEventListener('click', () => sendChar('A'));
-    sendXBtn.addEventListener('click', () => sendChar('X'));
+    
 </script>
 
 </body>
