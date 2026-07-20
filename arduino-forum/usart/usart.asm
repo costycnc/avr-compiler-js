@@ -17,7 +17,7 @@ init:
     sts 0xC2, r16        ; 0xC2 = UCSR0C
 
     ; 3. Turn on transmitter
-    ldi r16, 0b00010000  ; TXEN0=1
+    ldi r16, 0b00001000  ; TXEN0=1
     sts 0xC1, r16        ; 0xC1 = UCSR0B
 
 loop:
