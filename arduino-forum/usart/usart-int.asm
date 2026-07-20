@@ -28,6 +28,6 @@ costycnc:
     lds r18, 0xC6  ; Read byte from UDR0
     cpi r18, 'A'   ; Is it 'A'?
     brne jos
-    PINB: Toggle PB5 (Built-in LED) on match
+    sbi 3,5; Toggle PB5 (Built-in LED) on match
 jos:
     reti
