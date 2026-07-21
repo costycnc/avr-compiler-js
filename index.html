@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     <script>
 function loadtemplate() {
-  fetch("ledon.S")
+  fetch("ledon/ledon.S")
     .then(response => response.text())
     .then(text => {
       document.getElementById("in-asm").value = text;
