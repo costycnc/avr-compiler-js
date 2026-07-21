@@ -3,7 +3,6 @@
 ;void setup() {led_on();}
 ;void loop() {}
 
-;S code (save ledon.s in folder with ino
 .global led_on
 led_on:
 	nop
