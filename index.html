@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     <script>
 function loadtemplate() {
-  fetch("ledon/ledon.S")
+  fetch("arduino-forum/ledon/ledon.S")
     .then(response => response.text())
     .then(text => {
       document.getElementById("in-asm").value = text;
