@@ -1,9 +1,27 @@
-;ARDUINO CODE
-;extern "C" {void led_on();}
-;void setup() {led_on();}
-;void loop() {}
+/* 
+===================================================================
+1. ARDUINO CODE (.ino file)
+   Copy and paste this code into your main Arduino sketch tab.
+===================================================================
 
-;S code (save ledon.s in folder with ino
+extern "C" { 
+    void led_on(); 
+}
+
+void setup() {
+    led_on(); // Calls the Assembly routine once
+}
+
+void loop() {
+    // Left empty: the Assembly function will handle execution
+}
+
+ ===================================================================
+ 2. ASSEMBLY CODE (.S file)
+ Click the "Export template" button to save this file 
+ inside the same folder as your main .ino file.
+ ===================================================================
+*/
 .global led_on
 led_on:
 	nop
