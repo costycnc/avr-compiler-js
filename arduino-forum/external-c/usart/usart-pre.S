@@ -13,7 +13,13 @@ void setup() {
 }
 
 void loop() {
+
+asm volatile ("nop \n\t nop \n\t nop \n\t nop \n\t nop \n\t nop \n\t nop \n\t nop \n\t nop \n\t nop");
+
   send_char_asm(); // Assembly inserts the byte directly into the register
+
+asm volatile ("nop \n\t nop \n\t nop \n\t nop \n\t nop \n\t nop \n\t nop \n\t nop \n\t nop \n\t nop");
+
   delay(1000);     
 }
 
