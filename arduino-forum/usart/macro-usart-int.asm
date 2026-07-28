@@ -5,7 +5,7 @@ enable-receiver-and-RX-Interrupt
 loop:
     rjmp loop
 
-usart-interrupt:
+usart_interrupt:
     lds r18, 0xC6  ; Read byte from UDR0
     cpi r18, 'A'   ; Is it 'A'?
     brne jos
@@ -18,7 +18,7 @@ jos:
 .org 0x0000
     jmp RESET
 .org 0x0024        ; USART RX Complete Interrupt vector
-    jmp usart-interrupt
+    jmp usart_interrupt
 .org 0x0060
 RESET:
     sbi 0x04, 5    ; DDRB: Set PB5 as output
