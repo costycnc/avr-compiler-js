@@ -1,7 +1,5 @@
 init
-configure-baud-rate-to-9600
-configure-8N1
-enable-receiver-and-RX-Interrupt
+enable_serial_interrupt
 loop:
     rjmp loop
 
@@ -23,15 +21,11 @@ jos:
 RESET:
     sbi 0x04, 5    ; DDRB: Set PB5 as output
 .endmacro
-.macro configure-baud-rate-to-9600 
+.macro enable_serial_interrupt 
     ldi r16, 103
     sts 0xC4, r16  ; Write to UBRR0L
-.endmacro   
-.macro configure-8N1
     ldi r16, 0b00000110 ; Set UCSZ01 and UCSZ00 bits
     sts 0xC2, r16      ; Write to UCSR0C
-.endmacro
-.macro enable-receiver-and-RX-Interrupt
     ldi r16, 0b10010000 ; Set RXCIE0 and RXEN0 bits
     sts 0xC1, r16      ; Write to UCSR0B
     sei                ; Enable global interrupts
