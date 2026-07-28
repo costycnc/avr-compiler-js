@@ -11,7 +11,9 @@ serial_interrupt:
 jos:
     reti
     
-;---------------------------------MACRO ZONE------------------------------------------------------
+;------------MACRO ZONE------------------------------------------------------
+;for test use https://www.costycnc.it/serial-android/
+
 .macro init
 .org 0x0000
     jmp RESET
@@ -21,6 +23,7 @@ jos:
 RESET:
     sbi 0x04, 5    ; DDRB: Set PB5 as output
 .endmacro
+
 .macro enable_serial_interrupt 
     ldi r16, 103   ;bauds 9600
     sts 0xC4, r16  ; Write to UBRR0L
