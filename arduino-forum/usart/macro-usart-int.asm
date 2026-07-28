@@ -22,11 +22,11 @@ RESET:
     sbi 0x04, 5    ; DDRB: Set PB5 as output
 .endmacro
 .macro enable_serial_interrupt 
-    ldi r16, 103
+    ldi r16, 103   ;bauds 9600
     sts 0xC4, r16  ; Write to UBRR0L
-    ldi r16, 0b00000110 ; Set UCSZ01 and UCSZ00 bits
+    ldi r16, 0b00000110 ; Set UCSZ01 and UCSZ00 bits 8N1
     sts 0xC2, r16      ; Write to UCSR0C
-    ldi r16, 0b10010000 ; Set RXCIE0 and RXEN0 bits
+    ldi r16, 0b10010000 ; Set RXCIE0 and RXEN0 bits activate rx_interrupt
     sts 0xC1, r16      ; Write to UCSR0B
     sei                ; Enable global interrupts
 .endmacro
