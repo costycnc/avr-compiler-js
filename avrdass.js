@@ -140,7 +140,7 @@ var AVRDASS = new function(){let that = this;
 
   function label_addr(x){
 
-    return 'L'+x.toString(16).padStart(4,'0').toUpperCase();
+    return '0X'+x.toString(16).padStart(4,'0').toUpperCase();
 
   }
 
@@ -159,6 +159,11 @@ var AVRDASS = new function(){let that = this;
       return '0X'+x.toString(16).padStart(4,'0').toUpperCase();
 
     }
+
+    // Nuova funzione per i byte a 2 cifre
+function B(x){
+  return '0X'+x.toString(16).padStart(2,'0').toUpperCase();
+}
 
     let com2 = (x,n)=>(x>=n?(-(n*2-1-x)):(x+1))
 
@@ -274,9 +279,7 @@ var AVRDASS = new function(){let that = this;
 
          ||op_match(bytes,'LDD.Z'  ,'10q0_qq0d_dddd_0qqq',({d,q})=>[R(d),q])
 
-         //||op_match(bytes,'LDI'    ,'1110_KKKK_dddd_KKKK',({d,K})=>[R(d+16),K])
-
-         ||op_match(bytes,'LDI'    ,'1110_KKKK_dddd_KKKK',({d,K})=>[R(d+16), "0x" + K.toString(16).toUpperCase()])
+         ||op_match(bytes,'LDI'    ,'1110_KKKK_dddd_KKKK',({d,K})=>[R(d+16), B(K)])
 
          ||op_match(bytes,'LDS'    ,'1001_000d_dddd_0000_kkkk_kkkk_kkkk_kkkk',({d,k})=>[R(d),k])
 
