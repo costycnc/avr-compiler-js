@@ -274,7 +274,9 @@ var AVRDASS = new function(){let that = this;
 
          ||op_match(bytes,'LDD.Z'  ,'10q0_qq0d_dddd_0qqq',({d,q})=>[R(d),q])
 
-         ||op_match(bytes,'LDI'    ,'1110_KKKK_dddd_KKKK',({d,K})=>[R(d+16),K])
+         //||op_match(bytes,'LDI'    ,'1110_KKKK_dddd_KKKK',({d,K})=>[R(d+16),K])
+
+         ||op_match(bytes,'LDI'    ,'1110_KKKK_dddd_KKKK',({d,K})=>[R(d+16), "0x" + K.toString(16).toUpperCase()])
 
          ||op_match(bytes,'LDS'    ,'1001_000d_dddd_0000_kkkk_kkkk_kkkk_kkkk',({d,k})=>[R(d),k])
 
