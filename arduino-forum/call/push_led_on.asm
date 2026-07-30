@@ -1,3 +1,4 @@
+;Simulate CALL
 .org 0
     rjmp init
 .org 0x60
