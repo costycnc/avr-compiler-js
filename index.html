@@ -429,6 +429,33 @@ body.dark-theme iframe {
 	</style>
 
 	<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+    const toggleSwitch = document.querySelector('#checkbox-theme');
+    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+
+    // Se l'utente aveva già scelto il tema scuro in precedenza, lo riattiva
+    if (currentTheme) {
+        document.body.classList.add(currentTheme);
+
+        if (currentTheme === 'dark-theme') {
+            toggleSwitch.checked = true;
+        }
+    }
+
+    // Funzione che scambia i temi al click sul checkbox
+    function switchTheme(e) {
+        if (e.target.checked) {
+            document.body.classList.add('dark-theme');
+            localStorage.setItem('theme', 'dark-theme'); // Salva la preferenza
+        } else {
+            document.body.classList.remove('dark-theme');
+            localStorage.setItem('theme', 'light-theme'); // Salva la preferenza
+        }    
+    }
+
+    // Resta in ascolto dei cambiamenti del checkbox
+    toggleSwitch.addEventListener('change', switchTheme, false);
+});
 
 	</script>
 
